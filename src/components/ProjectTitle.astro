@@ -5,11 +5,10 @@ import logo from '../assets/LOGO_AI-ASSISTANTS_NO-TEXT.png';
 interface Props {
   includeLogo?: boolean;
   includeSubtitle?: boolean;
-  subTitleColor?: string;
   [key: string]: any;
 }
 
-const { includeLogo = false, includeSubtitle = false, subTitleColor = '#FFFFFFAA', class: className, ...attributes } = Astro.props;
+const { includeLogo = false, includeSubtitle = false, class: className, ...attributes } = Astro.props;
 ---
 
 <div 
@@ -51,14 +50,20 @@ const { includeLogo = false, includeSubtitle = false, subTitleColor = '#FFFFFFAA
   .title {
     display: inline-block; /* changed from inline to allow margins if needed */
     font-weight: bold;      /* Logos usually look better bold */
+
+    /* IMPORTANT: The font-size from 'style="..."' used in Header for the container
+     * inherits naturally, but we must ensure the title uses 'em' units
+     * so it scales if the parent font-size changes.
+     */
+    font-size: 1em;
   }
 
   .subtitle {
     display: block;
     margin: 0;
-    font-size: 14px;
+    font-size: 0.6em;
     font-weight: normal;
     line-height: 1.1;
-    color: #FFFFFFAA; /* semi-transparent white */
+    color: var(--color-subtitle, var(--color-dark-grey));
   }
 </style>
