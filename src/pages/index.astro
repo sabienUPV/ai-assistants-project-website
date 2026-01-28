@@ -1,17 +1,27 @@
 ---
-
+import Layout from '../layouts/Layout.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Welcome to AI-ASSISTANTS">
+	<section>
+		<h1>AI-ASSISTANTS</h1>
+		<h2>AI-Assisted Solutions for Enhancing the Independent Living of Persons with Intellectual Disabilities</h2>
+		<p>
+			This project is dedicated to leveraging artificial intelligence to create solutions that support the independent living of persons with intellectual disabilities.
+		</p>
+	</section>
+</Layout>
+<style>
+	section {
+		text-align: center;
+		padding: 2rem;
+	}
+	h1 {
+		color: var(--color-medium-blue);
+		font-size: 3rem;
+	}
+	h2 {
+		color: var(--color-dark-grey);
+		font-size: 1.5rem;
+	}
+</style>
