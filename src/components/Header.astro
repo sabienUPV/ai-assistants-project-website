@@ -1,16 +1,15 @@
 ---
-import { Image } from 'astro:assets';
-import logo from '../assets/LOGO_AI-ASSISTANTS.png';
+import ProjectTitle from './ProjectTitle.astro';
 ---
 <header>
-    <Image src={logo} alt="AI-ASSISTANTS Logo" height="80" />
+    <ProjectTitle includeLogo={true} includeSubtitle={true} style="font-size: 23.5px; font-weight: bold" />
 </header>
 <style>
     header {
         display: flex;
-        justify-content: center;
+        /* justify-content: center; */
         align-items: center;
         padding: 1rem;
-        background-color: var(--color-dark-grey);
+        background-color: var(--color-dark-blue);
     }
 </style>

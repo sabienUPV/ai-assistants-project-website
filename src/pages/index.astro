@@ -1,10 +1,15 @@
 ---
 import Layout from '../layouts/Layout.astro';
+
+import { Image } from 'astro:assets';
+import logo from '../assets/LOGO_AI-ASSISTANTS.png';
+import ProjectTitle from '../components/ProjectTitle.astro';
 ---
 
 <Layout title="Welcome to AI-ASSISTANTS">
 	<section>
-		<h1>AI-ASSISTANTS</h1>
+		<Image src={logo} alt="AI-ASSISTANTS Logo" height="200" />
+		<h1><ProjectTitle /></h1>
 		<h2>AI-Assisted Solutions for Enhancing the Independent Living of Persons with Intellectual Disabilities</h2>
 		<p>
 			This project is dedicated to leveraging artificial intelligence to create solutions that support the independent living of persons with intellectual disabilities.
@@ -13,6 +18,10 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 <style>
 	section {
+		display: flex;
+		flex-direction: column;
+		align-items: center;	
+		justify-content: center;
 		text-align: center;
 		padding: 2rem;
 	}

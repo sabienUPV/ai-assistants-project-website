@@ -1,0 +1,64 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/LOGO_AI-ASSISTANTS_NO-TEXT.png';
+
+interface Props {
+  includeLogo?: boolean;
+  includeSubtitle?: boolean;
+  subTitleColor?: string;
+  [key: string]: any;
+}
+
+const { includeLogo = false, includeSubtitle = false, subTitleColor = '#FFFFFFAA', class: className, ...attributes } = Astro.props;
+---
+
+<div 
+  class:list={['container', { 'has-logo': includeLogo }, className]} 
+  {...attributes}
+>
+  {includeLogo && (
+    <Image 
+      src={logo} 
+      alt="AI-ASSISTANTS Logo" 
+      height="80" 
+      style="width: auto; margin-right: 0.5rem;" 
+    />
+  )}
+  <div class="text">
+    <div class="title">
+      <span style="color: var(--color-light-blue)">AI</span><span style="color: var(--color-dark-grey)">-</span><span style="color: var(--color-medium-blue)">ASSISTANTS 4PIDS</span>
+    </div>
+    {includeSubtitle && (
+      <p class="subtitle">
+        AI-Assisted Solutions for Enhancing the<br />
+        Independent Living of Persons with<br />
+        Intellectual Disabilities
+      </p>
+    )}
+  </div>
+</div>
+
+<style>
+  .container {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .text {
+    width: auto;
+  }
+
+  .title {
+    display: inline-block; /* changed from inline to allow margins if needed */
+    font-weight: bold;      /* Logos usually look better bold */
+  }
+
+  .subtitle {
+    display: block;
+    margin: 0;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.1;
+    color: #FFFFFFAA; /* semi-transparent white */
+  }
+</style>
