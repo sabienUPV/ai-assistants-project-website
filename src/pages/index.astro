@@ -5,10 +5,11 @@ import { Image } from 'astro:assets';
 import logo from '../assets/images/LOGO_AI-ASSISTANTS.png';
 import ProjectTitle from '../components/ProjectTitle.astro';
 import Documents from '../components/Documents.astro';
+import Organisers from '../components/Organisers.astro';
 ---
 
 <Layout title="Welcome to AI-ASSISTANTS">
-	<section>
+	<section id="main">
 		<Image src={logo} alt="AI-ASSISTANTS Logo" height="200" />
 		<h1><ProjectTitle /></h1>
 		<h2>AI-Assisted Solutions for Enhancing the Independent Living of Persons with Intellectual Disabilities</h2>
@@ -17,6 +18,11 @@ import Documents from '../components/Documents.astro';
 		</p>
 		<h2 id="resources">Explore Our Resources</h2>
 		<Documents />
+	</section>
+	<section id="organisers">
+		<h2>Organisers</h2>
+		<p>Entities involved in this project</p>
+		<Organisers />
 	</section>
 </Layout>
 <style>

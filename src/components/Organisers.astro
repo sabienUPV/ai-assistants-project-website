@@ -1,0 +1,56 @@
+---
+import { Image } from 'astro:assets';
+import iatLogo from '../assets/images/iat_logo.png';
+import upvLogo from '../assets/images/logo_UPV_150.png';
+import hurtLogo from '../assets/images/logo_hurt_350.jpg';
+
+const { ...attributes } = Astro.props;
+---
+<div class="organisers-container" {...attributes}>
+  <a href="https://www.iat.eu" target="_blank" rel="noopener noreferrer">
+    <div class="organiser">
+      <Image src={iatLogo} alt="IAT Logo" height="60" />
+      <h3>IAT</h3>
+      <span>(Germany)</span>
+      <p>Project coordinator</p>
+    </div>
+  </a>
+  <a href="https://www.upv.es" target="_blank" rel="noopener noreferrer">
+    <div class="organiser">
+      <Image src={upvLogo} alt="UPV Logo" height="60" />
+      <h3>UPV</h3>
+      <span>(Spain)</span>
+    </div>
+  </a>
+  <a href="https://www.hurt.hr" target="_blank" rel="noopener noreferrer">
+    <div class="organiser">
+      <Image src={hurtLogo} alt="HURT Logo" height="60" />
+      <h3>HURT</h3>
+      <span>(Croatia)</span>
+    </div>
+  </a>
+</div>
+
+<style>
+.organisers-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  justify-items: center;
+  align-items: start;
+}
+.organiser {
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  justify-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+a {
+  text-decoration: none;
+  color: var(--color-dark-grey);
+}
+a:hover h3 {
+  color: var(--color-medium-blue);
+}
+</style>
