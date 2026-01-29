@@ -4,6 +4,7 @@ import Layout from '../layouts/Layout.astro';
 import { Image } from 'astro:assets';
 import logo from '../assets/LOGO_AI-ASSISTANTS.png';
 import ProjectTitle from '../components/ProjectTitle.astro';
+import Documents from '../components/Documents.astro';
 ---
 
 <Layout title="Welcome to AI-ASSISTANTS">
@@ -14,6 +15,8 @@ import ProjectTitle from '../components/ProjectTitle.astro';
 		<p>
 			This project is dedicated to leveraging artificial intelligence to create solutions that support the independent living of persons with intellectual disabilities.
 		</p>
+		<h2 id="resources">Explore Our Resources</h2>
+		<Documents />
 	</section>
 </Layout>
 <style>

@@ -1,0 +1,22 @@
+---
+// Get all PDFs in a specific folder
+const pdfFiles = import.meta.glob('../assets/docs/*.pdf', { eager: true });
+
+// Transform the object into an array we can map over
+const pdfs = Object.entries(pdfFiles).map(([path, file]) => {
+  return {
+    name: path.split('/').pop(), // Get the file name (e.g. "document.pdf")
+    url: (file as any).default, // The processed URL of the PDF
+  };
+});
+---
+
+<ul>
+  {pdfs.map(({ name, url }) => (
+    <li>
+      <a href={url} target="_blank" rel="noopener noreferrer">
+        {name}
+      </a>
+    </li>
+  ))}
+</ul>
