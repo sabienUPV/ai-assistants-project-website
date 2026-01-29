@@ -1,0 +1,42 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+  href: string;
+  logo: ImageMetadata;
+  alt: string;
+  name: string;
+  country: string;
+  role?: string;
+  height?: number;
+  [key: string]: any;
+}
+
+const { href, logo, alt, name, country, role, height = 60, ...attributes } = Astro.props;
+---
+
+<a href={href} target="_blank" rel="noopener noreferrer" {...attributes}>
+  <div class="organiser">
+    <Image src={logo} alt={alt} height={height} />
+    <h3>{name}</h3>
+    <span>({country})</span>
+    {role && <p>{role}</p>}
+  </div>
+</a>
+
+<style>
+  .organiser {
+    display: grid;
+    grid-template-rows: auto auto auto auto;
+    justify-items: center;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  a {
+    text-decoration: none;
+    color: var(--color-dark-grey);
+  }
+  a:hover h3 {
+    color: var(--color-medium-blue);
+  }
+</style>
