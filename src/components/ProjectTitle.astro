@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import logo from '../assets/images/LOGO_AI-ASSISTANTS_NO-TEXT.png';
+import logo from '../assets/images/LOGO_AI-ASSISTANTS_NO-TEXT.svg';
 
 interface Props {
   includeLogo?: boolean;
@@ -19,8 +19,8 @@ const { includeLogo = false, includeSubtitle = false, class: className, ...attri
     <Image 
       src={logo} 
       alt="AI-ASSISTANTS Logo" 
-      height="80" 
-      style="width: auto; margin-right: 0.5rem;" 
+      height="120" 
+      style="width: auto;" 
     />
   )}
   <div class="text">
