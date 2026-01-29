@@ -9,7 +9,7 @@ import Organisers from '../components/Organisers.astro';
 ---
 
 <Layout title="Welcome to AI-ASSISTANTS">
-	<section id="main">
+	<section id="description">
 		<Image src={logo} alt="AI-ASSISTANTS Logo" height="200" />
 		<h1><ProjectTitle /></h1>
 		<h2>AI-Assisted Solutions for Enhancing the Independent Living of Persons with Intellectual Disabilities</h2>
@@ -33,6 +33,10 @@ import Organisers from '../components/Organisers.astro';
 		justify-content: center;
 		text-align: center;
 		padding: 2rem;
+	}
+	section#description {
+		margin: auto;
+		max-width: 60ch;
 	}
 	h1 {
 		color: var(--color-medium-blue);
