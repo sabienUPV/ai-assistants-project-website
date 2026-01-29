@@ -6,26 +6,35 @@ import ProjectTitle from './ProjectTitle.astro';
     <a href="/">
         <ProjectTitle includeLogo={true} includeSubtitle={true} style="font-size: 23.5px" />
     </a>
-    <EuLogo style="margin-left: 2rem" />
-    <a href="/">Home</a>
-    <a href="/#resources">Resources</a>
+    <EuLogo style="margin-inline-start: 2rem" />
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/#resources">Resources</a>
+    </div>
 </header>
 <style>
     header {
         display: flex;
-        /* justify-content: center; */
+        flex-wrap: wrap;
         align-items: center;
         padding: 1rem;
         background-color: var(--color-dark-blue);
         --color-subtitle: var(--color-semi-transparent-white);
     }
 
-    header a:not(:first-child) {
-        margin-left: 3rem;
+    header > * {
+        margin: 1rem;
+    }
+
+    header .nav-links {
+        margin-block-end: 1.5rem;
+    }
+
+    header .nav-links a {
         color: var(--color-semi-transparent-white);
         font-size: 1.5rem;
         text-decoration: none;
         font-weight: bold;
-        margin-bottom: 10px;
+        margin-inline: 1rem;
     }
 </style>
