@@ -1,22 +1,15 @@
 ---
 import Layout from '../layouts/Layout.astro';
 
-import { Image } from 'astro:assets';
-import logo from '../assets/images/LOGO_AI-ASSISTANTS.svg';
-import ProjectTitle from '../components/ProjectTitle.astro';
-import Documents from '../components/Documents.astro';
+import Description from '../components/Description.astro';
+import Objectives from '../components/Objectives.astro';
 import Organisers from '../components/Organisers.astro';
+import Documents from '../components/Documents.astro';
 ---
 
 <Layout title="Welcome to AI-ASSISTANTS">
-	<section id="description">
-		<Image src={logo} alt="AI-ASSISTANTS Logo" height="200" />
-		<h1><ProjectTitle /></h1>
-		<h2>AI-Assisted Solutions for Enhancing the Independent Living of Persons with Intellectual Disabilities</h2>
-		<p>
-			This project is dedicated to leveraging artificial intelligence to create solutions that support the independent living of persons with intellectual disabilities.
-		</p>
-	</section>
+	<Description />
+	<Objectives />
 	<section id="organisers">
 		<h2>Organisers</h2>
 		<p>Entities involved in this project</p>
@@ -41,12 +34,9 @@ import Organisers from '../components/Organisers.astro';
 		margin: auto;
 		max-width: 60ch;
 	}
-	h1 {
-		color: var(--color-medium-blue);
-		font-size: 3rem;
-	}
-	h2 {
+	section > p {
+		font-size: 1.2rem;
 		color: var(--color-dark-grey);
-		font-size: 1.5rem;
+		margin-bottom: 1.5rem;
 	}
 </style>
