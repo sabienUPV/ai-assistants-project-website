@@ -29,7 +29,23 @@ import ProjectTitle from './ProjectTitle.astro';
     }
 
     header .nav-links {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        margin-inline-start: auto;
+        margin-block-start: 1.5rem;
         margin-block-end: 1.5rem;
+    }
+
+    @media (max-width: 1326px) {
+        header {
+            justify-content: center;
+        }
+        header .nav-links {
+            margin-inline-end: auto;
+        }
     }
 
     header .nav-links a {
@@ -38,6 +54,7 @@ import ProjectTitle from './ProjectTitle.astro';
         text-decoration: none;
         font-weight: bold;
         margin-inline: 1rem;
+        margin-block-end: 1rem;
     }
 
     header .nav-links a:hover {
