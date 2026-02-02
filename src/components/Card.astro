@@ -1,0 +1,45 @@
+---
+interface Props {
+  title?: string;
+  [key: string]: any;
+}
+
+const { title, ...attributes } = Astro.props;
+---
+
+<li class="card" {...attributes}>
+  {title && <h3>{title}</h3>}
+  <p><slot /></p>
+</li>
+
+<style>
+.card {
+  background: #fff;
+  border-radius: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem 1.2rem;
+  box-shadow: 0 2px 12px rgba(44, 62, 80, 0.07);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 6px 24px rgba(44, 62, 80, 0.13);
+}
+
+.card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+  /*color: #4a90e2;*/
+  color: var(--color-dark-blue);
+  font-weight: 600;
+}
+
+.card p {
+  margin: 0;
+  /*color: #34495e;*/
+  color: var(--color-dark-grey);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+</style>

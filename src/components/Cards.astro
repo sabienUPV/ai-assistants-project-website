@@ -1,0 +1,64 @@
+---
+// Cards.astro
+// Generic cards wrapper for consistent cards design
+// Props:
+// - title: optional title for the cards section
+// - columns: number of columns for grid layout (default: 1)
+// - class: additional classes for container
+// Usage:
+// <Cards columns={2}><Card>...</Card></Cards>
+
+interface Props {
+  title?: string;
+  columns?: number;
+  class?: string;
+  [key: string]: any;
+}
+
+const { title, columns = 1, class: className, ...attributes } = Astro.props;
+---
+
+<div class:list={['cards-grid', className]} {...attributes}>
+  {title && <h2 class="cards-title">{title}</h2>}
+  <ul class='cards-list'>
+    <slot />
+  </ul>
+</div>
+
+<style define:vars={{ columns }}>
+.cards-grid {
+  /*background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);*/
+  /*background: linear-gradient(135deg, var(--color-background) 0%, var(--color-medium-blue) 100%);*/
+  background: linear-gradient(165deg, var(--color-background) 10%, var(--color-medium-blue) 100%);
+  border-radius: 1.5rem;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 8px 32px rgba(60, 60, 120, 0.12);
+  max-width: 700px;
+  margin: 2rem auto;
+}
+
+.cards-title {
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 700;
+  /*color: #2d3a4a;*/
+  color: var(--color-dark-blue);
+  margin-bottom: 2rem;
+  letter-spacing: 1px;
+}
+
+.cards-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(var(--columns, 1), 1fr);
+}
+
+@media (max-width: 600px) {
+  .cards-list {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
