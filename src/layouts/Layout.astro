@@ -1,8 +1,7 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-
-const home = (path = '') => `${import.meta.env.BASE_URL}${path}`;
+import { home } from '../utils/url.ts';
 
 interface Props {
 	title: string;

@@ -1,8 +1,7 @@
 ---
 import EuLogo from './EuLogo.astro';
 import ProjectTitle from './ProjectTitle.astro';
-
-const home = (path = '') => `${import.meta.env.BASE_URL}${path}`;
+import { home } from '../utils/url.ts';
 ---
 <header>
     <a href={home('#')}>
