@@ -14,8 +14,18 @@ const pdfFiles = import.meta.glob<string>('@assets/docs/*.pdf', {
 
 // Transform the object into an array we can map over
 const pdfs = Object.entries(pdfFiles).map(([path, url]) => {
+  // Get filename "my-file.pdf"
+  const filename = path.split('/').pop() || path;
+  
+  // Remove extension and replace underscores with spaces
+  // "my_file.pdf" -> "my file"
+  const cleanName = filename.replace(/\.pdf$/i, '').replace(/[_]/g, ' ');
+
+  // Optional: Capitalize first letter
+  const formattedName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+
   return {
-    name: path.split('/').pop(), // Get the file name (e.g. "document.pdf")
+    name: formattedName,
     url: url, // The processed URL of the PDF
   };
 });
