@@ -1,8 +1,8 @@
 ---
-import DocIcon from "./DocIcon.astro";
+import DocIcon from "@components/DocIcon.astro";
 
 // Get all PDFs in a specific folder
-const pdfFiles = import.meta.glob('../assets/docs/*.pdf', { eager: true });
+const pdfFiles = import.meta.glob('@assets/docs/*.pdf', { eager: true });
 
 // Transform the object into an array we can map over
 const pdfs = Object.entries(pdfFiles).map(([path, file]) => {
