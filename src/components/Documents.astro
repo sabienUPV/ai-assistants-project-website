@@ -2,13 +2,21 @@
 import DocIcon from "@components/DocIcon.astro";
 
 // Get all PDFs in a specific folder
-const pdfFiles = import.meta.glob('@assets/docs/*.pdf', { eager: true });
+const pdfFiles = import.meta.glob<string>('@assets/docs/*.pdf', {
+  // Eagerly import the files so we can use their URLs immediately
+  eager: true,
+  // query and import properties allow us to get the URL directly
+  // instead of the module object with the URL under the `default` property
+  // (so 'url' instead of { default: 'url' })
+  query: '?url',
+  import: 'default'
+});
 
 // Transform the object into an array we can map over
-const pdfs = Object.entries(pdfFiles).map(([path, file]) => {
+const pdfs = Object.entries(pdfFiles).map(([path, url]) => {
   return {
     name: path.split('/').pop(), // Get the file name (e.g. "document.pdf")
-    url: (file as any).default, // The processed URL of the PDF
+    url: url, // The processed URL of the PDF
   };
 });
 ---
