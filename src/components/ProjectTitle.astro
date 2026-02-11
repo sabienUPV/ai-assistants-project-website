@@ -65,6 +65,7 @@ const { includeLogo = false, includeSubtitle = false, class: className, ...attri
     font-size: 0.6em;
     font-weight: normal;
     line-height: 1.1;
-    color: var(--color-subtitle, var(--color-text));
+    /* Here we default to --color-dark-grey and NOT --color-text, since --color-dark-grey is the official grey color of the logo palette, while we use --color-text as a darker grey for general text since it has better contrast with the background. */
+    color: var(--color-subtitle, var(--color-dark-grey));
   }
 </style>
