@@ -29,6 +29,8 @@ const { title } = Astro.props;
 		<title>{title}</title>
 	</head>
 	<body>
+		<a href="#main-content" class="skip-link sr-only">Skip to main content</a>
+
 		<Header />
 		<main id="main-content">
 			<slot />
@@ -49,7 +51,17 @@ const { title } = Astro.props;
 			}
 			html {
 				background-color: var(--color-background);
+
+				/* Default jump-scroll for maximum accessibility */
+				scroll-behavior: auto;
 			}
+
+			/* Enable smooth scroll ONLY if the user doesn't have a motion sensitivity setting */
+      @media (prefers-reduced-motion: no-preference) {
+        html {
+          scroll-behavior: smooth;
+        }
+      }
 
 			body {
 				margin: 0;
@@ -72,8 +84,31 @@ const { title } = Astro.props;
         margin-bottom: 2rem;
         letter-spacing: 0.5px;
       }
+
       h1 { font-size: 2.2rem; }
       h2 { font-size: 1.5rem; }
+
+      /* Help people using screen readers skip to the main content */
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+			/* This makes the skip link visible ONLY when it's focused via keyboard */
+			.skip-link:focus {
+				position: static;
+				width: auto;
+				height: auto;
+				background: var(--color-dark-blue);
+				color: white;
+				padding: 1rem;
+				z-index: 100;
+			}
 		</style>
 	</body>
 </html>
