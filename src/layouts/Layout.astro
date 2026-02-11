@@ -3,6 +3,13 @@ import Header from '@components/Header.astro';
 import Footer from '@components/Footer.astro';
 import { home } from '@utils/url.ts';
 
+// Importing the Roboto font for consistent typography across the site
+// Note: For optimization, we are only importing the specific weights and styles we need.
+// If we ever need more weights or styles (e.g. bold + italic, or non-typical weights), we can easily add them here.
+import '@fontsource/roboto/400.css'; // Regular weight
+import '@fontsource/roboto/400-italic.css'; // Regular italic weight
+import '@fontsource/roboto/700.css'; // Bold weight
+
 interface Props {
 	title: string;
 }
@@ -23,7 +30,7 @@ const { title } = Astro.props;
 	</head>
 	<body>
 		<Header />
-		<main>
+		<main id="main-content">
 			<slot />
 		</main>
 		<Footer />
@@ -41,31 +48,32 @@ const { title } = Astro.props;
 				--color-semi-transparent-white: #FFFFFFAA;
 			}
 			html {
-				font-family: system-ui, sans-serif;
 				background-color: var(--color-background);
 			}
+
 			body {
 				margin: 0;
+				font-family: 'Roboto', 'Arial', system-ui, sans-serif;
+				font-weight: 400;
+				/* Accessibility boost: readable line height and no text justification */
+        line-height: 1.6;
+        text-align: left;
+        color: var(--color-dark-grey);
 			}
 			main {
 				padding: 1.5rem;
+				max-width: 1200px; /* Prevents lines from getting too long/hard to read */
+        margin: 0 auto;
 			}
-			h1 {
-				text-align: center;
-				font-size: 2.2rem;
-				font-weight: 700;
-				color: var(--color-dark-blue);
-				margin-bottom: 2rem;
-				letter-spacing: 1px;
-			}
-			h2 {
-				text-align: center;
-				font-size: 1.5rem;
-				font-weight: 700;
-				color: var(--color-dark-blue);
-				margin-bottom: 2rem;
-				letter-spacing: 1px;			
-			}
+			h1, h2 {
+        text-align: center;
+        font-weight: 700;
+        color: var(--color-dark-blue);
+        margin-bottom: 2rem;
+        letter-spacing: 0.5px;
+      }
+      h1 { font-size: 2.2rem; }
+      h2 { font-size: 1.5rem; }
 		</style>
 	</body>
 </html>
