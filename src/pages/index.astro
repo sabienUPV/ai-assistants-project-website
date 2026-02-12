@@ -1,3 +1,7 @@
+---
+import { supportedLangs } from "@utils/translation"
+---
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -7,12 +11,18 @@
 
     <meta http-equiv="refresh" content="0;url=/en/" />
 
-    <script>
-      const lang = navigator.language;
-      if (lang && lang.startsWith('es')) {
-        window.location.replace('/es/');
+    <script is:inline define:vars={{ supportedLangs }}>
+      const userLang = navigator.language || navigator.userLanguage; // Support older browsers
+      const defaultLang = "en";
+
+      // Find if any of our supported langs are at the start of the user's browser lang
+      // e.g., 'en-US' matches 'en'
+      const matchedLang = supportedLangs.find(lang => userLang.startsWith(lang));
+
+      if (matchedLang) {
+        window.location.replace(`/${matchedLang}/`);
       } else {
-        window.location.replace('/en/');
+        window.location.replace(`/${defaultLang}/`);
       }
     </script>
 

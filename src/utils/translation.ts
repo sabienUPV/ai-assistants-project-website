@@ -1,17 +1,21 @@
 import { getCollection } from 'astro:content';
+import { supportedLangs } from '../content.config';
+import type { Lang } from '../content.config';
 
 // 1. Load data once (Astro optimizes this at build time)
 const i18nEntries = await getCollection('i18n');
 const glossaryEntries = await getCollection('glossary');
 
+// Re-export the supported languages for use in other parts of the app
+export { supportedLangs };
+export type { Lang };
+
 // 2. Convert array of rows into a fast Lookup Map
 // { en: { hero_title: "Welcome..." }, es: { ... } }
-const i18nMap = {
-  en: Object.fromEntries(i18nEntries.map(e => [e.data.id, e.data.en])),
-  es: Object.fromEntries(i18nEntries.map(e => [e.data.id, e.data.es])),
-};
-
-export type Lang = 'en' | 'es';
+const i18nMap = supportedLangs.reduce((acc, lang) => {
+  acc[lang] = Object.fromEntries(i18nEntries.map(e => [e.data.id, e.data[lang]]));
+  return acc;
+}, {} as Record<Lang, Record<string, string>>);
 
 export function getFormatter(lang: Lang) {
   return function t(key: string, htmlWithGlossaries: boolean = false) {
@@ -36,7 +40,8 @@ export function getFormatter(lang: Lang) {
     // Inject tooltips (only for the first occurrence of each term)
     terms.forEach(({ term, def }) => {
       // Create a regex that finds the term as a whole word, case-insensitive
-      const regex = new RegExp(`\\b(${term})\\b`, 'i');
+      const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b(${escapedTerm})\\b`, 'i');
       
       if (text.match(regex)) {
         const tooltipHtml = `

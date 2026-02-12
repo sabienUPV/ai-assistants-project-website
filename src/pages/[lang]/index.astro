@@ -1,17 +1,15 @@
 ---
-import { getFormatter } from '../../utils/translation';
+import { supportedLangs, getFormatter } from '@utils/translation';
+import type { Lang } from '@utils/translation';
 
 export function getStaticPaths() {
-  return [
-    { params: { lang: 'en' } },
-    { params: { lang: 'es' } },
-  ];
+		return supportedLangs.map(lang => ({ params: { lang } }));
 }
 
 const { lang } = Astro.params;
 
 // Get the translator function for this specific language
-const t = getFormatter(lang as 'en' | 'es');
+const t = getFormatter(lang as Lang);
 
 import Layout from '@layouts/Layout.astro';
 

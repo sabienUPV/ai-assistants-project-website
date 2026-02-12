@@ -1,10 +1,18 @@
 ---
 import Card from "@components/Card.astro";
 import Cards from "@components/Cards.astro";
+
+import { getFormatter } from '@utils/translation';
+import type { Lang } from '@utils/translation';
+
+const { lang } = Astro.params;
+
+// Get the translator function for this specific language
+const t = getFormatter(lang as Lang);
 ---
 
 <section id="description">
-  <Cards title="About AI-ASSISTANTS">
+  <Cards title={t('description_title')}>
     <Card>
       The <b>AI-ASSISTANTS</b> project is dedicated to empowering <b>People with Intellectual Disabilities (PID)</b> through the strategic use of <b>AI-assisted solutions</b>.
     </Card>
