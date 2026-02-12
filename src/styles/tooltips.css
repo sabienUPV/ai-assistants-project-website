@@ -1,0 +1,56 @@
+/* Tooltip Container */
+.tooltip-container {
+  display: inline-flex; /* Use inline-flex to keep icon and text aligned */
+  align-items: center;
+  gap: 4px; /* Space between icon and text */
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dotted #6b7280;
+}
+
+.pid-icon {
+  width: 14px;
+  height: 14px;
+  color: #6b7280; /* Gray-500, matches the underline */
+  flex-shrink: 0;
+}
+
+/* Ensure the text still looks like part of the link */
+.pid-text {
+  display: inline;
+}
+
+/* The Popup Box */
+.tooltip-content {
+  visibility: hidden;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  width: 12rem; /* 192px / w-48 */
+  padding: 8px;
+  background-color: #1e293b; /* Slate-800 */
+  color: #ffffff;
+  font-size: 0.75rem; /* text-xs */
+  border-radius: 4px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  text-align: center;
+}
+
+/* The Arrow */
+.tooltip-arrow {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%); /* Center the arrow under the tooltip */
+  height: 12px;
+  width: 16px; /* Give it a fixed width so it doesn't vanish */
+  fill: #1e293b; /* Matches slate-800 */
+}
+
+/* Hover State */
+.tooltip-container:hover .tooltip-content {
+  visibility: visible;
+}

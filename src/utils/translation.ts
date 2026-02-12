@@ -46,7 +46,11 @@ export function getFormatter(lang: Lang) {
       if (text.match(regex)) {
         const tooltipHtml = `
           <span class="tooltip-container">
-            $1
+            <svg class="pid-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span class="pid-text">$1</span>
             <span class="tooltip-content">
               ${def}
               <svg class="tooltip-arrow" viewBox="0 0 255 255" preserveAspectRatio="none">
