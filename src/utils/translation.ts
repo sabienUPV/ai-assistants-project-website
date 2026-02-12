@@ -18,6 +18,21 @@ const i18nMap = supportedLangs.reduce((acc, lang) => {
   return acc;
 }, {} as Record<Lang, Record<string, string>>);
 
+// 3. The Glossary Injection Magic
+// We create a fast lookup map for each language to find definitions by term
+type GlossaryEntry = { term: string; def: string };
+const glossaryTermsByLanguage = glossaryEntries.reduce((acc, entry) => {
+  supportedLangs.forEach(lang => {
+    const term = entry.data[`term_${lang}` as const];
+    const def = entry.data[`def_${lang}` as const];
+    if (term && def) {
+      if (!acc[lang]) acc[lang] = [];
+      acc[lang].push({ term, def });
+    }
+  });
+  return acc;
+}, {} as Record<Lang, GlossaryEntry[]>);
+
 export function getFormatter(lang: Lang) {
   return function t(key: string, htmlWithGlossaries: boolean = false) {
     let text = i18nMap[lang][key];
@@ -31,15 +46,8 @@ export function getFormatter(lang: Lang) {
       return text;
     }
 
-    // 3. The Glossary Injection Magic
-    // We filter terms relevant to the current language
-    const terms = glossaryEntries.map(g => ({
-      term: g.data[`term_${lang}` as const], // e.g. "Neural Networks"
-      def: g.data[`def_${lang}` as const]    // e.g. "Computer systems..."
-    }));
-
     // Inject tooltips (only for the first occurrence of each term)
-    terms.forEach(({ term, def }) => {
+    glossaryTermsByLanguage[lang]?.forEach(({ term, def }) => {
       // Create a regex that finds the term as a whole word, case-insensitive
       const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(`\\b(${escapedTerm})\\b`, 'i');
