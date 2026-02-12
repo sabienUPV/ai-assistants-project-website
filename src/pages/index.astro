@@ -1,5 +1,6 @@
 ---
 import { supportedLangs } from "@utils/translation"
+import { baseUrl as base } from "@utils/url"
 ---
 
 <!DOCTYPE html>
@@ -9,9 +10,9 @@ import { supportedLangs } from "@utils/translation"
     <meta name="viewport" content="width=device-width" />
     <title>Redirecting...</title>
 
-    <meta http-equiv="refresh" content="0;url=/en/" />
+    <meta http-equiv="refresh" content={`0;url=${base}/en/`} />
 
-    <script is:inline define:vars={{ supportedLangs }}>
+    <script is:inline define:vars={{ supportedLangs, base }}>
       const userLang = navigator.language || navigator.userLanguage; // Support older browsers
       const defaultLang = "en";
 
@@ -19,11 +20,11 @@ import { supportedLangs } from "@utils/translation"
       // e.g., 'en-US' matches 'en'
       const matchedLang = supportedLangs.find(lang => userLang.startsWith(lang));
 
-      if (matchedLang) {
-        window.location.replace(`/${matchedLang}/`);
-      } else {
-        window.location.replace(`/${defaultLang}/`);
-      }
+      const finalLang = matchedLang || defaultLang;
+
+      // Construct the final URL using the base path
+      // e.g. "/my-repo" + "/" + "en" + "/"
+      window.location.replace(`${base}/${finalLang}/`);
     </script>
 
     <style>
@@ -53,7 +54,7 @@ import { supportedLangs } from "@utils/translation"
     <div class="fallback-message">
       <p>Redirecting you to the English version...</p>
       <p>
-        <a href="/en/">Click here manually if nothing happens.</a>
+        <a href={`${base}/en/`}>Click here manually if nothing happens.</a>
       </p>
     </div>
 
