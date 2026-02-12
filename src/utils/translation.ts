@@ -45,11 +45,13 @@ export function getFormatter(lang: Lang) {
       
       if (text.match(regex)) {
         const tooltipHtml = `
-          <span class="group relative cursor-help border-b border-dotted border-gray-500">
+          <span class="tooltip-container">
             $1
-            <span class="invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded shadow-lg z-50">
+            <span class="tooltip-content">
               ${def}
-              <svg class="absolute text-slate-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+              <svg class="tooltip-arrow" viewBox="0 0 255 255" preserveAspectRatio="none">
+                <polygon points="0,0 127.5,127.5 255,0"/>
+              </svg>
             </span>
           </span>
         `;
