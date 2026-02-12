@@ -1,9 +1,11 @@
 ---
 // Importing the Roboto font for consistent typography across the site
 // Note: For optimization, we are only importing the specific weights and styles we need.
-// If we ever need more weights or styles (e.g. bold + italic, or non-typical weights), we can easily add them here.
+// If we ever need more weights or styles, we can easily add them here.
+
+// NOTE: For accessibility, we should NOT use italics. So we should be fine with just regular and bold weights.
+
 import '@fontsource/roboto/400.css'; // Regular weight
-import '@fontsource/roboto/400-italic.css'; // Regular italic weight
 import '@fontsource/roboto/700.css'; // Bold weight
 
 import { home } from '@utils/url.ts';
