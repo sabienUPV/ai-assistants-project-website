@@ -2,10 +2,10 @@ import { defineCollection, z } from 'astro:content';
 import { file } from 'astro/loaders';
 import { parse as parseCsv } from 'csv-parse/sync';
 
-// 1. Define your languages in one place
-const langEnum = z.enum(['en', 'es', 'de', 'pt', 'it', 'hr']);
-export const supportedLangs = langEnum.options;
-export type Lang = z.infer<typeof langEnum>;
+// 1. Import the supported languages and their types
+// from a single source of truth
+import { supportedLangs } from './languages';
+import type { Lang } from './languages';
 
 // 2. Dynamically create the shape for the translations
 // We want: { en: z.string(), es: z.string(), ... }

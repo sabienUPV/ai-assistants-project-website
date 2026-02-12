@@ -1,10 +1,8 @@
 ---
-import { supportedLangs, getFormatter } from '@utils/translation';
-import type { Lang } from '@utils/translation';
+import { getStaticPathsFromLangs as getStaticPaths, getFormatter } from '@utils/translation';
+import type { Lang } from '@languages';
 
-export function getStaticPaths() {
-		return supportedLangs.map(lang => ({ params: { lang } }));
-}
+export { getStaticPaths };
 
 const { lang } = Astro.params;
 

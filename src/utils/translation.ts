@@ -1,14 +1,15 @@
 import { getCollection } from 'astro:content';
-import { supportedLangs } from '../content.config';
-import type { Lang } from '../content.config';
+
+import { supportedLangs } from '@languages';
+import type { Lang } from '@languages';
+
+export function getStaticPathsFromLangs() {
+		return supportedLangs.map(lang => ({ params: { lang } }));
+}
 
 // 1. Load data once (Astro optimizes this at build time)
 const i18nEntries = await getCollection('i18n');
 const glossaryEntries = await getCollection('glossary');
-
-// Re-export the supported languages for use in other parts of the app
-export { supportedLangs };
-export type { Lang };
 
 // 2. Convert array of rows into a fast Lookup Map
 // { en: { hero_title: "Welcome..." }, es: { ... } }
