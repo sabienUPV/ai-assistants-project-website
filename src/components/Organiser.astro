@@ -35,8 +35,16 @@ const { href, logo, alt, name, country, role, height = 60, ...attributes } = Ast
   a {
     text-decoration: none;
     color: var(--color-text);
+    transition: transform 0.2s;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1rem;
+    border-radius: 1rem;
   }
   a:hover {
     color: var(--color-medium-blue);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 2px 12px rgba(44, 62, 80, 0.13);
   }
 </style>
