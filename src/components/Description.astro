@@ -2,13 +2,7 @@
 import Card from "@components/Card.astro";
 import Cards from "@components/Cards.astro";
 
-import { getFormatter } from '@utils/translation';
-import type { Lang } from '@languages';
-
-const { lang } = Astro.params;
-
-// Get the translator function for this specific language
-const t = getFormatter(lang as Lang);
+const { t } = Astro.locals;
 ---
 
 <section id="description">

@@ -1,13 +1,9 @@
 ---
-import { getStaticPathsFromLangs as getStaticPaths, getFormatter } from '@utils/translation';
-import type { Lang } from '@languages';
+import { getStaticPathsFromLangs as getStaticPaths } from '@utils/translation';
 
 export { getStaticPaths };
 
-const { lang } = Astro.params;
-
-// Get the translator function for this specific language
-const t = getFormatter(lang as Lang);
+const { t } = Astro.locals;
 
 import Layout from '@layouts/Layout.astro';
 

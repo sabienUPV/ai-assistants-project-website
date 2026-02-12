@@ -33,6 +33,7 @@ const glossaryTermsByLanguage = glossaryEntries.reduce((acc, entry) => {
   return acc;
 }, {} as Record<Lang, GlossaryEntry[]>);
 
+export type TranslationHelper = ReturnType<typeof getFormatter>;
 export function getFormatter(lang: Lang) {
   return function t(key: string, htmlWithGlossaries: boolean = false) {
     let text = i18nMap[lang][key];
