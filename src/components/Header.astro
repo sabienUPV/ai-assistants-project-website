@@ -8,7 +8,7 @@ import { home } from '@utils/url.ts';
         <ProjectTitle includeLogo={true} includeSubtitle={true} style="font-size: 23.5px" />
     </a>
     <EuLogo />
-    <nav class="nav-links" aria-label="Main navigation">
+    <nav aria-label="Main navigation">
         <ul>
             <li><a href={home('#top')}>Welcome</a></li>
             <li><a href={home('#objectives')}>Objectives</a></li>
@@ -28,7 +28,7 @@ import { home } from '@utils/url.ts';
         --color-subtitle: var(--color-semi-transparent-white);
     }
 
-    header .nav-links ul {
+    nav > ul {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
@@ -40,7 +40,7 @@ import { home } from '@utils/url.ts';
         margin: 0;
     }
 
-    header .nav-links {
+    nav {
         margin-inline-start: auto;
     }
 
@@ -49,13 +49,13 @@ import { home } from '@utils/url.ts';
             justify-content: center;
             gap: 1rem;
         }
-        header .nav-links {
+        nav {
             margin-inline-start: 0;
             width: 100%;
         }
     }
 
-    header .nav-links a {
+    nav a {
         color: var(--color-semi-transparent-white);
         font-size: 1.5rem;
         text-decoration: none;
@@ -65,8 +65,8 @@ import { home } from '@utils/url.ts';
         transition: color 0.2s ease, background-color 0.2s ease;
     }
 
-    header .nav-links a:hover,
-    header .nav-links a:focus-visible {
+    nav a:hover,
+    nav a:focus-visible {
         color: white;
         background-color: rgba(255, 255, 255, 0.1);
         outline: none;

@@ -1,8 +1,8 @@
-<a href="#top" class="floating-top-button" aria-label="Back to top">
+<a href="#top" aria-label="Back to top">
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
 </a>
 <style>
-  .floating-top-button {
+  a {
     position: fixed;
     bottom: 2rem;
     right: 2rem;
@@ -19,14 +19,14 @@
     transition: transform 0.2s ease;
   }
 
-  .floating-top-button:hover {
+  a:hover {
     transform: scale(1.1);
     background-color: var(--color-medium-blue);
   }
 
   /* Make sure it's big enough to tap on mobile (Accessibility requirement) */
   @media (max-width: 600px) {
-    .floating-top-button {
+    a {
       bottom: 1rem;
       right: 1rem;
       width: 3rem;
