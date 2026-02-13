@@ -11,7 +11,7 @@ import '@fontsource/roboto/700.css'; // Bold weight
 // Import global CSS here
 import '@styles/tooltips.css';
 
-import { home } from '@utils/url.ts';
+import { homeNoLocale } from '@utils/url.ts';
 import Header from '@components/Header.astro';
 import Footer from '@components/Footer.astro';
 import SkipLink from '@components/SkipLink.astro';
@@ -30,8 +30,8 @@ const { title } = Astro.props;
 		<meta charset="UTF-8" />
 		<meta name="description" content="AI-ASSISTANTS Project Website" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href={home('favicon.svg')} />
-		<link rel="icon" sizes="any" href={home('favicon.ico')} />
+		<link rel="icon" type="image/svg+xml" href={homeNoLocale('favicon.svg')} />
+		<link rel="icon" sizes="any" href={homeNoLocale('favicon.ico')} />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>

@@ -4,15 +4,15 @@ import { parse as parseCsv } from 'csv-parse/sync';
 
 // 1. Import the supported languages and their types
 // from a single source of truth
-import { supportedLangs } from './languages';
-import type { Lang } from './languages';
+import { locales } from './languages';
+import type { Locale } from './languages';
 
 // 2. Dynamically create the shape for the translations
 // We want: { en: z.string(), es: z.string(), ... }
-const langFields = supportedLangs.reduce((acc, lang) => {
-  acc[lang] = z.string();
+const langFields = locales.reduce((acc, locale) => {
+  acc[locale] = z.string();
   return acc;
-}, {} as Record<Lang, z.ZodString>);
+}, {} as Record<Locale, z.ZodString>);
 
 const i18n = defineCollection({
   // Load the CSV and parse it into rows
@@ -30,11 +30,11 @@ const i18n = defineCollection({
 });
 
 // 3. Dynamically create the shape for the glossary
-const glossaryFields = supportedLangs.reduce((acc, lang) => {
-  acc[`term_${lang}`] = z.string();
-  acc[`def_${lang}`] = z.string();
+const glossaryFields = locales.reduce((acc, locale) => {
+  acc[`term_${locale}`] = z.string();
+  acc[`def_${locale}`] = z.string();
   return acc;
-}, {} as Record<`term_${Lang}` | `def_${Lang}`, z.ZodString>);
+}, {} as Record<`term_${Locale}` | `def_${Locale}`, z.ZodString>);
 
 const glossary = defineCollection({
   loader: file("src/content/glossary.csv", {

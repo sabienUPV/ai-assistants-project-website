@@ -5,35 +5,20 @@ export const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, ''); // Remove tr
 
 /**
  * Proper way to reference the homepage or subpaths
- * handles base paths for GitHub Pages deployments
+ * 
+ * NOTE: This is NOT locale-aware.
+ * For that, either use the homeLocale helper function from Astro.locals (which we set up in middleware.ts),
+ * or if you already have the locale available, use the getRelativeLocaleUrl function from "astro:i18n" directly.
+ * 
+ * Handles base paths for GitHub Pages deployments
  * (since default is '/' but GitHub Pages often uses '/repo-name'
  * without the trailing slash, so we account for both cases)
  */
-export function home(path: string = ''): string {
+export function homeNoLocale(path: string = ''): string {
   // Ensure the path starts with a slash
   const validPath = path.startsWith('/') ? path : `/${path}`;
 
   // Combine the base URL with the valid path, ensuring we don't end up with double slashes
   // (e.g. "/my-repo" + "/en/" => "/my-repo/en/")
   return `${baseUrl}${validPath}`;
-};
-
-export type HomeHelper = typeof home;
-
-/**
- * Proper way to reference the homepage or subpaths (including language prefix)
- * handles base paths for GitHub Pages deployments
- * (since default is '/' but GitHub Pages often uses '/repo-name'
- * without the trailing slash, so we account for both cases)
- */
-export function getHomeFnWithLang(lang: string): HomeHelper {
-  // Ensure the lang starts with a slash
-  const validLang = lang.startsWith('/') ? lang : `/${lang}`;
-
-  // Return the home function with the language prefix added to the path
-  return (path: string = '') => {
-    // Ensure the path starts with a slash
-    const validPath = path.startsWith('/') ? path : `/${path}`;
-    return home(`${validLang}${validPath}`);
-  }
 };

@@ -1,10 +1,10 @@
 import { getCollection } from 'astro:content';
 
-import { supportedLangs } from '@languages';
-import type { Lang } from '@languages';
+import { locales } from '@languages';
+import type { Locale } from '@languages';
 
-export function getStaticPathsFromLangs() {
-		return supportedLangs.map(lang => ({ params: { lang } }));
+export function getStaticPathsFromLocales() {
+		return locales.map(locale => ({ params: { locale } }));
 }
 
 // 1. Load data once (Astro optimizes this at build time)
@@ -13,30 +13,30 @@ const glossaryEntries = await getCollection('glossary');
 
 // 2. Convert array of rows into a fast Lookup Map
 // { en: { hero_title: "Welcome..." }, es: { ... } }
-const i18nMap = supportedLangs.reduce((acc, lang) => {
-  acc[lang] = Object.fromEntries(i18nEntries.map(e => [e.data.id, e.data[lang]]));
+const i18nMap = locales.reduce((acc, locale) => {
+  acc[locale] = Object.fromEntries(i18nEntries.map(e => [e.data.id, e.data[locale]]));
   return acc;
-}, {} as Record<Lang, Record<string, string>>);
+}, {} as Record<Locale, Record<string, string>>);
 
 // 3. The Glossary Injection Magic
 // We create a fast lookup map for each language to find definitions by term
 type GlossaryEntry = { term: string; def: string };
 const glossaryTermsByLanguage = glossaryEntries.reduce((acc, entry) => {
-  supportedLangs.forEach(lang => {
-    const term = entry.data[`term_${lang}` as const];
-    const def = entry.data[`def_${lang}` as const];
+  locales.forEach(locale => {
+    const term = entry.data[`term_${locale}` as const];
+    const def = entry.data[`def_${locale}` as const];
     if (term && def) {
-      if (!acc[lang]) acc[lang] = [];
-      acc[lang].push({ term, def });
+      if (!acc[locale]) acc[locale] = [];
+      acc[locale].push({ term, def });
     }
   });
   return acc;
-}, {} as Record<Lang, GlossaryEntry[]>);
+}, {} as Record<Locale, GlossaryEntry[]>);
 
 export type TranslationHelper = ReturnType<typeof getFormatter>;
-export function getFormatter(lang: Lang) {
+export function getFormatter(locale: Locale) {
   return function t(key: string, htmlWithGlossaries: boolean = false) {
-    let text = i18nMap[lang][key];
+    let text = i18nMap[locale][key];
 
     if (!text) {
       console.warn(`Missing translation for key: ${key}`);
@@ -48,7 +48,7 @@ export function getFormatter(lang: Lang) {
     }
 
     // Inject tooltips (only for the first occurrence of each term)
-    glossaryTermsByLanguage[lang]?.forEach(({ term, def }) => {
+    glossaryTermsByLanguage[locale]?.forEach(({ term, def }) => {
       // Create a regex that finds the term as a whole word, case-insensitive
       const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const regex = new RegExp(`\\b(${escapedTerm})\\b`, 'i');

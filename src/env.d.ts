@@ -1,17 +1,15 @@
 /// <reference path="../.astro/types.d.ts" />
 
 // 1. imports make this file a module
-import type { TranslationHelper } from './utils/translation';
-import type { Lang } from './languages';
-import type { HomeHelper } from '@utils/url';
+import type { TranslationHelper } from '@utils/translation';
+import type { HomeHelper } from '@utils/localizedUrl';
 
 // 2. WRAP YOUR NAMESPACE IN 'declare global'
 declare global {
   namespace App {
     interface Locals {
       t: TranslationHelper;
-      homeLang: HomeHelper; // Add the home function with language support to the context
-      lang: Lang;
+      homeLocale: HomeHelper; // Add the home function with language support to the context
     }
   }
 }

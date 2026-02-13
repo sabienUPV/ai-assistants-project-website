@@ -2,7 +2,7 @@
 import EuLogo from '@components/EuLogo.astro';
 import ProjectTitle from '@components/ProjectTitle.astro';
 
-const { homeLang: home } = Astro.locals; // Get the home function with language support from the context
+const { homeLocale: home } = Astro.locals; // Get the home function with language support from the context
 ---
 <header>
     <a href={home('#top')}>
