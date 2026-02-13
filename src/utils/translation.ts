@@ -50,9 +50,16 @@ export function getFormatter(locale: Locale) {
     // Inject tooltips (only for the first occurrence of each term)
     glossaryTermsByLanguage[locale]?.forEach(({ term, def }) => {
       // Create a regex that finds the term as a whole word, case-insensitive
+      // 1. ESCAPE: Escape the term for regex
       const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`\\b(${escapedTerm})\\b`, 'i');
-      
+
+      // 2. REGEX: Modified to capture punctuation
+      // \b          -> Word boundary
+      // (${escapedTerm}) -> Group $1: The Term itself
+      // \b          -> Word boundary
+      // ([.,;:!?]?) -> Group $2: Optional punctuation immediately following (dot, comma, etc.) (this is to avoid bad line breaks between the term and its punctuation)
+      const regex = new RegExp(`\\b(${escapedTerm})\\b([.,;:!?]?)`, 'i');
+
       if (text.match(regex)) {
         const tooltipHtml = `
           <span class="tooltip-container">
@@ -60,7 +67,7 @@ export function getFormatter(locale: Locale) {
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <span class="pid-text">$1</span>
+            <span class="pid-text">$1</span>$2      
             <span class="tooltip-content">
               ${def}
               <svg class="tooltip-arrow" viewBox="0 0 255 255" preserveAspectRatio="none">
@@ -69,6 +76,8 @@ export function getFormatter(locale: Locale) {
             </span>
           </span>
         `;
+        
+        // Replace using the new template
         text = text.replace(regex, tooltipHtml);
       }
     });
