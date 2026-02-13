@@ -1,7 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 import { getFormatter } from "@utils/translation";
 import { getHomeHelperFn, type HomeHelper } from "@utils/localizedUrl"; // URL helper for locale-aware links
-import type { Locale } from "@languages";
+import { defaultLocale, type Locale } from "@languages";
 
 // NOTE: Even though we are using Static Site Generation (SSG), Astro's middleware runs at build time for each page.
 // So we can safely use it to set up our translations without worrying about runtime performance.
@@ -11,9 +11,7 @@ export const onRequest = defineMiddleware((context, next) => {
   // Your page should be inside the pages/[locale]/ directory,
   // and it should also be defined in getStaticPaths
   // (you can use the getStaticPathsFromLocales helper in translation.ts for that)
-  const locale = context.currentLocale as Locale | undefined;
-
-  if (!locale) return next(); // No locale found, skip middleware
+  const locale = (context.currentLocale || defaultLocale) as Locale;
 
   // Create the formatter ONCE per page
   const t = getFormatter(locale);
