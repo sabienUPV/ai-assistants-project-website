@@ -1,10 +1,12 @@
 ---
 import EuLogo from '@components/EuLogo.astro';
 import ProjectTitle from '@components/ProjectTitle.astro';
+import LocaleSelector from './LocaleSelector.astro';
 
 const { homeLocale: home } = Astro.locals; // Get the home function with language support from the context
 ---
 <header>
+    <LocaleSelector class="locale-selector" />
     <a href={`${home()}#top`}>
         <ProjectTitle includeLogo={true} includeSubtitle={true} style="font-size: 23.5px" />
     </a>
@@ -21,12 +23,26 @@ const { homeLocale: home } = Astro.locals; // Get the home function with languag
 <style>
     header {
         display: flex;
+        position: relative;
         flex-wrap: wrap;
         align-items: center;
         padding: 1rem;
         gap: 2rem;
         background-color: var(--color-dark-blue);
-        --color-subtitle: var(--color-semi-transparent-white);
+        --color-text: var(--color-semi-transparent-white);
+        --color-subtitle: var(--color-text);
+    }
+
+    .locale-selector {
+        /* Place it on the top right corner, but still inside the header */
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        background-color: var(--color-dark-blue);
+        transition: background-color 0.2s ease;
+        color: var(--color-semi-transparent-white);
     }
 
     nav > ul {

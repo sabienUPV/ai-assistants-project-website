@@ -1,0 +1,46 @@
+---
+import { locales } from "@languages";
+import { getRelativeLocaleUrl } from "astro:i18n";
+
+const currentLocale = Astro.currentLocale;
+
+const { ...attributes } = Astro.props;
+---
+
+<ul {...attributes}>
+  {locales.map((locale) => (
+    <li>
+      <a href={getRelativeLocaleUrl(locale)} class={locale === currentLocale ? "is-active" : ""}>
+        {locale.toUpperCase()}
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  ul {
+    display: flex;
+    gap: 0.1rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  li {
+    font-weight: bold;
+  }
+
+  a {
+    color: var(--color-semi-transparent-white);
+    text-decoration: none;
+    padding: 0.5rem 0.5rem;
+    border-radius: 0.5rem;
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+
+  a:hover,
+  a:focus-visible,
+  a.is-active {
+      color: white;
+      background-color: rgba(255, 255, 255, 0.1);
+  }
+</style>
