@@ -74,4 +74,11 @@ const { includeLogo = false, includeSubtitle = false, class: className, ...attri
     /* Limit the width of the subtitle so it wraps nicely and it's not a super long line */
     max-width: 32ch;
   }
+
+  /* --- MOBILE LAYOUT --- */
+  @media (max-width: 700px) {
+    .subtitle {
+      max-width: 20ch; /* On smaller screens, we want the subtitle to wrap more to avoid very long lines and keep it centered */
+    }
+  }
 </style>
