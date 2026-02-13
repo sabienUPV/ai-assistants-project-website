@@ -20,7 +20,8 @@ const { includeLogo = false, includeSubtitle = false, class: className, ...attri
     <Image 
       src={logo} 
       alt="AI-ASSISTANTS Logo" 
-      height="120" 
+      height="120"
+      class="logo"
       style="width: auto;" 
     />
   )}
@@ -77,8 +78,8 @@ const { includeLogo = false, includeSubtitle = false, class: className, ...attri
 
   /* --- MOBILE LAYOUT --- */
   @media (max-width: 700px) {
-    .subtitle {
-      max-width: 20ch; /* On smaller screens, we want the subtitle to wrap more to avoid very long lines and keep it centered */
+    .logo {
+      height: 100px;
     }
   }
 </style>
