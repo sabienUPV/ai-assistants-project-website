@@ -5,16 +5,16 @@ import ProjectTitle from '@components/ProjectTitle.astro';
 const { homeLocale: home } = Astro.locals; // Get the home function with language support from the context
 ---
 <header>
-    <a href={home('#top')}>
+    <a href={`${home()}#top`}>
         <ProjectTitle includeLogo={true} includeSubtitle={true} style="font-size: 23.5px" />
     </a>
     <EuLogo />
     <nav aria-label="Main navigation">
         <ul>
-            <li><a href={home('#top')}>Welcome</a></li>
-            <li><a href={home('#objectives')}>Objectives</a></li>
-            <li><a href={home('#organisers')}>Partners</a></li>
-            <li><a href={home('#resources')}>Resources</a></li>
+            <li><a href={`${home()}#top`}>Welcome</a></li>
+            <li><a href={`${home()}#objectives`}>Objectives</a></li>
+            <li><a href={`${home()}#organisers`}>Partners</a></li>
+            <li><a href={`${home()}#resources`}>Resources</a></li>
         </ul>
     </nav>
 </header>
