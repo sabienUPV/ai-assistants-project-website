@@ -3,15 +3,24 @@ import EuLogo from '@components/EuLogo.astro';
 import ProjectTitle from '@components/ProjectTitle.astro';
 import LocaleSelector from './LocaleSelector.astro';
 
-const { homeLocale: home } = Astro.locals; // Get the home function with language support from the context
+const { homeLocale: home } = Astro.locals;
 ---
+
 <header>
-    <LocaleSelector class="locale-selector" />
-    <a href={`${home()}#top`}>
-        <ProjectTitle includeLogo={true} includeSubtitle={true} class="project-title" />
-    </a>
-    <EuLogo />
-    <nav aria-label="Main navigation">
+    <div class="branding">
+        <a href={`${home()}#top`} class="title-link">
+             <ProjectTitle includeLogo={true} includeSubtitle={true} class="project-title" />
+        </a>
+        <div class="eu-logo-wrapper">
+             <EuLogo />
+        </div>
+    </div>
+
+    <div class="locale">
+        <LocaleSelector class="locale-selector" />
+    </div>
+
+    <nav aria-label="Main navigation" class="nav">
         <ul>
             <li><a href={`${home()}#top`}>Welcome</a></li>
             <li><a href={`${home()}#objectives`}>Objectives</a></li>
@@ -20,33 +29,55 @@ const { homeLocale: home } = Astro.locals; // Get the home function with languag
         </ul>
     </nav>
 </header>
+
 <style>
     header {
-        display: flex;
-        position: relative;
-        flex-wrap: wrap;
-        align-items: center;
-        padding: 1rem;
-        gap: 2rem;
+        display: grid;
         background-color: var(--color-dark-blue);
+        padding: 0.5rem 2rem;
+        gap: 0.5rem 2rem; /* Row gap 0.5rem, Column gap 2rem */
+        align-items: center;
+
+        font-size: 1.5rem;
+        
+        /* DESKTOP LAYOUT */
+        /* Column 1 takes remaining space (1fr), Column 2 fits content (auto) */
+        grid-template-columns: 1fr auto; 
+        
+        /* We define the visual layout here using names */
+        grid-template-areas:
+            "branding  locale"
+            "branding  nav";
+            
         --color-text: var(--color-semi-transparent-white);
         --color-subtitle: var(--color-text);
     }
 
-    .locale-selector {
-        /* Place it on the top right corner, but still inside the header */
-        position: absolute;
-        top: 0;
-        right: 0;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        background-color: var(--color-dark-blue);
-        transition: background-color 0.2s ease;
-        color: var(--color-semi-transparent-white);
+    /* Assign the HTML elements to the Grid Areas */
+    
+    .branding {
+        grid-area: branding;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex-wrap: nowrap;
     }
 
-    .project-title {
-        font-size: 1.5rem;
+    .locale {
+        grid-area: locale;
+        justify-self: end; /* Pushes it to the far right */
+        align-self: flex-start;   /* Aligns it to the top of its row */
+    }
+
+    .nav {
+        grid-area: nav;
+        justify-self: end; /* Pushes it to the far right */
+        align-self: flex-start; /* Aligns it to the top of its row (closer to locale) */
+    }
+
+    /* --- Component Styles --- */
+    .title-link {
+        text-decoration: none;
     }
 
     nav > ul {
@@ -55,39 +86,10 @@ const { homeLocale: home } = Astro.locals; // Get the home function with languag
         flex-wrap: wrap;
         align-items: center;
         justify-content: center;
-        gap: 1rem;
+        gap: 1.5rem;
         list-style: none;
         padding: 0;
         margin: 0;
-    }
-
-    nav {
-        margin-inline-start: auto;
-    }
-
-    @media (max-width: 1343px) {
-        header {
-            justify-content: center;
-            gap: 1rem;
-        }
-        nav {
-            margin-inline-start: 0;
-            width: 100%;
-        }
-    }
-
-    @media (max-width: 700px) {
-        .project-title {
-            font-size: 1.35rem;
-            padding-top: 0.5rem;
-        }
-    }
-
-    @media (max-width: 369px) {
-        .project-title {
-            font-size: 1.25rem;
-            padding-top: 1.5rem;
-        }
     }
 
     nav a {
@@ -104,5 +106,36 @@ const { homeLocale: home } = Astro.locals; // Get the home function with languag
     nav a:focus-visible {
         color: white;
         background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* --- MOBILE LAYOUT --- */
+    @media (max-width: 1400px) {
+        header {
+            /* Switch to a single column */
+            grid-template-columns: 1fr;
+            
+            /* REORDER EVERYTHING HERE */
+            /* This is the magic. We just change the list order. */
+            grid-template-areas:
+                "locale"
+                "branding"
+                "nav";
+            
+            gap: 1.5rem;
+            padding: 1rem;
+            justify-items: center; /* Center everything horizontally */
+            text-align: center;
+        }
+
+        .branding {
+            justify-content: center;
+            width: 100%;
+            flex-wrap: wrap;
+            font-size: 1.2rem;
+        }
+
+        .locale, .nav {
+            justify-self: center; /* Override the 'end' alignment from desktop */
+        }
     }
 </style>
