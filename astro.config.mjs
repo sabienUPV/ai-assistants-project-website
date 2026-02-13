@@ -10,7 +10,8 @@ export default defineConfig({
     defaultLocale: defaultLocale,
     locales: [...locales],
     routing: {
-      prefixDefaultLocale: true
+      prefixDefaultLocale: true,
+      redirectToDefaultLocale: false // We handle redirection from the root URL '/' ourselves, so that we redirect to the client's preferred language instead of always redirecting to the default language
     }
   }
 });
