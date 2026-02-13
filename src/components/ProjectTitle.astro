@@ -30,8 +30,8 @@ const { includeLogo = false, includeSubtitle = false, class: className, ...attri
     </div>
     {includeSubtitle && (
       <p class="subtitle">
-        AI-Assisted Solutions for Enhancing the<br />
-        Independent Living of Persons with<br />
+        AI-Assisted Solutions for Enhancing the
+        Independent Living of Persons with
         Intellectual Disabilities
       </p>
     )}
@@ -70,5 +70,8 @@ const { includeLogo = false, includeSubtitle = false, class: className, ...attri
     line-height: 1.1;
     /* Here we default to --color-dark-grey and NOT --color-text, since --color-dark-grey is the official grey color of the logo palette, while we use --color-text as a darker grey for general text since it has better contrast with the background. */
     color: var(--color-subtitle, var(--color-dark-grey));
+
+    /* Limit the width of the subtitle so it wraps nicely and it's not a super long line */
+    max-width: 32ch;
   }
 </style>
