@@ -8,7 +8,7 @@ const { homeLocale: home } = Astro.locals; // Get the home function with languag
 <header>
     <LocaleSelector class="locale-selector" />
     <a href={`${home()}#top`}>
-        <ProjectTitle includeLogo={true} includeSubtitle={true} style="font-size: 23.5px" />
+        <ProjectTitle includeLogo={true} includeSubtitle={true} class="project-title" />
     </a>
     <EuLogo />
     <nav aria-label="Main navigation">
@@ -45,6 +45,10 @@ const { homeLocale: home } = Astro.locals; // Get the home function with languag
         color: var(--color-semi-transparent-white);
     }
 
+    .project-title {
+        font-size: 1.5rem;
+    }
+
     nav > ul {
         display: flex;
         flex-direction: row;
@@ -69,6 +73,20 @@ const { homeLocale: home } = Astro.locals; // Get the home function with languag
         nav {
             margin-inline-start: 0;
             width: 100%;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .project-title {
+            font-size: 1.35rem;
+            padding-top: 0.5rem;
+        }
+    }
+
+    @media (max-width: 369px) {
+        .project-title {
+            font-size: 1.25rem;
+            padding-top: 1.5rem;
         }
     }
 
