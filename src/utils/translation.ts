@@ -14,19 +14,24 @@ export function getStaticPathsFromLocales() {
 const i18nEntries = await getCollection('i18n');
 const glossaryEntries = await getCollection('glossary');
 
-// 2. Convert array of rows into a fast Lookup Map
+// 2. Fast i18n Lookup Map
 // { en: { hero_title: "Welcome..." }, es: { ... } }
-const i18nMap = locales.reduce((acc, locale) => {
-  acc[locale] = Object.fromEntries(i18nEntries.map(e => [e.data.id, e.data[locale]]));
+const i18nMap = i18nEntries.reduce((acc, entry) => {
+  locales.forEach(locale => {
+    if (!acc[locale]) acc[locale] = {};
+    acc[locale][entry.data.id] = entry.data[locale];
+  });
   return acc;
 }, {} as Record<Locale, Record<string, string>>);
 
-// 3. The Glossary Injection Magic
-// We create a fast lookup map for each language to find definitions by term
+// 3. Fast Glossary Lookup Map
+// { en: { term1: "definition1", term2: "definition2" }, es: { ... } }
 const glossaryTermsByLanguage = glossaryEntries.reduce((acc, entry) => {
   locales.forEach(locale => {
     const term = entry.data[`term_${locale}` as const];
     const def = entry.data[`def_${locale}` as const];
+    
+    // Validates existence AND safely normalizes the key to lowercase
     if (term && def) {
       if (!acc[locale]) acc[locale] = {};
       acc[locale][term.toLowerCase()] = def;
