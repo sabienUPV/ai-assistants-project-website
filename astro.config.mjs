@@ -17,5 +17,8 @@ export default defineConfig({
     }
   },
 
-  integrations: [icon()]
+  integrations: [icon({
+    // We use the "astro-icon" integration to easily use icons from various icon libraries in our components
+    iconDir: 'src/assets/icons',
+  })]
 });
