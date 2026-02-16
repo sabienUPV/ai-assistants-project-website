@@ -5,19 +5,24 @@
   gap: 4px; /* Space between icon and text */
   position: relative;
   cursor: help;
-  border-bottom: 1px dotted #6b7280;
+  /*border-bottom: 1px dotted #6b7280;*/ /* Gray-500 */
+  border-bottom: 1px dotted var(--color-dark-blue);
 }
 
 .pid-icon {
   width: 14px;
-  height: 14px;
-  color: #6b7280; /* Gray-500, matches the underline */
+  height: 14px; 
   flex-shrink: 0;
+  /* color: #6b7280;*/ /* Gray-500, matches the underline */
+  color: var(--color-dark-blue);
+  stroke-width: 3.5;
 }
 
 /* Ensure the text still looks like part of the link */
 .pid-text {
   display: inline;
+  color: var(--color-dark-blue);
+  font-weight: bold;
 }
 
 /* The Popup Box */

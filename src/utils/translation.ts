@@ -1,6 +1,6 @@
 import { getCollection } from 'astro:content';
 
-import glossaryTermIconSvg from '@assets/icons/search.svg?raw';
+import glossaryTermIconSvg from '@assets/icons/glossary-term.svg?raw';
 import tooltipArrowSvg from '@assets/icons/arrow.svg?raw';
 
 import { locales } from '@languages';

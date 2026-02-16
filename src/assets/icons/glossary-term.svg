@@ -1,0 +1,5 @@
+<svg class="pid-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.2 1.5 1.5 2.5"></path>
+  <line x1="9" y1="18" x2="15" y2="18"></line>
+  <line x1="10" y1="22" x2="14" y2="22"></line>
+</svg>
