@@ -1,5 +1,6 @@
 ---
 import { locales } from "@languages";
+import { Icon } from "astro-icon/components";
 import { getRelativeLocaleUrl } from "astro:i18n";
 
 const currentLocale = Astro.currentLocale;
@@ -11,7 +12,7 @@ const { ...attributes } = Astro.props;
   {locales.map((locale) => (
     <li>
       <a href={getRelativeLocaleUrl(locale)} class={locale === currentLocale ? "is-active" : ""}>
-        {locale.toUpperCase()}
+        <Icon name={`circle-flags:${locale}`} width="24" height="24" /> {locale.toUpperCase()}
       </a>
     </li>
   ))}

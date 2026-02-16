@@ -2,6 +2,8 @@
 import { defineConfig } from 'astro/config';
 import { defaultLocale, locales } from './src/languages';
 
+import icon from 'astro-icon';
+
 // https://astro.build/config
 export default defineConfig({
   i18n: {
@@ -13,5 +15,7 @@ export default defineConfig({
       prefixDefaultLocale: true,
       redirectToDefaultLocale: false // We handle redirection from the root URL '/' ourselves, so that we redirect to the client's preferred language instead of always redirecting to the default language
     }
-  }
+  },
+
+  integrations: [icon()]
 });

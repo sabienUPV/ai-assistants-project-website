@@ -1,5 +1,5 @@
 {
-  "name": "",
+  "name": "ai-assistants-project-website",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@fontsource/roboto": "^5.2.9",
+    "@iconify-json/circle-flags": "^1.2.10",
     "astro": "^5.17.1",
+    "astro-icon": "^1.1.5",
     "csv-parse": "^6.1.0"
   }
 }
