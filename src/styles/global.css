@@ -1,0 +1,85 @@
+:root {
+  /* Logo palette colors */
+  --color-light-blue: #A8D4DC;
+  --color-medium-blue: #3BA6BC;
+  --color-green: #95C11F;
+  --color-dark-grey: #657176;
+
+  /* Website base colors */
+  --color-background: #F4F4F4;
+  --color-primary: var(--color-medium-blue);
+  --color-secondary: var(--color-light-blue);
+  --color-tertiary: var(--color-green);
+  --color-text: #555555;
+
+  /* Additional colors */
+  --color-dark-blue: #1F5A66;
+  --color-semi-transparent-white: #FFFFFFAA;
+}
+html {
+  background-color: var(--color-background);
+
+  /* Default jump-scroll for maximum accessibility */
+  scroll-behavior: auto;
+}
+
+/* Enable smooth scroll ONLY if the user doesn't have a motion sensitivity setting */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Arial', system-ui, sans-serif;
+  font-weight: 400;
+  color: var(--color-text);
+  /* Accessibility boost: 14px size (set with rem for better accessibility for people that need larger font sizes), readable line height and no text justification */
+  /* (as defined in "lectura fácil" standards) */
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.8; /* Lectura fácil recommends 1.5, but I think it's based on Microsoft Word's way of calculating line height which is different from how browsers do it. In my tests, 1.8 seems to provide a similar amount of spacing between lines as Word's 1.5, while 1.5 looks too cramped in the browser.) */
+  text-align: left;
+}
+
+/* Increased spacing between paragraphs for accessibility */
+p {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+main {
+  padding: 1.5rem;
+  max-width: 1200px; /* Prevents lines from getting too long/hard to read */
+  margin: 0 auto;
+}
+
+/* In titles, it looks better with less line height than the 1.8 we use by default */
+h1, h2, h3 {
+  line-height: 1.2;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+h1, h2 {
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-dark-blue);
+  margin-bottom: 2rem;
+  letter-spacing: 0.5px;
+}
+
+h1 { font-size: 2.2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1rem; }
+
+/* Help people using screen readers skip to the main content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
