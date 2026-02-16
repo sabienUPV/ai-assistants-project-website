@@ -1,5 +1,8 @@
 import { getCollection } from 'astro:content';
 
+import glossaryTermIconSvg from '@assets/icons/search.svg?raw';
+import tooltipArrowSvg from '@assets/icons/arrow.svg?raw';
+
 import { locales } from '@languages';
 import type { Locale } from '@languages';
 
@@ -20,18 +23,17 @@ const i18nMap = locales.reduce((acc, locale) => {
 
 // 3. The Glossary Injection Magic
 // We create a fast lookup map for each language to find definitions by term
-type GlossaryEntry = { term: string; def: string };
 const glossaryTermsByLanguage = glossaryEntries.reduce((acc, entry) => {
   locales.forEach(locale => {
     const term = entry.data[`term_${locale}` as const];
     const def = entry.data[`def_${locale}` as const];
     if (term && def) {
-      if (!acc[locale]) acc[locale] = [];
-      acc[locale].push({ term, def });
+      if (!acc[locale]) acc[locale] = {};
+      acc[locale][term.toLowerCase()] = def;
     }
   });
   return acc;
-}, {} as Record<Locale, GlossaryEntry[]>);
+}, {} as Record<Locale, Record<string, string>>);
 
 export type TranslationHelper = ReturnType<typeof getFormatter>;
 export function getFormatter(locale: Locale) {
@@ -47,39 +49,43 @@ export function getFormatter(locale: Locale) {
       return text;
     }
 
-    // Inject tooltips (only for the first occurrence of each term)
-    glossaryTermsByLanguage[locale]?.forEach(({ term, def }) => {
-      // Create a regex that finds the term as a whole word, case-insensitive
-      // 1. ESCAPE: Escape the term for regex
-      const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // 1. Get all terms for this language
+    const terms = glossaryTermsByLanguage[locale];
+    if (!terms) return text;
 
-      // 2. REGEX: Modified to capture punctuation
-      // \b          -> Word boundary
-      // (${escapedTerm}) -> Group $1: The Term itself
-      // \b          -> Word boundary
-      // ([.,;:!?]?) -> Group $2: Optional punctuation immediately following (dot, comma, etc.) (this is to avoid bad line breaks between the term and its punctuation)
-      const regex = new RegExp(`\\b(${escapedTerm})\\b([.,;:!?]?)`, 'i');
+    // 2. Create ONE regex matching ANY of the terms: \b(term1|term2|term3)\b([.,;:!?]?)
+    const escapedTerms = Object.keys(terms).map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const combinedRegex = new RegExp(`\\b(${escapedTerms.join('|')})\\b([.,;:!?]?)`, 'gi');
 
-      if (text.match(regex)) {
-        const tooltipHtml = `
-          <span class="tooltip-container">
-            <svg class="pid-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <span class="pid-text">$1</span>$2      
-            <span class="tooltip-content">
-              ${def}
-              <svg class="tooltip-arrow" viewBox="0 0 255 255" preserveAspectRatio="none">
-                <polygon points="0,0 127.5,127.5 255,0"/>
-              </svg>
-            </span>
-          </span>
-        `;
-        
-        // Replace using the new template
-        text = text.replace(regex, tooltipHtml);
+    // Keep track of what we've replaced so we only do the first occurrence
+    const replacedTerms = new Set<string>();
+
+    // 3. Run a single replace pass
+    text = text.replace(combinedRegex, (match, termMatch, punctuation) => {
+      const lowerTerm = termMatch.toLowerCase();
+      
+      // If we already added a tooltip for this word, just return the word normally
+      if (replacedTerms.has(lowerTerm)) {
+        return match; 
       }
+
+      // Find the definition
+      const definition = terms[lowerTerm];
+      if (!definition) return match;
+
+      replacedTerms.add(lowerTerm);
+
+      // 4. Inject using the ?raw SVG variables!
+      return `
+        <span class="tooltip-container">
+          ${glossaryTermIconSvg}
+          <span class="pid-text">${termMatch}</span>${punctuation}      
+          <span class="tooltip-content">
+            ${definition}
+            ${tooltipArrowSvg}
+          </span>
+        </span>
+      `;
     });
 
     return text;
