@@ -67,6 +67,7 @@ const { homeLocale: home } = Astro.locals;
         grid-area: locale;
         justify-self: end; /* Pushes it to the far right */
         align-self: flex-start;   /* Aligns it to the top of its row */
+        font-size: 2rem;
     }
 
     .nav {
@@ -117,25 +118,36 @@ const { homeLocale: home } = Astro.locals;
             /* REORDER EVERYTHING HERE */
             /* This is the magic. We just change the list order. */
             grid-template-areas:
-                "locale"
                 "branding"
                 "nav";
+
+            position: relative; /* Needed for the dropdown to position itself */
             
             /* gap: 1.5rem; */
             padding: 1rem;
-            justify-items: center; /* Center everything horizontally */
-            text-align: center;
+            justify-items: stretch; 
+            text-align: left;
+            gap: 1rem;
         }
 
         .branding {
             justify-content: center;
             width: 100%;
             flex-wrap: wrap;
-            font-size: 1.2rem;
+            gap: 0;
+            font-size: 1rem; /* Smaller font to fit alongside the dropdown */
         }
 
-        .locale, .nav {
-            justify-self: center; /* Override the 'end' alignment from desktop */
+        .locale {
+            /* Move the locale selector to the top-right corner */
+            position: absolute;
+            top: 0.1rem;
+            right: 0.1rem;
+            font-size: 1.5rem;
+        }
+
+        .nav {
+            justify-self: center;
         }
     }
 </style>
