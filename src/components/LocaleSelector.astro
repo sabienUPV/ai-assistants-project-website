@@ -10,7 +10,7 @@ const { ...attributes } = Astro.props;
 <div class="locale-selector" {...attributes}>
   {/* Desktop Dropdown Trigger */}
   <button class="dropdown-trigger" aria-haspopup="true" aria-expanded="false">
-    <Icon name={`circle-flags:${currentLocale}`} width="24" height="24" aria-hidden="true" />
+    <Icon name={`circle-flags:${currentLocale}`} class="flag-icon" width="24" height="24" aria-hidden="true" />
     <span class="locale-label">{currentLocale?.toUpperCase()}</span>
     <Icon name="arrow" width="14" height="14" class="chevron" aria-hidden="true" />
   </button>
@@ -26,7 +26,7 @@ const { ...attributes } = Astro.props;
           title={locale.toUpperCase()} 
           aria-label={`Switch to ${locale.toUpperCase()} language`}
         >
-          <Icon name={`circle-flags:${locale}`} width="24" height="24" aria-hidden="true" /> 
+          <Icon name={`circle-flags:${locale}`} class="flag-icon" width="24" height="24" aria-hidden="true" /> 
           <span class="locale-label">{locale.toUpperCase()}</span>
         </a>
       </li>
@@ -74,6 +74,10 @@ const { ...attributes } = Astro.props;
   a.is-active {
     color: white;
     background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .flag-icon {
+    border-radius: 50%;
   }
 
   /* --- Mobile Styles (Row of Icons) --- */
