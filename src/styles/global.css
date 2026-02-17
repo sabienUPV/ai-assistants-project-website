@@ -11,6 +11,7 @@
   --color-secondary: var(--color-light-blue);
   --color-tertiary: var(--color-green);
   --color-text: #555555;
+  --color-link-hover: #26718f; /* A middle ground between the medium blue and the dark blue, for better contrast on hover */
 
   /* Additional colors */
   --color-dark-blue: #1F5A66;

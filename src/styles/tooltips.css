@@ -59,3 +59,10 @@
 .tooltip-container:hover .tooltip-content {
   visibility: visible;
 }
+.tooltip-container:hover {
+  border-bottom: 1px dotted var(--color-link-hover);
+}
+.tooltip-container:hover .pid-text,
+.tooltip-container:hover .pid-icon {
+  color: var(--color-link-hover);
+}
