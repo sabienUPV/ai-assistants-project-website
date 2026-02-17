@@ -27,10 +27,14 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.5rem;
   padding: 0.5rem;
-  min-width: max-content;
   z-index: 50;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   
+  /* Make sure all content shows properly,
+  while ensuring it doesn't overflow horizontally */
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+
   flex-direction: column;
   gap: 0.2rem;
 }
@@ -89,18 +93,10 @@
 /* --- Mobile Landscape: Switch to row layout to save vertical space --- */
 /* We use 450px to catch most phones in landscape orientation */
 @media (max-width: 790px) and (max-height: 450px) {
-    .dropdown-menu {
-        /* Ensure it doesn't overflow horizontally */
-        width: max-content;
-        max-width: calc(100vw - 2rem);
-        /* Reset min-width so max-width can force wrapping if needed */
-        min-width: auto;
-    }
-
     .dropdown-list {
         flex-direction: row;
         flex-wrap: wrap;
-        gap: 0.5rem;
+        gap: 1rem;
         justify-content: center;
     }
 }
