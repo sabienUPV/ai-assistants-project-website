@@ -1,5 +1,5 @@
 ---
-import DocIcon from "@components/DocIcon.astro";
+import { Icon } from "astro-icon/components";
 
 // Get all PDFs in a specific folder
 const pdfFiles = import.meta.glob<string>('@assets/docs/*.pdf', {
@@ -35,7 +35,7 @@ const pdfs = Object.entries(pdfFiles).map(([path, url]) => {
   {pdfs.map(({ name, url }) => (
     <li>
       <a href={url} target="_blank" rel="noopener noreferrer">
-        <DocIcon />
+        <Icon name="document" width="24" height="24" aria-hidden="true" />
         {name}
       </a>
     </li>
