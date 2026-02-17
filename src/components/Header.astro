@@ -10,10 +10,10 @@ const { homeLocale: home } = Astro.locals;
 <header>
     <div class="branding">
         <a href={`${home()}#top`} class="title-link">
-             <ProjectTitle includeLogo={true} includeSubtitle={true} class="project-title" />
+             <ProjectTitle includeLogo={true} includeSubtitle={true} class="project-title" loading="eager" />
         </a>
         <div class="eu-logo-wrapper">
-             <EuLogo class="eu-logo" />
+             <EuLogo class="eu-logo" loading="eager" />
         </div>
     </div>
 

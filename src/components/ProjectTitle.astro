@@ -1,15 +1,17 @@
 ---
 import { Image } from 'astro:assets';
 import logo from '@assets/images/LOGO_AI-ASSISTANTS_NO-TEXT.svg';
+import type { HTMLAttributes } from 'astro/types';
 
 interface Props {
   includeLogo?: boolean;
   includeSubtitle?: boolean;
   class?: string;
+  loading?: HTMLAttributes<'img'>['loading'];
   [key: string]: any;
 }
 
-const { includeLogo = false, includeSubtitle = false, class: className, ...attributes } = Astro.props;
+const { includeLogo = false, includeSubtitle = false, loading, class: className, ...attributes } = Astro.props;
 ---
 
 <div 
@@ -23,6 +25,7 @@ const { includeLogo = false, includeSubtitle = false, class: className, ...attri
       height="120"
       class="logo"
       style="width: auto;" 
+      loading={loading}
     />
   )}
   <div class="text">
