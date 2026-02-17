@@ -10,61 +10,41 @@ const { ...attributes } = Astro.props;
 
 <div class="locale-selector dropdown-wrapper" {...attributes}>
   {/* Desktop Dropdown Trigger */}
-  <button class="dropdown-trigger locale-trigger" aria-haspopup="true" aria-expanded="false">
+  <button class="dropdown-trigger dropdown-link" aria-haspopup="true" aria-expanded="false">
     <Icon name={`circle-flags:${currentLocale}`} class="flag-icon" width="24" height="24" aria-hidden="true" />
     <span class="locale-label">{currentLocale?.toUpperCase()}</span>
     <Icon name="arrow" width="14" height="14" class="chevron" aria-hidden="true" />
   </button>
 
   {/* The List of Locales */}
-  <ul class="locale-list dropdown-menu">
-    {locales.map((locale) => (
-      <li>
-        <a 
-          href={getRelativeLocaleUrl(locale)} 
-          class={locale === currentLocale ? "is-active" : ""}
-          aria-current={locale === currentLocale ? "page" : undefined}
-          title={locale.toUpperCase()} 
-          aria-label={`Switch to ${locale.toUpperCase()} language`}
-        >
-          <Icon name={`circle-flags:${locale}`} class="flag-icon" width="24" height="24" aria-hidden="true" /> 
-          <span class="locale-label">{locale.toUpperCase()}</span>
-        </a>
-      </li>
-    ))}
-  </ul>
+  <nav class="dropdown-menu" aria-label="Select language">
+    <ul class="dropdown-list">
+      {locales.map((locale) => (
+        <li>
+          <a 
+            href={getRelativeLocaleUrl(locale)} 
+            class:list={["dropdown-link", { "is-active": locale === currentLocale }]}
+            aria-current={locale === currentLocale ? "page" : undefined}
+            title={locale.toUpperCase()} 
+            aria-label={`Switch to ${locale.toUpperCase()} language`}
+          >
+            <Icon name={`circle-flags:${locale}`} class="flag-icon" width="24" height="24" aria-hidden="true" /> 
+            <span class="locale-label">{locale.toUpperCase()}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
 </div>
 
 <style>
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  li {
-    font-weight: bold;
-  }
-
-  a, .locale-trigger {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--color-semi-transparent-white);
-    text-decoration: none;
-    font-size: 1.1rem;
-    padding: 0.6rem 0.9rem;
-    border-radius: 0.5rem;
-    transition: color 0.2s ease, background-color 0.2s ease;
-  }
-
-  a:hover,
-  a:focus-visible,
-  .locale-trigger:hover,
-  .locale-trigger:focus-visible,
-  a.is-active {
-    color: white;
-    background-color: rgba(255, 255, 255, 0.1);
+  /* We only need to define specific overrides here */
+  .dropdown-trigger {
+    font-size: 1.2rem;
+    /* Reset button styles for the trigger since it uses the shared link class */
+    background: transparent;
+    border: none;
+    font-family: inherit;
   }
 
   .flag-icon {

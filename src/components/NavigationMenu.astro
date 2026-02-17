@@ -20,41 +20,16 @@ const { class: className, ...attributes } = Astro.props;
 
     <!-- Menu Items (Row on Desktop, Dropdown on Mobile) -->
     <nav aria-label="Main navigation" class="nav-content dropdown-menu">
-        <ul>
-            <li><a href={`${home()}#top`}>Welcome</a></li>
-            <li><a href={`${home()}#objectives`}>Objectives</a></li>
-            <li><a href={`${home()}#organisers`}>Organisers</a></li>
-            <li><a href={`${home()}#resources`}>Resources</a></li>
+        <ul class="dropdown-list">
+            <li><a class="dropdown-link" href={`${home()}#top`}>Welcome</a></li>
+            <li><a class="dropdown-link" href={`${home()}#objectives`}>Objectives</a></li>
+            <li><a class="dropdown-link" href={`${home()}#organisers`}>Organisers</a></li>
+            <li><a class="dropdown-link" href={`${home()}#resources`}>Resources</a></li>
         </ul>
     </nav>
 </div>
 
 <style>
-    /* --- Shared Link Styles --- */
-    a {
-        display: block;
-        color: var(--color-semi-transparent-white);
-        text-decoration: none;
-        font-weight: bold;
-        padding: 0.6rem 0.9rem;
-        border-radius: 0.5rem;
-        transition: color 0.2s, background-color 0.2s;
-        white-space: nowrap;
-    }
-
-    a:hover, a:focus-visible {
-        color: white;
-        background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-    }
-
     /* --- Desktop/Tablet Overrides (Disable dropdown behavior) --- */
     @media (min-width: 791px) {
         .hamburger-btn {
@@ -70,7 +45,7 @@ const { class: className, ...attributes } = Astro.props;
             padding: 0;
         }
 
-        ul {
+        .dropdown-list {
             flex-direction: row;
             gap: 1.5rem;
         }
