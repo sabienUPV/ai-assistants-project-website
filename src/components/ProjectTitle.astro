@@ -45,6 +45,10 @@ const { includeLogo = false, includeSubtitle = false, class: className, ...attri
     align-items: center;
   }
 
+  .logo {
+    height: var(--logo-height, 120px);
+  }
+
   .text {
     width: auto;
   }
@@ -74,12 +78,5 @@ const { includeLogo = false, includeSubtitle = false, class: className, ...attri
 
     /* Limit the width of the subtitle so it wraps nicely and it's not a super long line */
     max-width: 32ch;
-  }
-
-  /* --- MOBILE LAYOUT --- */
-  @media (max-width: 700px) {
-    .logo {
-      height: 100px;
-    }
   }
 </style>

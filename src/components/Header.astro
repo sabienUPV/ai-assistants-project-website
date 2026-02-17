@@ -140,11 +140,15 @@ const { homeLocale: home } = Astro.locals;
             justify-content: center;
             width: 100%;
             flex-wrap: wrap;
-            font-size: 1rem; /* Smaller font to fit alongside the dropdown */
+            font-size: 1.2rem;
+        }
+
+        .branding .project-title {
+            --logo-height: 110px; /* Custom property to control logo height from the parent */
         }
 
         .branding .eu-logo {
-            height: 50px;
+            height: 55px;
         }
 
         .locale {
@@ -183,7 +187,11 @@ const { homeLocale: home } = Astro.locals;
             justify-content: center;
             width: 100%;
             flex-wrap: wrap;
-            font-size: 1rem; /* Smaller font to fit alongside the dropdown */
+            font-size: 1rem;
+        }
+
+        .branding .project-title {
+            --logo-height: 100px; /* Custom property to control logo height from the parent */
         }
 
         .branding .eu-logo {
