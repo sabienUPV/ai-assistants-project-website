@@ -93,6 +93,8 @@
         /* Ensure it doesn't overflow horizontally */
         width: max-content;
         max-width: calc(100vw - 2rem);
+        /* Reset min-width so max-width can force wrapping if needed */
+        min-width: auto;
     }
 
     .dropdown-list {
