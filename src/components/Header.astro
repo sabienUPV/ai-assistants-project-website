@@ -119,16 +119,14 @@ const { homeLocale: home } = Astro.locals;
     /* --- TABLET LAYOUT --- */
     @media (max-width: 1535px) {
         header {
-            /* Switch to a single column */
-            grid-template-columns: 1fr;
+
+            grid-template-columns: auto auto;
             
             /* REORDER EVERYTHING HERE */
             /* This is the magic. We just change the list order. */
             grid-template-areas:
-                "branding"
-                "nav";
-
-            position: relative; /* Needed for the dropdown to position itself */
+                "branding  branding"
+                "nav  locale";
             
             padding: 1rem;
             justify-items: stretch; 
@@ -151,21 +149,19 @@ const { homeLocale: home } = Astro.locals;
             height: 55px;
         }
 
+        /* Moving the locale and nav next to each other somehow centers them out */
         .locale {
-            /* Move the locale selector to the top-right corner */
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
             font-size: 1.5rem;
+            justify-self: start; /* Move it to the left, next to the nav */
         }
 
         .nav {
-            justify-self: center;
+            justify-self: end; /* Move it to the right, next to the locale */
         }
     }
 
     /* --- MOBILE LAYOUT --- */
-    @media (max-width: 700px) {
+    @media (max-width: 790px) {
         header {
             /* Two equal columns for the top row controls */
             grid-template-columns: 1fr 1fr;
@@ -179,8 +175,6 @@ const { homeLocale: home } = Astro.locals;
             justify-items: center; 
             text-align: center;
             gap: 0;
-
-            position: static; /* Reset position for mobile, since we will use a different approach for the dropdown */
         }
 
         .branding {
@@ -199,7 +193,6 @@ const { homeLocale: home } = Astro.locals;
         }
 
         .locale {
-            position: static; /* Reset absolute positioning */
             grid-area: locale;
             justify-self: end; /* Top Right */
             align-self: center;
