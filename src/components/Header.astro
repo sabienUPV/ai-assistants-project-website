@@ -2,6 +2,7 @@
 import EuLogo from '@components/EuLogo.astro';
 import ProjectTitle from '@components/ProjectTitle.astro';
 import LocaleSelector from './LocaleSelector.astro';
+import { Icon } from 'astro-icon/components';
 
 const { homeLocale: home } = Astro.locals;
 ---
@@ -15,6 +16,10 @@ const { homeLocale: home } = Astro.locals;
              <EuLogo class="eu-logo" />
         </div>
     </div>
+
+    <button id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <Icon name="hamburger" width="32" height="32" aria-hidden="true" />
+    </button>
 
     <div class="locale">
         <LocaleSelector class="locale-selector" />
@@ -41,13 +46,12 @@ const { homeLocale: home } = Astro.locals;
         font-size: 1.5rem;
         
         /* DESKTOP LAYOUT */
-        /* Column 1 takes remaining space (1fr), Column 2 fits content (auto) */
-        grid-template-columns: 1fr auto; 
+        /* Branding (Left) | Nav (Middle) | Locale (Right) */
+        grid-template-columns: auto 1fr auto; 
         
         /* We define the visual layout here using names */
         grid-template-areas:
-            "branding  locale"
-            "branding  nav";
+            "branding nav locale";
             
         --color-text: var(--color-semi-transparent-white);
         --color-subtitle: var(--color-text);
@@ -65,15 +69,18 @@ const { homeLocale: home } = Astro.locals;
 
     .locale {
         grid-area: locale;
-        justify-self: end; /* Pushes it to the far right */
-        align-self: flex-start;   /* Aligns it to the top of its row */
-        font-size: 2rem;
+        justify-self: end;
+        align-self: center;
     }
 
     .nav {
         grid-area: nav;
         justify-self: end; /* Pushes it to the far right */
-        align-self: flex-start; /* Aligns it to the top of its row (closer to locale) */
+        align-self: center;
+    }
+
+    #menu-toggle {
+        display: none; /* Hidden on desktop */
     }
 
     /* --- Component Styles --- */
@@ -109,8 +116,8 @@ const { homeLocale: home } = Astro.locals;
         background-color: rgba(255, 255, 255, 0.1);
     }
 
-    /* --- MOBILE LAYOUT --- */
-    @media (max-width: 1400px) {
+    /* --- TABLET LAYOUT --- */
+    @media (max-width: 1535px) {
         header {
             /* Switch to a single column */
             grid-template-columns: 1fr;
@@ -123,7 +130,6 @@ const { homeLocale: home } = Astro.locals;
 
             position: relative; /* Needed for the dropdown to position itself */
             
-            /* gap: 1.5rem; */
             padding: 1rem;
             justify-items: stretch; 
             text-align: left;
@@ -144,8 +150,8 @@ const { homeLocale: home } = Astro.locals;
         .locale {
             /* Move the locale selector to the top-right corner */
             position: absolute;
-            top: 0.1rem;
-            right: 0.1rem;
+            top: 0.5rem;
+            right: 0.5rem;
             font-size: 1.5rem;
         }
 
@@ -153,4 +159,82 @@ const { homeLocale: home } = Astro.locals;
             justify-self: center;
         }
     }
+
+    /* --- MOBILE LAYOUT --- */
+    @media (max-width: 700px) {
+        header {
+            /* Two equal columns for the top row controls */
+            grid-template-columns: 1fr 1fr;
+            
+            grid-template-areas:
+                "hamburger locale"
+                "branding  branding"
+                "nav       nav";
+            
+            padding: 0.5rem;
+            justify-items: center; 
+            text-align: center;
+            gap: 0;
+
+            position: static; /* Reset position for mobile, since we will use a different approach for the dropdown */
+        }
+
+        .branding {
+            justify-content: center;
+            width: 100%;
+            flex-wrap: wrap;
+            font-size: 1rem; /* Smaller font to fit alongside the dropdown */
+        }
+
+        .branding .eu-logo {
+            height: 50px;
+        }
+
+        .locale {
+            position: static; /* Reset absolute positioning */
+            grid-area: locale;
+            justify-self: end; /* Top Right */
+            align-self: center;
+        }
+
+        #menu-toggle {
+            grid-area: hamburger;
+            justify-self: start; /* Top Left */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .nav {
+            justify-self: center;
+            display: none; /* Hidden by default on mobile */
+            width: 100%;
+        }
+
+        .nav.is-open {
+            display: block;
+        }
+
+        .nav ul {
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+    }
 </style>
+
+<script>
+    const menuToggle = document.getElementById('menu-toggle');
+    const nav = document.querySelector('.nav');
+
+    menuToggle?.addEventListener('click', () => {
+        nav?.classList.toggle('is-open');
+        const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+        menuToggle.setAttribute('aria-expanded', (!isExpanded).toString());
+    });
+</script>
