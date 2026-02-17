@@ -2,13 +2,14 @@
 import { Icon } from 'astro-icon/components';
 import '@styles/dropdown-selector.css';
 
+const { homeLocale: home } = Astro.locals;
+
 interface Props {
-  homeUrl: string;
   class?: string;
   [key: string]: any;
 }
 
-const { homeUrl, class: className, ...attributes } = Astro.props;
+const { class: className, ...attributes } = Astro.props;
 ---
 
 <div class:list={["nav-wrapper dropdown-wrapper", className]} {...attributes}>
@@ -20,10 +21,10 @@ const { homeUrl, class: className, ...attributes } = Astro.props;
     <!-- Menu Items (Row on Desktop, Dropdown on Mobile) -->
     <nav aria-label="Main navigation" class="nav-content dropdown-menu">
         <ul>
-            <li><a href={`${homeUrl}#top`}>Welcome</a></li>
-            <li><a href={`${homeUrl}#objectives`}>Objectives</a></li>
-            <li><a href={`${homeUrl}#organisers`}>Partners</a></li>
-            <li><a href={`${homeUrl}#resources`}>Resources</a></li>
+            <li><a href={`${home()}#top`}>Welcome</a></li>
+            <li><a href={`${home()}#objectives`}>Objectives</a></li>
+            <li><a href={`${home()}#organisers`}>Partners</a></li>
+            <li><a href={`${home()}#resources`}>Resources</a></li>
         </ul>
     </nav>
 </div>
