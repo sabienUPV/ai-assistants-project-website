@@ -2,7 +2,7 @@
 import EuLogo from '@components/EuLogo.astro';
 import ProjectTitle from '@components/ProjectTitle.astro';
 import LocaleSelector from './LocaleSelector.astro';
-import { Icon } from 'astro-icon/components';
+import NavigationMenu from './NavigationMenu.astro';
 
 const { homeLocale: home } = Astro.locals;
 ---
@@ -17,19 +17,7 @@ const { homeLocale: home } = Astro.locals;
         </div>
     </div>
 
-    <div class="nav-wrapper">
-        <button class="hamburger-btn" aria-label="Toggle navigation">
-            <Icon name="hamburger" width="32" height="32" aria-hidden="true" />
-        </button>
-        <nav aria-label="Main navigation" class="nav">
-            <ul>
-                <li><a href={`${home()}#top`}>Welcome</a></li>
-                <li><a href={`${home()}#objectives`}>Objectives</a></li>
-                <li><a href={`${home()}#organisers`}>Partners</a></li>
-                <li><a href={`${home()}#resources`}>Resources</a></li>
-            </ul>
-        </nav>
-    </div>
+    <NavigationMenu homeUrl={home()} class="nav-wrapper" />
 
     <div class="locale">
         <LocaleSelector class="locale-selector" />
@@ -81,46 +69,9 @@ const { homeLocale: home } = Astro.locals;
         position: relative;
     }
 
-    .hamburger-btn {
-        display: none; /* Hidden on desktop/tablet */
-        background: transparent;
-        border: none;
-        color: white;
-        cursor: pointer;
-        padding: 0.5rem;
-    }
-
     /* --- Component Styles --- */
     .title-link {
         text-decoration: none;
-    }
-
-    nav > ul {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: center;
-        gap: 1.5rem;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    nav a {
-        color: var(--color-semi-transparent-white);
-        font-size: 1.5rem;
-        text-decoration: none;
-        font-weight: bold;
-        padding: 0.5rem 1rem;
-        border-radius: 0.5rem;
-        transition: color 0.2s ease, background-color 0.2s ease;
-    }
-
-    nav a:hover,
-    nav a:focus-visible {
-        color: white;
-        background-color: rgba(255, 255, 255, 0.1);
     }
 
     /* --- TABLET LAYOUT --- */
@@ -208,42 +159,11 @@ const { homeLocale: home } = Astro.locals;
             justify-self: start; /* Top Left */
         }
 
-        .hamburger-btn {
-            display: flex;
-        }
-
-        /* Dropdown Logic for Mobile */
-        .nav {
-            display: none; /* Hidden by default on mobile */
-            position: absolute;
-            top: 100%;
+        /* Override the dropdown alignment for the left-side menu */
+        .nav-wrapper :global(.dropdown-menu) {
             left: 0;
-            background-color: #1a1a1a;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 0.5rem;
-            padding: 0.5rem;
+            right: auto;
             min-width: 200px;
-            z-index: 20;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            text-align: left;
-        }
-
-        .nav-wrapper:hover .nav,
-        .nav-wrapper:focus-within .nav {
-            display: block;
-        }
-
-        .nav ul {
-            flex-direction: column;
-            gap: 0.5rem;
-            padding: 0;
-            align-items: stretch;
-        }
-
-        .nav a {
-            display: block;
-            font-size: 1.2rem;
-            padding: 0.6rem 0.9rem; /* Match LocaleSelector padding */
         }
     }
 </style>

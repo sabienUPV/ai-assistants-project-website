@@ -1,0 +1,79 @@
+---
+import { Icon } from 'astro-icon/components';
+import '@styles/dropdown-selector.css';
+
+interface Props {
+  homeUrl: string;
+  class?: string;
+  [key: string]: any;
+}
+
+const { homeUrl, class: className, ...attributes } = Astro.props;
+---
+
+<div class:list={["nav-wrapper dropdown-wrapper", className]} {...attributes}>
+    <!-- Mobile Trigger (Hamburger) -->
+    <button class="hamburger-btn dropdown-trigger" aria-label="Toggle navigation">
+        <Icon name="hamburger" width="32" height="32" aria-hidden="true" />
+    </button>
+
+    <!-- Menu Items (Row on Desktop, Dropdown on Mobile) -->
+    <nav aria-label="Main navigation" class="nav-content dropdown-menu">
+        <ul>
+            <li><a href={`${homeUrl}#top`}>Welcome</a></li>
+            <li><a href={`${homeUrl}#objectives`}>Objectives</a></li>
+            <li><a href={`${homeUrl}#organisers`}>Partners</a></li>
+            <li><a href={`${homeUrl}#resources`}>Resources</a></li>
+        </ul>
+    </nav>
+</div>
+
+<style>
+    /* --- Shared Link Styles --- */
+    a {
+        display: block;
+        color: var(--color-semi-transparent-white);
+        text-decoration: none;
+        font-weight: bold;
+        padding: 0.6rem 0.9rem;
+        border-radius: 0.5rem;
+        transition: color 0.2s, background-color 0.2s;
+        white-space: nowrap;
+    }
+
+    a:hover, a:focus-visible {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* --- Desktop/Tablet Overrides (Disable dropdown behavior) --- */
+    @media (min-width: 791px) {
+        .hamburger-btn {
+            display: none;
+        }
+
+        .nav-content.dropdown-menu {
+            display: block; /* Always visible */
+            position: static;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+        }
+
+        ul {
+            flex-direction: row;
+            gap: 1.5rem;
+        }
+    }
+
+    /* --- Mobile Overrides are handled by dropdown-selector.css + Header grid positioning --- */
+</style>

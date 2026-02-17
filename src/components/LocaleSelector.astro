@@ -2,21 +2,22 @@
 import { locales } from "@languages";
 import { Icon } from "astro-icon/components";
 import { getRelativeLocaleUrl } from "astro:i18n";
+import '@styles/dropdown-selector.css';
 
 const currentLocale = Astro.currentLocale;
 const { ...attributes } = Astro.props;
 ---
 
-<div class="locale-selector" {...attributes}>
+<div class="locale-selector dropdown-wrapper" {...attributes}>
   {/* Desktop Dropdown Trigger */}
-  <button class="dropdown-trigger" aria-haspopup="true" aria-expanded="false">
+  <button class="dropdown-trigger locale-trigger" aria-haspopup="true" aria-expanded="false">
     <Icon name={`circle-flags:${currentLocale}`} class="flag-icon" width="24" height="24" aria-hidden="true" />
     <span class="locale-label">{currentLocale?.toUpperCase()}</span>
     <Icon name="arrow" width="14" height="14" class="chevron" aria-hidden="true" />
   </button>
 
   {/* The List of Locales */}
-  <ul class="locale-list">
+  <ul class="locale-list dropdown-menu">
     {locales.map((locale) => (
       <li>
         <a 
@@ -35,13 +36,7 @@ const { ...attributes } = Astro.props;
 </div>
 
 <style>
-  /* --- Shared Styles --- */
-  .locale-selector {
-    position: relative; /* Essential for the absolute dropdown */
-    display: inline-block;
-  }
-
-  ul.locale-list {
+  ul {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -51,7 +46,7 @@ const { ...attributes } = Astro.props;
     font-weight: bold;
   }
 
-  a, .dropdown-trigger {
+  a, .locale-trigger {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -61,16 +56,12 @@ const { ...attributes } = Astro.props;
     padding: 0.6rem 0.9rem;
     border-radius: 0.5rem;
     transition: color 0.2s ease, background-color 0.2s ease;
-    cursor: pointer;
-    background: transparent;
-    border: none;
-    font-family: inherit;
   }
 
   a:hover,
   a:focus-visible,
-  .dropdown-trigger:hover,
-  .dropdown-trigger:focus-visible,
+  .locale-trigger:hover,
+  .locale-trigger:focus-visible,
   a.is-active {
     color: white;
     background-color: rgba(255, 255, 255, 0.1);
@@ -79,39 +70,4 @@ const { ...attributes } = Astro.props;
   .flag-icon {
     border-radius: 50%;
   }
-
-  /* --- Dropdown Styles --- */
-    .locale-list {
-      display: none; /* Hidden by default */
-      position: absolute;
-      top: 100%;
-      right: 0; /* Align to the right, change to left: 0 if needed */
-      background-color: #1a1a1a; /* Replace with your theme's background */
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 0.5rem;
-      padding: 0.5rem;
-      min-width: max-content;
-      z-index: 10;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    }
-
-    /* The magic that makes the CSS dropdown work */
-    .locale-selector:hover .locale-list,
-    .locale-selector:focus-within .locale-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-    }
-
-    /* Animation for your SVG arrow */
-    .chevron {
-      transition: transform 0.2s ease;
-      transform-origin: 50% 25%; /* Centers the rotation point for this specific triangle */
-      margin-top: 0.5rem;
-    }
-
-    .locale-selector:hover .chevron,
-    .locale-selector:focus-within .chevron {
-      transform: rotate(180deg);
-    }
 </style>
