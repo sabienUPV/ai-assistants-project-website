@@ -59,7 +59,7 @@ const { homeLocale: home } = Astro.locals;
         grid-area: branding;
         display: flex;
         align-items: center;
-        gap: 1.5rem;
+        column-gap: 1.5rem; /* Using column-gap instead of gap makes it so it doesn't create a big gap when they wrap on mobile */
         flex-wrap: nowrap;
     }
 
@@ -134,7 +134,6 @@ const { homeLocale: home } = Astro.locals;
             justify-content: center;
             width: 100%;
             flex-wrap: wrap;
-            gap: 0;
             font-size: 1rem; /* Smaller font to fit alongside the dropdown */
         }
 
