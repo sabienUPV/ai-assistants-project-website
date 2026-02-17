@@ -167,17 +167,4 @@ const { homeLocale: home } = Astro.locals;
             min-width: 200px;
         }
     }
-
-    /** ROW HAMBURGER MENU FOR MOBILE WITH SHORT HEIGHT (E.G. LANDSCAPE LAYOUT) */
-    @media (max-width: 790px) and (max-height: 330px) {
-        /* Override the dropdown orientation */
-        .nav-wrapper :global(.dropdown-list) {
-            flex-direction: row;
-            flex-wrap: wrap;
-            gap: 1rem; /* Ensure spacing between items in row layout */
-            width: max-content; /* Make it so it stretches horizontally as much as it needs to */
-            max-width: calc(100vw - 2rem); /* Prevent overflow with a safe margin (it will wrap to the next row) */
-            justify-content: center; /* Center the items in the row */
-        }
-    }
 </style>

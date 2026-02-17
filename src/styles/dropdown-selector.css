@@ -85,3 +85,20 @@
   color: white;
   background-color: rgba(255, 255, 255, 0.1);
 }
+
+/* --- Mobile Landscape: Switch to row layout to save vertical space --- */
+/* We use 450px to catch most phones in landscape orientation */
+@media (max-width: 790px) and (max-height: 450px) {
+    .dropdown-menu {
+        /* Ensure it doesn't overflow horizontally */
+        width: max-content;
+        max-width: calc(100vw - 2rem);
+    }
+
+    .dropdown-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+}
