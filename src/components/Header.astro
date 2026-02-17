@@ -12,7 +12,7 @@ const { homeLocale: home } = Astro.locals;
              <ProjectTitle includeLogo={true} includeSubtitle={true} class="project-title" />
         </a>
         <div class="eu-logo-wrapper">
-             <EuLogo />
+             <EuLogo class="eu-logo" />
         </div>
     </div>
 
@@ -135,6 +135,10 @@ const { homeLocale: home } = Astro.locals;
             width: 100%;
             flex-wrap: wrap;
             font-size: 1rem; /* Smaller font to fit alongside the dropdown */
+        }
+
+        .branding .eu-logo {
+            height: 50px;
         }
 
         .locale {
