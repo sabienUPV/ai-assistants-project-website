@@ -2,7 +2,7 @@
 import { Icon } from 'astro-icon/components';
 import '@styles/dropdown-selector.css';
 
-const { homeLocale: home } = Astro.locals;
+const { homeLocale: home, t } = Astro.locals;
 
 interface Props {
   class?: string;
@@ -21,10 +21,10 @@ const { class: className, ...attributes } = Astro.props;
     <!-- Menu Items (Row on Desktop, Dropdown on Mobile) -->
     <nav aria-label="Main navigation" class="nav-content dropdown-menu">
         <ul class="dropdown-list">
-            <li><a class="dropdown-link" href={`${home()}#top`}>Welcome</a></li>
-            <li><a class="dropdown-link" href={`${home()}#objectives`}>Objectives</a></li>
-            <li><a class="dropdown-link" href={`${home()}#organisers`}>Organisers</a></li>
-            <li><a class="dropdown-link" href={`${home()}#resources`}>Resources</a></li>
+            <li><a class="dropdown-link" href={`${home()}#top`}>{t('nav_home')}</a></li>
+            <li><a class="dropdown-link" href={`${home()}#objectives`}>{t('nav_objectives')}</a></li>
+            <li><a class="dropdown-link" href={`${home()}#organisers`}>{t('nav_organisers')}</a></li>
+            <li><a class="dropdown-link" href={`${home()}#resources`}>{t('nav_resources')}</a></li>
         </ul>
     </nav>
 </div>
