@@ -1,5 +1,5 @@
 import { defineMiddleware } from "astro:middleware";
-import { getFormatter } from "@utils/translation";
+import { getTranslationHelperFn, getGlossaryHtmlForTermFn } from "@utils/translation";
 import { getHomeHelperFn, type HomeHelper } from "@utils/localizedUrl"; // URL helper for locale-aware links
 import { defaultLocale, type Locale } from "@languages";
 
@@ -13,16 +13,11 @@ export const onRequest = defineMiddleware((context, next) => {
   // (you can use the getStaticPathsFromLocales helper in translation.ts for that)
   const locale = (context.currentLocale || defaultLocale) as Locale;
 
-  // Create the formatter ONCE per page
-  const t = getFormatter(locale);
-
-  // Create the home function with language support for this page
-  const homeLocale : HomeHelper = getHomeHelperFn(locale);
-
-  // "Cascade" it to every component
+  // "Cascade" these to every component
   context.locals.locale = locale;
-  context.locals.t = t;
-  context.locals.homeLocale = homeLocale;
+  context.locals.t = getTranslationHelperFn(locale); // Create the translation helper for the current locale
+  context.locals.homeLocale = getHomeHelperFn(locale); // Create the home function that takes into account the current locale
+  context.locals.getGlossaryHtmlForTerm = getGlossaryHtmlForTermFn(locale); // Create the glossary helper for the current locale
 
   return next();
 });

@@ -41,7 +41,7 @@ const glossaryTermsByLanguage = glossaryEntries.reduce((acc, entry) => {
 }, {} as Record<Locale, Record<string, string>>);
 
 export type TranslationHelper = (key: string, htmlWithGlossaries?: boolean) => string;
-export function getFormatter(locale: Locale) : TranslationHelper {
+export function getTranslationHelperFn(locale: Locale) : TranslationHelper {
   return (key: string, htmlWithGlossaries: boolean = false) => tForLocale(locale, key, htmlWithGlossaries);
 }
 
@@ -52,16 +52,16 @@ export function tForLocale(locale: Locale, key: string, htmlWithGlossaries: bool
     return key;
   }
 
-  let text = translations[key];
+  const text = translations[key];
   if (!text) {
     console.warn(`Missing translation for key: ${key}`);
     return key;
   }
 
-  if (!htmlWithGlossaries) {
-    return text;
-  }
+  return htmlWithGlossaries ? injectGlossariesHtml(locale, text) : text;
+}
 
+function injectGlossariesHtml(locale: Locale, text: string): string {
   // 1. Get all terms for this language
   const terms = glossaryTermsByLanguage[locale];
   if (!terms) return text;
@@ -89,8 +89,29 @@ export function tForLocale(locale: Locale, key: string, htmlWithGlossaries: bool
     replacedTerms.add(lowerTerm);
 
     // 4. Inject using the ?raw SVG variables!
-    return `<span class="tooltip-container">${glossaryTermIconSvg}<span class="pid-text">${termMatch}</span>${punctuation}<span class="tooltip-content">${definition}${tooltipArrowSvg}</span></span>`;
+    return getGlossaryHtml(termMatch, definition, punctuation);
   });
 
   return text;
+}
+
+export type GlossaryHelper = ReturnType<typeof getGlossaryHtmlForTermFn>;
+export function getGlossaryHtmlForTermFn(locale: Locale) {
+  return (term: string, containerEl = 'span', textEl = 'span') => getGlossaryHtmlForTermInLocale(locale, term, containerEl, textEl);
+}
+export function getGlossaryHtmlForTermInLocale(locale: Locale, term: string, containerEl = 'span', textEl = 'span'): string | null {
+  // Get all terms for this language
+  const terms = glossaryTermsByLanguage[locale];
+  if (!terms) return null;
+  
+  // Find the definition
+  const definition = terms[term.toLowerCase()];
+  if (!definition) return null;
+
+  // Return the HTML for this term
+  return getGlossaryHtml(term, definition, undefined, containerEl, textEl);
+}
+
+function getGlossaryHtml(term: string, definition: string, punctuation?: string, containerEl = 'span', textEl = 'span'): string {
+  return `<${containerEl} class="tooltip-container">${glossaryTermIconSvg}<${textEl} class="pid-text">${term}</${textEl}>${punctuation || ''}<span class="tooltip-content">${definition}${tooltipArrowSvg}</span></${containerEl}>`;
 }

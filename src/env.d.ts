@@ -1,7 +1,7 @@
 /// <reference path="../.astro/types.d.ts" />
 
 // 1. imports make this file a module
-import type { TranslationHelper } from '@utils/translation';
+import type { TranslationHelper, GlossaryHelper } from '@utils/translation';
 import type { HomeHelper } from '@utils/localizedUrl';
 import type { Locale } from '@languages';
 
@@ -12,6 +12,7 @@ declare global {
       locale: Locale; // Add the locale to the context
       t: TranslationHelper; // Add the translation helper for the current locale to the context
       homeLocale: HomeHelper; // Add the home function with language support to the context
+      getGlossaryHtmlForTerm: GlossaryHelper; // Add the glossary helper to the context
     }
   }
 }
