@@ -1,21 +1,23 @@
 ---
 import Card from "@components/Card.astro";
 import Cards from "@components/Cards.astro";
+
+const { t } = Astro.locals;
 ---
 
 <section id="objectives">
-  <Cards title="Project Objectives" columns={2}>
-    <Card title="Digital Literacy">
-      Facilitate the acquisition of AI literacy, enabling PID to understand, use, and critically reflect on AI applications.
+  <Cards title={t('objectives_title')} columns={2}>
+    <Card title={t('objective_literacy_title')}>
+      {t('objective_literacy_text')}
     </Card>
-    <Card title="Independent Living">
-      Increase specific competencies to apply AI solutions in daily life for greater autonomy.
+    <Card title={t('objective_living_title')}>
+      {t('objective_living_text')}
     </Card>
-    <Card title="Tailored Resources">
-      Develop novel training materials and tools specifically adapted to the unique needs of PID.
+    <Card title={t('objective_resources_title')}>
+      {t('objective_resources_text')}
     </Card>
-    <Card title="Support Empowerment">
-      Enhance the skills and knowledge of professional and personal Supports in the field of AI assistance.
+    <Card title={t('objective_support_title')}>
+      {t('objective_support_text')}
     </Card>
   </Cards>
 </section>

@@ -10,65 +10,66 @@ import arfieLogo from '@assets/images/logo_ARFIE.png';
 import hurtLogo from '@assets/images/logo_hurt_350.jpg';
 
 const { ...attributes } = Astro.props;
+const { t } = Astro.locals;
 ---
 
 <div class="organisers-container" {...attributes}>
   <Organiser
     href="https://www.iat.eu"
     logo={iatLogo}
-    alt="IAT Logo"
+    alt={t('alt_logo_iat')}
     name="IAT"
-    country="Germany"
-    role="Project coordinator"
+    country={t('country_germany')}
+    role={t('role_coordinator')}
   />
   <Organiser
     href="https://www.aiasbo.it/"
     logo={aiasLogo}
-    alt="AIAS Logo"
+    alt={t('alt_logo_aias')}
     name="AIAS"
-    country="Italy"
+    country={t('country_italy')}
   />
   <Organiser
     href="https://www.cecd.pt/"
     logo={cecdLogo}
-    alt="CECD Logo"
+    alt={t('alt_logo_cecd')}
     name="CECD"
-    country="Portugal"
+    country={t('country_portugal')}
   />
   <Organiser
     href="https://www.inesc-id.pt"
     logo={inescIdLogo}
-    alt="INESC-ID Logo"
+    alt={t('alt_logo_inescid')}
     name="INESC-ID"
-    country="Portugal"
+    country={t('country_portugal')}
   />
   <Organiser
     href="https://www.upv.es"
     logo={upvLogo}
-    alt="UPV Logo"
+    alt={t('alt_logo_upv')}
     name="UPV"
-    country="Spain"
+    country={t('country_spain')}
   />
   <Organiser
     href="https://www.amica.es"
     logo={amicaLogo}
-    alt="Amica Logo"
+    alt={t('alt_logo_amica')}
     name="Amica"
-    country="Spain"
+    country={t('country_spain')}
   />
   <Organiser
     href="https://www.arfie.info/"
     logo={arfieLogo}
-    alt="ARFIE Logo"
+    alt={t('alt_logo_arfie')}
     name="ARFIE"
-    country="Belgium"
+    country={t('country_belgium')}
   />
   <Organiser
     href="https://www.hurt.hr"
     logo={hurtLogo}
-    alt="HURT Logo"
+    alt={t('alt_logo_hurt')}
     name="HURT"
-    country="Croatia"
+    country={t('country_croatia')}
   />
 </div>
 

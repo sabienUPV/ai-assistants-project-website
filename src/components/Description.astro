@@ -8,8 +8,6 @@ const { t } = Astro.locals;
 <section id="description">
   <Cards title={t('description_title')}>
     <Card set:html={t('description_text', true)} />      
-    <Card>
-      Our <b>mission</b> is to bridge the digital divide, fostering <b>independent living</b> by transforming how <b>PID</b> interact with and control emerging technologies.
-    </Card>
+    <Card set:html={t('description_mission', true)} />
   </Cards>
 </section>

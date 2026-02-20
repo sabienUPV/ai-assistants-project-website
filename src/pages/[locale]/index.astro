@@ -17,13 +17,13 @@ import Documents from '@components/Documents.astro';
 	<Description />
 	<Objectives />
 	<section id="organisers">
-		<h2>Organisers</h2>
-		<p>Entities involved in this project</p>
+		<h2>{t('nav_organisers')}</h2>
+		<p>{t('organisers_subtitle')}</p>
 		<Organisers />
 	</section>
 	<section id="resources">
-		<h2>Resources</h2>
-		<p>Downloadable documents related to the project</p>
+		<h2>{t('nav_resources')}</h2>
+		<p>{t('resources_subtitle')}</p>
 		<Documents />
 	</section>
 </Layout>
