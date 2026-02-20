@@ -34,8 +34,10 @@ const { title } = Astro.props;
 		<meta charset="UTF-8" />
 		<meta name="description" content="AI-ASSISTANTS Project Website" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href={homeNoLocale('favicon.svg')} />
-		<link rel="icon" sizes="any" href={homeNoLocale('favicon.ico')} />
+		<link rel="icon" type="image/svg+xml" href={homeNoLocale('favicon.svg')} /> {/* Default SVG icon for modern browsers */}
+		<link rel="icon" sizes="any" href={homeNoLocale('favicon.ico')} /> {/* Fallback ICO for older browsers */}
+    <link rel="icon" type="image/png" sizes="192x192" href={homeNoLocale('icon-192.png')} /> {/* Icon for Android Chrome */}
+		<link rel="apple-touch-icon" href={homeNoLocale('apple-touch-icon.png')} /> {/* Icon for iOS Safari */}
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
 	</head>

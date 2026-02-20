@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "generate-icons": "node generate-icons.js"
   },
   "dependencies": {
     "@fontsource/roboto": "^5.2.9",
@@ -14,5 +15,8 @@
     "astro": "^5.17.1",
     "astro-icon": "^1.1.5",
     "csv-parse": "^6.1.0"
+  },
+  "devDependencies": {
+    "svgo": "^4.0.0"
   }
 }
