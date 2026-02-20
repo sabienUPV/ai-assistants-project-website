@@ -8,16 +8,16 @@ const { t } = Astro.locals;
 <section id="objectives">
   <Cards title={t('objectives_title')} columns={2}>
     <Card title={t('objective_literacy_title')}>
-      {t('objective_literacy_text')}
+      <Fragment set:html={t('objective_literacy_text', true)} />
     </Card>
     <Card title={t('objective_living_title')}>
-      {t('objective_living_text')}
+      <Fragment set:html={t('objective_living_text', true)} />
     </Card>
     <Card title={t('objective_resources_title')}>
-      {t('objective_resources_text')}
+      <Fragment set:html={t('objective_resources_text', true)} />
     </Card>
     <Card title={t('objective_support_title')}>
-      {t('objective_support_text')}
+      <Fragment set:html={t('objective_support_text', true)} />
     </Card>
   </Cards>
 </section>
