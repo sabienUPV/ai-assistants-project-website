@@ -81,16 +81,7 @@ export function getFormatter(locale: Locale) {
       replacedTerms.add(lowerTerm);
 
       // 4. Inject using the ?raw SVG variables!
-      return `
-        <span class="tooltip-container">
-          ${glossaryTermIconSvg}
-          <span class="pid-text">${termMatch}</span>${punctuation}      
-          <span class="tooltip-content">
-            ${definition}
-            ${tooltipArrowSvg}
-          </span>
-        </span>
-      `;
+      return `<span class="tooltip-container">${glossaryTermIconSvg}<span class="pid-text">${termMatch}</span>${punctuation}<span class="tooltip-content">${definition}${tooltipArrowSvg}</span></span>`;
     });
 
     return text;
