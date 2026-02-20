@@ -78,7 +78,6 @@ const { homeLocale: home } = Astro.locals;
     /* --- TABLET LAYOUT --- */
     @media (max-width: 1535px) {
         header {
-
             grid-template-columns: auto auto;
             
             /* REORDER EVERYTHING HERE */
@@ -129,25 +128,14 @@ const { homeLocale: home } = Astro.locals;
                 "nav      locale"
                 "branding branding";
             
-            padding: 0.5rem;
+            padding: 0.2rem;
             justify-items: center; 
             text-align: center;
             gap: 0;
         }
 
-        .branding {
-            justify-content: center;
-            width: 100%;
-            flex-wrap: wrap;
-            font-size: 1rem;
-        }
-
-        .branding .project-title {
-            --logo-height: 100px; /* Custom property to control logo height from the parent */
-        }
-
         .branding .eu-logo {
-            height: 50px;
+            display: none; /* Hide the EU logo on mobile to save space */
         }
 
         .locale {
