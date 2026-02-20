@@ -43,8 +43,13 @@ const glossaryTermsByLanguage = glossaryEntries.reduce((acc, entry) => {
 export type TranslationHelper = ReturnType<typeof getFormatter>;
 export function getFormatter(locale: Locale) {
   return function t(key: string, htmlWithGlossaries: boolean = false) {
-    let text = i18nMap[locale][key];
+    const translations = i18nMap[locale];
+    if (!translations) {
+      console.warn(`Missing translations for locale: ${locale}`);
+      return key;
+    }
 
+    let text = translations[key];
     if (!text) {
       console.warn(`Missing translation for key: ${key}`);
       return key;
