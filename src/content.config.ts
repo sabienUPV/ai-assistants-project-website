@@ -16,7 +16,7 @@ const langFields = locales.reduce((acc, locale) => {
 
 const i18n = defineCollection({
   // Load the CSV and parse it into rows
-  loader: file("src/content/i18n.csv", {
+  loader: file("src/content/translations.csv", {
     parser: (text) => parseCsv(text, { 
       columns: true, // Use the header row for keys
       skip_empty_lines: true,
