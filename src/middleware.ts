@@ -20,6 +20,7 @@ export const onRequest = defineMiddleware((context, next) => {
   const homeLocale : HomeHelper = getHomeHelperFn(locale);
 
   // "Cascade" it to every component
+  context.locals.locale = locale;
   context.locals.t = t;
   context.locals.homeLocale = homeLocale;
 

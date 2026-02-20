@@ -1,10 +1,11 @@
 ---
 import { locales } from "@languages";
+import { tForLocale } from "@utils/translation";
 import { Icon } from "astro-icon/components";
 import { getRelativeLocaleUrl } from "astro:i18n";
 import '@styles/dropdown-selector.css';
 
-const currentLocale = Astro.currentLocale;
+const { locale: currentLocale } = Astro.locals;
 const { ...attributes } = Astro.props;
 ---
 
@@ -12,7 +13,7 @@ const { ...attributes } = Astro.props;
   {/* Desktop Dropdown Trigger */}
   <button class="dropdown-trigger dropdown-link" aria-haspopup="true" aria-expanded="false">
     <Icon name={`circle-flags:${currentLocale}`} class="flag-icon" width="24" height="24" aria-hidden="true" />
-    <span class="locale-label">{currentLocale?.toUpperCase()}</span>
+    <span class="locale-label">{tForLocale(currentLocale, "locale_current_name")}</span>
     <Icon name="arrow" width="14" height="14" class="chevron" aria-hidden="true" />
   </button>
 
@@ -26,10 +27,10 @@ const { ...attributes } = Astro.props;
             class:list={["dropdown-link", { "is-active": locale === currentLocale }]}
             aria-current={locale === currentLocale ? "page" : undefined}
             title={locale.toUpperCase()} 
-            aria-label={`Switch to ${locale.toUpperCase()} language`}
+            aria-label={`Switch to ${tForLocale(locale, "locale_current_name")}`}
           >
             <Icon name={`circle-flags:${locale}`} class="flag-icon" width="24" height="24" aria-hidden="true" /> 
-            <span class="locale-label">{locale.toUpperCase()}</span>
+            <span class="locale-label">{tForLocale(locale, "locale_current_name")}</span>
           </a>
         </li>
       ))}

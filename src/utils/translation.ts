@@ -40,55 +40,57 @@ const glossaryTermsByLanguage = glossaryEntries.reduce((acc, entry) => {
   return acc;
 }, {} as Record<Locale, Record<string, string>>);
 
-export type TranslationHelper = ReturnType<typeof getFormatter>;
-export function getFormatter(locale: Locale) {
-  return function t(key: string, htmlWithGlossaries: boolean = false) {
-    const translations = i18nMap[locale];
-    if (!translations) {
-      console.warn(`Missing translations for locale: ${locale}`);
-      return key;
-    }
+export type TranslationHelper = (key: string, htmlWithGlossaries?: boolean) => string;
+export function getFormatter(locale: Locale) : TranslationHelper {
+  return (key: string, htmlWithGlossaries: boolean = false) => tForLocale(locale, key, htmlWithGlossaries);
+}
 
-    let text = translations[key];
-    if (!text) {
-      console.warn(`Missing translation for key: ${key}`);
-      return key;
-    }
+export function tForLocale(locale: Locale, key: string, htmlWithGlossaries: boolean = false) {
+  const translations = i18nMap[locale];
+  if (!translations) {
+    console.warn(`Missing translations for locale: ${locale}`);
+    return key;
+  }
 
-    if (!htmlWithGlossaries) {
-      return text;
-    }
+  let text = translations[key];
+  if (!text) {
+    console.warn(`Missing translation for key: ${key}`);
+    return key;
+  }
 
-    // 1. Get all terms for this language
-    const terms = glossaryTermsByLanguage[locale];
-    if (!terms) return text;
-
-    // 2. Create ONE regex matching ANY of the terms: \b(term1|term2|term3)\b([.,;:!?]?)
-    const escapedTerms = Object.keys(terms).map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    const combinedRegex = new RegExp(`\\b(${escapedTerms.join('|')})\\b([.,;:!?]?)`, 'gi');
-
-    // Keep track of what we've replaced so we only do the first occurrence
-    const replacedTerms = new Set<string>();
-
-    // 3. Run a single replace pass
-    text = text.replace(combinedRegex, (match, termMatch, punctuation) => {
-      const lowerTerm = termMatch.toLowerCase();
-      
-      // If we already added a tooltip for this word, just return the word normally
-      if (replacedTerms.has(lowerTerm)) {
-        return match; 
-      }
-
-      // Find the definition
-      const definition = terms[lowerTerm];
-      if (!definition) return match;
-
-      replacedTerms.add(lowerTerm);
-
-      // 4. Inject using the ?raw SVG variables!
-      return `<span class="tooltip-container">${glossaryTermIconSvg}<span class="pid-text">${termMatch}</span>${punctuation}<span class="tooltip-content">${definition}${tooltipArrowSvg}</span></span>`;
-    });
-
+  if (!htmlWithGlossaries) {
     return text;
-  };
+  }
+
+  // 1. Get all terms for this language
+  const terms = glossaryTermsByLanguage[locale];
+  if (!terms) return text;
+
+  // 2. Create ONE regex matching ANY of the terms: \b(term1|term2|term3)\b([.,;:!?]?)
+  const escapedTerms = Object.keys(terms).map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const combinedRegex = new RegExp(`\\b(${escapedTerms.join('|')})\\b([.,;:!?]?)`, 'gi');
+
+  // Keep track of what we've replaced so we only do the first occurrence
+  const replacedTerms = new Set<string>();
+
+  // 3. Run a single replace pass
+  text = text.replace(combinedRegex, (match, termMatch, punctuation) => {
+    const lowerTerm = termMatch.toLowerCase();
+    
+    // If we already added a tooltip for this word, just return the word normally
+    if (replacedTerms.has(lowerTerm)) {
+      return match; 
+    }
+
+    // Find the definition
+    const definition = terms[lowerTerm];
+    if (!definition) return match;
+
+    replacedTerms.add(lowerTerm);
+
+    // 4. Inject using the ?raw SVG variables!
+    return `<span class="tooltip-container">${glossaryTermIconSvg}<span class="pid-text">${termMatch}</span>${punctuation}<span class="tooltip-content">${definition}${tooltipArrowSvg}</span></span>`;
+  });
+
+  return text;
 }
