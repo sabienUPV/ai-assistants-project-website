@@ -26,3 +26,6 @@ country_belgium,Belgium,Bélgica,Belgien,Bélgica,Belgio,Belgija
 country_croatia,Croatia,Croacia,Kroatien,Croácia,Croazia,Hrvatska
 role_coordinator,Project coordinator,Coordinador del proyecto,Projektkoordinator,Coordenador do projeto,Coordinatore del progetto,Voditelj projekta
 alt_logo_template,{0} Logo,Logotipo de {0},{0}-Logo,Logótipo de {0},Logo {0},Logo {0}
+locale_selector_label,Select language,Seleccionar idioma,Sprache auswählen,Selecionar idioma,Seleziona lingua,Odaberite jezik
+locale_selector_current_label_template,Current language: {0},Idioma actual: {0},Aktuelle Sprache: {0},Idioma atual: {0},Lingua attuale: {0},Trenutni jezik: {0}
+locale_selector_switch_label_template,Switch to {0},Cambiar a {0},Wechseln zu {0},Mudar para {0},Passa a {0},Prebaci na {0}
