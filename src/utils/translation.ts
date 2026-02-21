@@ -40,12 +40,12 @@ const glossaryTermsByLanguage = glossaryEntries.reduce((acc, entry) => {
   return acc;
 }, {} as Record<Locale, Record<string, string>>);
 
-export type TranslationHelper = (key: string, htmlWithGlossaries?: boolean) => string;
+export type TranslationHelper = (key: string, htmlWithGlossaries?: boolean, ...args: Parameters<typeof formatString>[1][]) => string;
 export function getTranslationHelperFn(locale: Locale) : TranslationHelper {
-  return (key: string, htmlWithGlossaries: boolean = false) => tForLocale(locale, key, htmlWithGlossaries);
+  return (key: string, htmlWithGlossaries: boolean = false, ...args: Parameters<typeof formatString>[1][]) => tForLocale(locale, key, htmlWithGlossaries, ...args);
 }
 
-export function tForLocale(locale: Locale, key: string, htmlWithGlossaries: boolean = false) {
+export function tForLocale(locale: Locale, key: string, htmlWithGlossaries: boolean = false, ...args: Parameters<typeof formatString>[1][]) : string {
   const translations = i18nMap[locale];
   if (!translations) {
     console.warn(`Missing translations for locale: ${locale}`);
@@ -58,7 +58,9 @@ export function tForLocale(locale: Locale, key: string, htmlWithGlossaries: bool
     return key;
   }
 
-  return htmlWithGlossaries ? injectGlossariesHtml(locale, text) : text;
+  const formattedText = args.length > 0 ? formatString(text, ...args) : text;
+
+  return htmlWithGlossaries ? injectGlossariesHtml(locale, formattedText) : formattedText;
 }
 
 function injectGlossariesHtml(locale: Locale, text: string): string {
@@ -114,4 +116,14 @@ export function getGlossaryHtmlForTermInLocale(locale: Locale, term: string, con
 
 function getGlossaryHtml(term: string, definition: string, punctuation?: string, containerEl = 'span', textEl = 'span'): string {
   return `<${containerEl} class="tooltip-container">${glossaryTermIconSvg}<${textEl} class="pid-text">${term}</${textEl}>${punctuation || ''}<span class="tooltip-content">${definition}${tooltipArrowSvg}</span></${containerEl}>`;
+}
+
+/**
+ * Simulates C# string.Format for positional arguments.
+ * Usage: formatString("Hello {0}!", "World") => "Hello World!"
+ */
+export function formatString(template: string, ...args: (string | number)[]): string {
+  return template.replace(/{(\d+)}/g, (match, number) => {
+    return typeof args[+number] !== 'undefined' ? String(args[+number]) : match;
+  });
 }

@@ -25,11 +25,4 @@ country_spain,Spain,España,Spanien,Espanha,Spagna,Španjolska
 country_belgium,Belgium,Bélgica,Belgien,Bélgica,Belgio,Belgija
 country_croatia,Croatia,Croacia,Kroatien,Croácia,Croazia,Hrvatska
 role_coordinator,Project coordinator,Coordinador del proyecto,Projektkoordinator,Coordenador do projeto,Coordinatore del progetto,Voditelj projekta
-alt_logo_iat,IAT Logo,Logotipo de IAT,IAT-Logo,Logótipo do IAT,Logo IAT,Logo IAT-a
-alt_logo_aias,AIAS Logo,Logotipo de AIAS,AIAS-Logo,Logótipo da AIAS,Logo AIAS,Logo AIAS-a
-alt_logo_cecd,CECD Logo,Logotipo de CECD,CECD-Logo,Logótipo do CECD,Logo CECD,Logo CECD-a
-alt_logo_inescid,INESC-ID Logo,Logotipo de INESC-ID,INESC-ID-Logo,Logótipo do INESC-ID,Logo INESC-ID,Logo INESC-ID-a
-alt_logo_upv,UPV Logo,Logotipo de la UPV,UPV-Logo,Logótipo da UPV,Logo UPV,Logo UPV-a
-alt_logo_amica,Amica Logo,Logotipo de Amica,Amica-Logo,Logótipo da Amica,Logo Amica,Logo Amice
-alt_logo_arfie,ARFIE Logo,Logotipo de ARFIE,ARFIE-Logo,Logótipo da ARFIE,Logo ARFIE,Logo ARFIE-a
-alt_logo_hurt,HURT Logo,Logotipo de HURT,HURT-Logo,Logótipo da HURT,Logo HURT,Logo HURT-a
+alt_logo_template,{0} Logo,Logotipo de {0},{0}-Logo,Logótipo de {0},Logo {0},Logo {0}
