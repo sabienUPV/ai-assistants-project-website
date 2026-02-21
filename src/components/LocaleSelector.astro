@@ -7,13 +7,15 @@ import '@styles/dropdown-selector.css';
 
 const { locale: currentLocale } = Astro.locals;
 const { ...attributes } = Astro.props;
+
+const currentLocaleName = tForLocale(currentLocale, "locale_current_name");
 ---
 
 <div class="locale-selector dropdown-wrapper" {...attributes}>
   {/* Desktop Dropdown Trigger */}
-  <button class="dropdown-trigger dropdown-link" aria-haspopup="true" aria-expanded="false">
+  <button class="dropdown-trigger dropdown-link" aria-haspopup="true" aria-expanded="false" aria-label={`Select language. Current language: ${currentLocaleName}`}>
     <Icon name={`circle-flags:${currentLocale}`} class="flag-icon" width="24" height="24" aria-hidden="true" />
-    <span class="locale-label">{tForLocale(currentLocale, "locale_current_name")}</span>
+    <span class="locale-label">{currentLocaleName}</span>
     <Icon name="arrow" width="14" height="14" class="chevron" aria-hidden="true" />
   </button>
 
