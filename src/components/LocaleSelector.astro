@@ -22,20 +22,23 @@ const currentLocaleName = tForLocale(currentLocale, "locale_name");
   {/* The List of Locales */}
   <nav class="dropdown-menu" aria-label="Select language">
     <ul class="dropdown-list">
-      {locales.map((locale) => (
-        <li>
-          <a 
-            href={getRelativeLocaleUrl(locale)} 
-            class:list={["dropdown-link", { "is-active": locale === currentLocale }]}
-            aria-current={locale === currentLocale ? "page" : undefined}
-            title={locale.toUpperCase()} 
-            aria-label={`Switch to ${tForLocale(locale, "locale_name")}`}
-          >
-            <Icon name={`circle-flags:${locale}`} class="flag-icon" width="24" height="24" aria-hidden="true" /> 
-            <span class="locale-label">{tForLocale(locale, "locale_name")}</span>
-          </a>
-        </li>
-      ))}
+      {locales.map((locale) => {
+        const localeName = tForLocale(locale, "locale_name");
+        return (
+          <li>
+            <a 
+              href={getRelativeLocaleUrl(locale)} 
+              class:list={["dropdown-link", { "is-active": locale === currentLocale }]}
+              aria-current={locale === currentLocale ? "page" : undefined}
+              title={localeName} 
+              aria-label={`Switch to ${localeName}`}
+            >
+              <Icon name={`circle-flags:${locale}`} class="flag-icon" width="24" height="24" aria-hidden="true" /> 
+              <span class="locale-label">{localeName}</span>
+            </a>
+          </li>
+        );
+      })}
     </ul>
   </nav>
 </div>
