@@ -3,7 +3,9 @@ import EuLogo from "@components/EuLogo.astro";
 ---
 
 <footer>
-    <EuLogo />
+    <div class="eu-logo-wrapper">
+        <EuLogo showDisclaimer={true} />
+    </div>
 </footer>
 <style>
     footer {
@@ -12,5 +14,14 @@ import EuLogo from "@components/EuLogo.astro";
         align-items: center;
         padding: 1rem;
         background-color: var(--color-secondary);
+    }
+    .eu-logo-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        max-width: 50vw;
+        gap: 0.5rem;
+        color: var(--color-text-on-secondary);
     }
 </style>
