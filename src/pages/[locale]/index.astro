@@ -14,8 +14,12 @@ import Documents from '@components/Documents.astro';
 ---
 
 <Layout title={'AI-ASSISTANTS 4PIDS'}>
-	<Description />
-	<Objectives />
+	<section id="description">
+		<Description />
+	</section>
+	<section id="objectives">
+		<Objectives />
+	</section>
 	<section id="organisers">
 		<h2>{t('nav_organisers')}</h2>
 		<p>{t('organisers_subtitle')}</p>
