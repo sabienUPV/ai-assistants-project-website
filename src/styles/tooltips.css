@@ -27,7 +27,7 @@
 
 /* The Popup Box */
 .tooltip-content {
-  visibility: hidden;
+  display: none;
   position: absolute;
   bottom: 100%;
   left: 50%;
@@ -57,7 +57,7 @@
 
 /* Hover State */
 .tooltip-container:hover .tooltip-content {
-  visibility: visible;
+  display: block;
 }
 .tooltip-container:hover {
   border-bottom: 1px dotted var(--color-link-hover);
