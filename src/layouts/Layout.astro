@@ -44,12 +44,10 @@ const { title } = Astro.props;
 	<body id="top">
 		<SkipLink />
 		<Header />
-		<div> {/* Wrapper div for BackToTopButton to do sticky positioning with main content and not get on top of the Footer */}
-			<BackToTopButton /> {/* Note: It's important for BackToTopButton to be before main for sticky positioning to work properly */}
-			<main id="main-content">
-				<slot />
-			</main>
-		</div>
+		<main id="main-content">
+			<slot />
+		</main>
 		<Footer />
+		<BackToTopButton />
 	</body>
 </html>

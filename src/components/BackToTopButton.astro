@@ -3,13 +3,9 @@
 </a>
 <style>
   a {
-    position: sticky;
-    top: 90vh; /* Sticks to the bottom of the screen while scrolling DOWN */
-    float: right;
-    margin-right: 2rem;
-    margin-top: -3.5rem; /* Pull it up so it doesn't push the main content down */
-    margin-bottom: 1rem; /* Add some space from the bottom of the screen */
-    
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
     background-color: var(--color-secondary);
     color: white;
     width: 3.5rem;
@@ -28,11 +24,11 @@
     background-color: var(--color-primary);
   }
 
-  /* Make sure it's big enough to tap on mobile (better for accessibility) */
+  /* Make sure it's big enough to tap on mobile (Accessibility requirement) */
   @media (max-width: 600px) {
     a {
-      top: 90vh;
-      margin-right: 1rem;
+      bottom: 1rem;
+      right: 1rem;
       width: 3rem;
       height: 3rem;
     }
