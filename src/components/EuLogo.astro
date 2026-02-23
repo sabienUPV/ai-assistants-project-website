@@ -2,6 +2,8 @@
 import { Image } from 'astro:assets';
 import euLogo from '@assets/images/EN_Co-fundedbytheEU_RGB_NEG.svg';
 
+const { t } = Astro.locals;
+
 const { ...attributes } = Astro.props;
 ---
-<Image {...attributes} src={euLogo} alt="Co-funded by the European Union" height="60" />
+<Image {...attributes} src={euLogo} alt={t('alt_eu_cofunded')} height="60" />
