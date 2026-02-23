@@ -6,7 +6,7 @@
   position: relative;
   cursor: help;
   /*border-bottom: 1px dotted #6b7280;*/ /* Gray-500 */
-  border-bottom: 1px dotted var(--color-dark-blue);
+  border-bottom: 1px dotted var(--color-secondary);
 }
 
 .pid-icon {
@@ -14,14 +14,14 @@
   height: 14px; 
   flex-shrink: 0;
   /* color: #6b7280;*/ /* Gray-500, matches the underline */
-  color: var(--color-dark-blue);
+  color: var(--color-secondary);
   stroke-width: 3.5;
 }
 
 /* Ensure the text still looks like part of the link */
 .pid-text {
   display: inline;
-  color: var(--color-dark-blue);
+  color: var(--color-secondary);
   font-weight: bold;
 }
 

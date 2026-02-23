@@ -1,17 +1,18 @@
 :root {
+  /* Website base colors */
+  --color-background: #F4F4F4;
+  --color-primary: var(--color-medium-blue);
+  --color-secondary: var(--color-dark-blue);
+  --color-tertiary: var(--color-light-blue);
+  --color-text: #555555;
+  --color-text-on-secondary: var(--color-semi-transparent-white);
+  --color-link-hover: #26718f; /* A middle ground between the medium blue and the dark blue, for better contrast on hover */
+
   /* Logo palette colors */
   --color-light-blue: #A8D4DC;
   --color-medium-blue: #3BA6BC;
   --color-green: #95C11F;
   --color-dark-grey: #657176;
-
-  /* Website base colors */
-  --color-background: #F4F4F4;
-  --color-primary: var(--color-medium-blue);
-  --color-secondary: var(--color-light-blue);
-  --color-tertiary: var(--color-green);
-  --color-text: #555555;
-  --color-link-hover: #26718f; /* A middle ground between the medium blue and the dark blue, for better contrast on hover */
 
   /* Additional colors */
   --color-dark-blue: #1F5A66;
@@ -64,7 +65,7 @@ h1, h2, h3 {
 h1, h2 {
   text-align: center;
   font-weight: 700;
-  color: var(--color-dark-blue);
+  color: var(--color-secondary);
   margin-bottom: 2rem;
   letter-spacing: 0.5px;
 }
