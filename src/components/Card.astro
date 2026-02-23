@@ -53,4 +53,18 @@ const titleGlossaryHtml = title ? getGlossaryHtmlForTerm(title, 'h3') : null;
   color: var(--color-text);
   font-size: 1.05rem;
 }
+
+@media (max-width: 600px) {
+  .card {
+    padding: 1rem;
+  }
+
+  .card :global(h3) {
+    font-size: 1.1rem;
+  }
+
+  .card .content {
+    font-size: 1rem;
+  }
+}
 </style>
