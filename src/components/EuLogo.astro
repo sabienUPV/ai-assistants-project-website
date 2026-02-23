@@ -15,11 +15,11 @@ const { showDisclaimer = false, ...attributes } = Astro.props;
 
 {
 /* Disclaimer text required by EU funding guidelines */ 
-/* https://www.eacea.ec.europa.eu/grants/visual-identity/visual-identity-programming-period-2021-2027/european-flag-emblem-and-multilingual-disclaimer_en#:~:text=All%20recipients%20of%20EU%20funding%20have%20a,and%20funding%20statement%20and%20(2)%20the%20disclaimer.*/
+/* https://www.eacea.ec.europa.eu/grants/visual-identity/visual-identity-programming-period-2021-2027/european-flag-emblem-and-multilingual-disclaimer_en#ref-2-disclaimer-to-use-in-all-communication-materials*/
 /* (We control it with a flag so that we only show it in the footer, not the header) */
 }
 {showDisclaimer && (
   <p class="eu-disclaimer">
-    Funded by the European Union. Views and opinions expressed are however those of the author(s) only and do not necessarily reflect those of the European Union or the European Education and Culture Executive Agency (EACEA). Neither the European Union nor EACEA can be held responsible for them.
+    {t('eu_disclaimer')}
   </p>
 )}
