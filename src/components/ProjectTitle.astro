@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import logo from '@assets/images/LOGO_AI-ASSISTANTS_NO-TEXT.svg';
 import type { HTMLAttributes } from 'astro/types';
+import { PROJECT_NAME } from '@utils/constants';
 
 interface Props {
   includeLogo?: boolean;
@@ -23,7 +24,7 @@ const { includeLogo = false, includeSubtitle = false, loading, class: className,
   {includeLogo && (
     <Image 
       src={logo} 
-      alt={t('alt_logo_template', false, 'AI-ASSISTANTS')} 
+      alt={t('alt_logo_template', false, PROJECT_NAME)} 
       height="120"
       class="logo"
       style="width: auto;" 

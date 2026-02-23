@@ -1,0 +1,1 @@
+export const PROJECT_NAME = 'AI-ASSISTANTS 4PIDS';

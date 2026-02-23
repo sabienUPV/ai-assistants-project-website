@@ -1,13 +1,14 @@
 ---
 import Card from "@components/Card.astro";
 import Cards from "@components/Cards.astro";
+import { PROJECT_NAME } from "@utils/constants";
 
 const { t } = Astro.locals;
 ---
 
 <section id="description">
-  <Cards title={t('description_title')}>
-    <Card set:html={t('description_text', true)} />      
+  <Cards title={t('description_title', false, PROJECT_NAME)}>
+    <Card set:html={t('description_text', true, PROJECT_NAME)} />      
     <Card set:html={t('description_mission', true)} />
   </Cards>
 </section>
