@@ -56,6 +56,12 @@ main {
   margin: 0 auto;
 }
 
+@media (max-width: 767px) {
+  main {
+    padding: 0.5rem;
+  }
+}
+
 /* In titles, it looks better with less line height than the 1.8 we use by default */
 h1, h2, h3 {
   line-height: 1.2;

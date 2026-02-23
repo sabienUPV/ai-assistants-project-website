@@ -36,9 +36,6 @@ import Contact from '@components/Contact.astro';
 	</section>
 </Layout>
 <style>
-	section {
-		padding: 2rem;
-	}
 	{/* Only for subtitles in organisers and resources sections */}
 	section#organisers > p,
 	section#resources > p {
@@ -46,5 +43,12 @@ import Contact from '@components/Contact.astro';
 		color: var(--color-text);
 		margin-bottom: 1.5rem;
 		text-align: center;
+	}
+
+	/* Add some padding to sections on larger screens */
+	@media (min-width: 768px) {
+		section {
+			padding: 2rem;
+		}
 	}
 </style>
