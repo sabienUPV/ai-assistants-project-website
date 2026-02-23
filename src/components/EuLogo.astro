@@ -1,13 +1,16 @@
 ---
 import { Image } from 'astro:assets';
-import euLogo from '@assets/images/eu/EN_Co-fundedbytheEU_RGB_NEG.svg';
+
+const { t, locale } = Astro.locals;
+
+// Get the logo from the current locale (the file starts with the locale code in uppercase, e.g. "EN_")
+// (Note: our "locale" from Astro.locals already falls back to the default locale)
+const euLogo = (await import(`../assets/images/eu/${locale.toUpperCase()}_Co-fundedbytheEU_RGB_NEG.svg`)).default;
 
 interface Props {
   showDisclaimer?: boolean;
   [key: string]: any;
 }
-
-const { t } = Astro.locals;
 
 const { showDisclaimer = false, ...attributes } = Astro.props;
 ---

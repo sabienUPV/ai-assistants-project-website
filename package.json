@@ -7,7 +7,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "generate-icons": "node generate-icons.js"
+    "generate-icons": "node generate-icons.js",
+    "extract-and-convert-eu-logos": "node extract-and-convert-eu-logos.js"
   },
   "dependencies": {
     "@fontsource/roboto": "^5.2.9",
@@ -17,6 +18,7 @@
     "csv-parse": "^6.1.0"
   },
   "devDependencies": {
+    "adm-zip": "^0.5.16",
     "svgo": "^4.0.0"
   }
 }
