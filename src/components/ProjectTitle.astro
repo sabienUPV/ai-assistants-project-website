@@ -73,15 +73,15 @@ const { includeLogo = false, includeSubtitle = false, loading, class: className,
   }
 
   .title > .title-first {
-    color: var(--color-light-blue);
+    color: var(--color-logo-light-blue);
   }
 
   .title > .title-second {
-    color: var(--color-subtitle, var(--color-dark-grey));
+    color: var(--color-subtitle, var(--color-logo-dark-grey));
   }
 
   .title > .title-third {
-    color: var(--color-medium-blue);
+    color: var(--color-logo-medium-blue);
   }
 
   .subtitle {
@@ -90,8 +90,8 @@ const { includeLogo = false, includeSubtitle = false, loading, class: className,
     font-size: 0.6em;
     font-weight: normal;
     line-height: 1.1;
-    /* Here we default to --color-dark-grey and NOT --color-text, since --color-dark-grey is the official grey color of the logo palette, while we use --color-text as a darker grey for general text since it has better contrast with the background. */
-    color: var(--color-subtitle, var(--color-dark-grey));
+    /* Here we default to --color-logo-dark-grey and NOT --color-text, since --color-logo-dark-grey is the official grey color of the logo palette, while we use --color-text as a darker grey for general text since it has better contrast with the background. */
+    color: var(--color-subtitle, var(--color-logo-dark-grey));
 
     /* Limit the width of the subtitle so it wraps nicely and it's not a super long line */
     max-width: 32ch;
