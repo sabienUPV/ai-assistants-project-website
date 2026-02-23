@@ -21,6 +21,7 @@ const { href, logo, alt, name, country, role, height = 60, ...attributes } = Ast
     <h3>{name}</h3>
     <span>({country})</span>
     {role && <p>{role}</p>}
+    <span class="sr-only"> {Astro.locals.t('opens_in_new_window')}</span>
   </div>
 </a>
 

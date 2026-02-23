@@ -36,7 +36,7 @@ const pdfs = Object.entries(pdfFiles).map(([path, url]) => {
     <li>
       <a href={url} target="_blank" rel="noopener noreferrer">
         <Icon name="document" width="24" height="24" aria-hidden="true" />
-        {name}
+        {name} <span class="sr-only"> {Astro.locals.t('opens_in_new_window')}</span>
       </a>
     </li>
   ))}
