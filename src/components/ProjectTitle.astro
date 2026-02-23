@@ -32,7 +32,7 @@ const { includeLogo = false, includeSubtitle = false, loading, class: className,
   )}
   <div class="text">
     <div class="title">
-      <span style="color: var(--color-light-blue)">AI</span><span style="color: var(--color-subtitle, var(--color-dark-grey))">-</span><span style="color: var(--color-medium-blue)">ASSISTANTS 4PIDS</span>
+      <span class="title-first">AI</span><span class="title-second">-</span><span class="title-third">ASSISTANTS 4PIDS</span>
     </div>
     {includeSubtitle && (
       <p class="subtitle">
@@ -70,6 +70,18 @@ const { includeLogo = false, includeSubtitle = false, loading, class: className,
 
     /* Reduce the line-height to make the title more compact, which is common in logos */
     line-height: 1.1;
+  }
+
+  .title > .title-first {
+    color: var(--color-light-blue);
+  }
+
+  .title > .title-second {
+    color: var(--color-subtitle, var(--color-dark-grey));
+  }
+
+  .title > .title-third {
+    color: var(--color-medium-blue);
   }
 
   .subtitle {
