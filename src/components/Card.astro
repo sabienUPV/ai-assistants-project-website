@@ -13,7 +13,7 @@ const titleGlossaryHtml = title ? getGlossaryHtmlForTerm(title, 'h3') : null;
 
 <li class="card" {...attributes}>
   {title && (titleGlossaryHtml ? <Fragment set:html={titleGlossaryHtml} /> : <h3>{title}</h3>)}
-  <p><slot /></p>
+  <div class="content"><slot /></div>
 </li>
 
 <style>
@@ -47,7 +47,7 @@ const titleGlossaryHtml = title ? getGlossaryHtmlForTerm(title, 'h3') : null;
   height: 20px;
 }
 
-.card p {
+.card .content {
   margin: 0;
   /*color: #34495e;*/
   color: var(--color-text);
