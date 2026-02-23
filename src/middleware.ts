@@ -1,6 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 import { getTranslationHelperFn, getGlossaryHtmlForTermFn } from "@utils/translation";
-import { getHomeHelperFn, type HomeHelper } from "@utils/localizedUrl"; // URL helper for locale-aware links
+import { getHomeHelperFn } from "@utils/localizedUrl"; // URL helper for locale-aware links
 import { defaultLocale, type Locale } from "@languages";
 
 // NOTE: Even though we are using Static Site Generation (SSG), Astro's middleware runs at build time for each page.
