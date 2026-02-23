@@ -11,6 +11,7 @@ import Description from '@components/Description.astro';
 import Objectives from '@components/Objectives.astro';
 import Organisers from '@components/Organisers.astro';
 import Documents from '@components/Documents.astro';
+import Contact from '@components/Contact.astro';
 ---
 
 <Layout title={'AI-ASSISTANTS 4PIDS'}>
@@ -24,6 +25,9 @@ import Documents from '@components/Documents.astro';
 		<h2>{t('nav_organisers')}</h2>
 		<p>{t('organisers_subtitle')}</p>
 		<Organisers />
+	</section>
+	<section id="contact">
+		<Contact />
 	</section>
 	<section id="resources">
 		<h2>{t('nav_resources')}</h2>
