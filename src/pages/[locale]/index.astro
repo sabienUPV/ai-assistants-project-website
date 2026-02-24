@@ -5,6 +5,8 @@ export { getStaticPaths };
 
 const { t } = Astro.locals;
 
+import { PROJECT_NAME } from '@utils/constants';
+
 import Layout from '@layouts/Layout.astro';
 
 import Description from '@components/Description.astro';
@@ -14,7 +16,7 @@ import Documents from '@components/Documents.astro';
 import Contact from '@components/Contact.astro';
 ---
 
-<Layout title={'AI-ASSISTANTS 4PIDS'}>
+<Layout title={PROJECT_NAME}>
 	<section id="description">
 		<Description />
 	</section>
