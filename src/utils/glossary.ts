@@ -76,5 +76,31 @@ export function getGlossaryHtmlForTermInLocale(locale: Locale, term: string, con
 }
 
 function getGlossaryHtml(term: string, definition: string, punctuation?: string, containerEl = 'span', textEl = 'span'): string {
-  return `<${containerEl} class="tooltip-container">${glossaryTermIconSvg}<${textEl} class="pid-text">${term}</${textEl}>${punctuation || ''}<span class="tooltip-content">${definition}${tooltipArrowSvg}</span></${containerEl}>`;
+  // Generate a unique ID for aria-describedby to link the term to its tooltip
+  const tooltipId = `glossary-${generateUniqueId()}`;
+
+  return `
+  <${containerEl} class="tooltip-container">
+    ${glossaryTermIconSvg}
+    
+    <${textEl} class="pid-text" tabindex="0" aria-describedby="${tooltipId}">
+      ${term}
+    </${textEl}>${punctuation || ''}
+    
+    <span id="${tooltipId}" role="tooltip" class="tooltip-content">
+      
+      <span class="sr-only"> - </span>
+      
+      ${definition}
+      ${tooltipArrowSvg}
+    </span>
+  </${containerEl}>
+  `;
+}
+
+function generateUniqueId() {
+  // Generate a unique ID safely: use native Web Crypto if available, otherwise fallback to Base36
+  return typeof crypto !== 'undefined' && crypto.randomUUID 
+    ? crypto.randomUUID() 
+    : Math.random().toString(36).substring(2, 11);
 }
