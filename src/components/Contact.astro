@@ -11,16 +11,16 @@ const { t } = Astro.locals;
 <section id="contact">
   <Cards title={t('nav_contact')} columns={1}>
     <Card>
-      <div class="contact-wrapper">
+      <address class="contact-wrapper">
         <p class="contact-text">{t('contact_description')}</p>
         
-        <div class="contact-pill">
-          <a href={`mailto:${CONTACT_EMAIL}`} class="icon-link" aria-label="Send email">
+        <a href={`mailto:${CONTACT_EMAIL}`} class="contact-pill">
+          <span class="icon-circle">
             <Icon name="email" class="icon" />
-          </a>
+          </span>
           <span class="email-text">{CONTACT_EMAIL}</span>
-        </div>
-      </div>
+        </a>
+      </address>
     </Card>
   </Cards>
 </section>
@@ -34,6 +34,8 @@ const { t } = Astro.locals;
     text-align: center;
     gap: 1.5rem;
     width: 100%;
+    /* Reset the default italic styling that browsers apply to <address> */
+    font-style: normal; 
   }
 
   .contact-text {
@@ -43,6 +45,7 @@ const { t } = Astro.locals;
     margin: 0;
   }
 
+  /* The pill is now a link, so we remove the default underline */
   .contact-pill {
     display: inline-flex;
     align-items: center;
@@ -52,9 +55,19 @@ const { t } = Astro.locals;
     padding: 0.5rem 1.5rem 0.5rem 0.5rem;
     border-radius: 2rem;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    text-decoration: none; 
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .icon-link {
+  /* Add back the underline and add box shadow on hover */
+  .contact-pill:hover,
+  .contact-pill:focus-visible {
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    text-decoration: underline;
+  }
+
+  /* The icon link wrapper becomes just a visual container */
+  .icon-circle {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -66,19 +79,14 @@ const { t } = Astro.locals;
     transition: all 0.2s ease;
   }
 
-  .icon-link:hover {
+  /* The circle grows when you hover over the main pill link */
+  .contact-pill:hover .icon-circle {
     background-color: rgba(255, 255, 255, 0.4);
     transform: scale(1.1);
   }
 
   .email-text {
     font-weight: 600;
-    cursor: text;
-  }
-
-  .email-text::selection {
-    background-color: white;
-    color: var(--color-secondary);
   }
 
   .icon {
@@ -89,7 +97,7 @@ const { t } = Astro.locals;
   @media (max-width: 350px) {
     .contact-pill {
       padding: 0.5rem 0.5rem 0.5rem 0.5rem;
-      gap: 0.2rem;
+      gap: 0.4rem;
     }
     .email-text {
       font-size: 85%;
