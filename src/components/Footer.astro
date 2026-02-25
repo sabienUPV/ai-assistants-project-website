@@ -1,8 +1,19 @@
 ---
 import EuLogo from "@components/EuLogo.astro";
+import { PROJECT_NAME, COPYRIGHT_YEARS } from "@utils/constants";
+
+const { homeLocale: home, t } = Astro.locals;
 ---
 
 <footer>
+    <nav class="footer-nav">
+        <ul>
+            <li><a href={`${home()}imprint`} class="footer-link">{t('nav_imprint')}</a></li>
+        </ul>
+    </nav>
+    <div class="copyright-text">
+        Copyright © {COPYRIGHT_YEARS} {t('copyright_text', false, PROJECT_NAME)}
+    </div>
     <div class="eu-logo-wrapper">
         <EuLogo showDisclaimer={true} />
     </div>
@@ -10,11 +21,19 @@ import EuLogo from "@components/EuLogo.astro";
 <style>
     footer {
         display: flex;
-        justify-content: center;
+        flex-direction: column;
         align-items: center;
-        padding: 1rem;
+        gap: 1rem;
+        padding: 1.2rem;
         background-color: var(--color-secondary);
         color: var(--color-text-on-secondary);
+    }
+    .footer-nav > ul {
+        list-style: none;
+        display: flex;
+        gap: 1.5rem;
+        margin: 0;
+        padding: 0;
     }
     .eu-logo-wrapper {
         display: flex;
@@ -23,5 +42,14 @@ import EuLogo from "@components/EuLogo.astro";
         text-align: center;
         max-width: 50vw;
         gap: 0.5rem;
+    }
+    .footer-link {
+        color: var(--color-text-on-secondary);
+        text-decoration: none;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    .footer-link:hover {
+        text-decoration: underline;
     }
 </style>
