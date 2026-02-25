@@ -16,7 +16,7 @@ const { href, logo, alt, name, country, role, height = 60, ...attributes } = Ast
 ---
 
 <a href={href} target="_blank" rel="noopener noreferrer" {...attributes}>
-  <div class="organiser">
+  <div class="partner">
     <Image src={logo} alt={alt} height={height} />
     <h3>{name}</h3>
     <span>({country})</span>
@@ -26,7 +26,7 @@ const { href, logo, alt, name, country, role, height = 60, ...attributes } = Ast
 </a>
 
 <style>
-  .organiser {
+  .partner {
     display: grid;
     grid-template-rows: auto auto auto auto;
     justify-items: center;

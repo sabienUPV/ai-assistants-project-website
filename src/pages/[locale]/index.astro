@@ -11,7 +11,7 @@ import Layout from '@layouts/Layout.astro';
 
 import Description from '@components/Description.astro';
 import Objectives from '@components/Objectives.astro';
-import Organisers from '@components/Organisers.astro';
+import Partners from '@components/Partners.astro';
 import Documents from '@components/Documents.astro';
 import Contact from '@components/Contact.astro';
 ---
@@ -23,10 +23,10 @@ import Contact from '@components/Contact.astro';
 	<section id="objectives">
 		<Objectives />
 	</section>
-	<section id="organisers">
-		<h2>{t('nav_organisers')}</h2>
-		<p>{t('organisers_subtitle')}</p>
-		<Organisers />
+	<section id="partners">
+		<h2>{t('nav_partners')}</h2>
+		<p>{t('partners_subtitle')}</p>
+		<Partners />
 	</section>
 	<section id="contact">
 		<Contact />
@@ -38,8 +38,8 @@ import Contact from '@components/Contact.astro';
 	</section>
 </Layout>
 <style>
-	{/* Only for subtitles in organisers and resources sections */}
-	section#organisers > p,
+	{/* Only for subtitles in partners and resources sections */}
+	section#partners > p,
 	section#resources > p {
 		font-size: 1.2rem;
 		color: var(--color-text);

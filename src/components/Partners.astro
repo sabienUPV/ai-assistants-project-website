@@ -1,20 +1,20 @@
 ---
-import Organiser from '@components/Organiser.astro';
-import iatLogo from '@assets/images/organisers/iat_logo.png';
-import aiasLogo from '@assets/images/organisers/AIAS_Bologna.png';
-import cecdLogo from '@assets/images/organisers/CECD_institucional-horizontal-300x99.png';
-import inescIdLogo from '@assets/images/organisers/INESC-ID-logo_01.png';
-import upvLogo from '@assets/images/organisers/logo_UPV_150.png';
-import amicaLogo from '@assets/images/organisers/Amica-Logo.png';
-import arfieLogo from '@assets/images/organisers/logo_ARFIE.png';
-import hurtLogo from '@assets/images/organisers/logo_hurt_350.jpg';
+import Partner from '@components/Partner.astro';
+import iatLogo from '@assets/images/partners/iat_logo.png';
+import aiasLogo from '@assets/images/partners/AIAS_Bologna.png';
+import cecdLogo from '@assets/images/partners/CECD_institucional-horizontal-300x99.png';
+import inescIdLogo from '@assets/images/partners/INESC-ID-logo_01.png';
+import upvLogo from '@assets/images/partners/logo_UPV_150.png';
+import amicaLogo from '@assets/images/partners/Amica-Logo.png';
+import arfieLogo from '@assets/images/partners/logo_ARFIE.png';
+import hurtLogo from '@assets/images/partners/logo_hurt_350.jpg';
 
 const { ...attributes } = Astro.props;
 const { t } = Astro.locals;
 ---
 
-<div class="organisers-container" {...attributes}>
-  <Organiser
+<div class="partners-container" {...attributes}>
+  <Partner
     href="https://www.iat.eu"
     logo={iatLogo}
     alt={t('alt_logo_template', false, 'IAT')}
@@ -22,49 +22,49 @@ const { t } = Astro.locals;
     country={t('country_germany')}
     role={t('role_coordinator')}
   />
-  <Organiser
+  <Partner
     href="https://www.aiasbo.it/"
     logo={aiasLogo}
     alt={t('alt_logo_template', false, 'AIAS')}
     name="AIAS"
     country={t('country_italy')}
   />
-  <Organiser
+  <Partner
     href="https://www.cecd.pt/"
     logo={cecdLogo}
     alt={t('alt_logo_template', false, 'CECD')}
     name="CECD"
     country={t('country_portugal')}
   />
-  <Organiser
+  <Partner
     href="https://www.inesc-id.pt"
     logo={inescIdLogo}
     alt={t('alt_logo_template', false, 'INESC-ID')}
     name="INESC-ID"
     country={t('country_portugal')}
   />
-  <Organiser
+  <Partner
     href="https://www.upv.es"
     logo={upvLogo}
     alt={t('alt_logo_template', false, 'UPV')}
     name="UPV"
     country={t('country_spain')}
   />
-  <Organiser
+  <Partner
     href="https://www.amica.es"
     logo={amicaLogo}
     alt={t('alt_logo_template', false, 'Amica')}
     name="Amica"
     country={t('country_spain')}
   />
-  <Organiser
+  <Partner
     href="https://www.arfie.info/"
     logo={arfieLogo}
     alt={t('alt_logo_template', false, 'ARFIE')}
     name="ARFIE"
     country={t('country_belgium')}
   />
-  <Organiser
+  <Partner
     href="https://www.hurt.hr"
     logo={hurtLogo}
     alt={t('alt_logo_template', false, 'HURT')}
@@ -74,20 +74,20 @@ const { t } = Astro.locals;
 </div>
 
 <style>
-.organisers-container {
+.partners-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
 }
 
 @media (max-width: 1024px) {
-  .organisers-container {
+  .partners-container {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 600px) {
-  .organisers-container {
+  .partners-container {
     grid-template-columns: 1fr;
   }
 }
