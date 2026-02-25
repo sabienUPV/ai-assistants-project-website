@@ -3,11 +3,15 @@ import { locales } from "@languages";
 import { tForLocale } from "@utils/translation";
 import { Icon } from "astro-icon/components";
 import { getRelativeLocaleUrl } from "astro:i18n";
+import { getPlainPathNoLocale } from "@utils/localizedUrl";
 
 import DropdownBase from "./DropdownBase.astro";
 
 const { locale: currentLocale } = Astro.locals;
 const { ...attributes } = Astro.props;
+
+// Get the locale-agnostic path (e.g., 'contact' instead of '/en/contact' or '/my-repo/en/contact')
+const plainPathNoLocale = getPlainPathNoLocale(Astro.url.pathname, currentLocale);
 
 const currentLocaleName = tForLocale(currentLocale, "locale_name");
 const localeSelectorLabel = tForLocale(currentLocale, "locale_selector_label");
@@ -30,7 +34,7 @@ const localeSelectorLabel = tForLocale(currentLocale, "locale_selector_label");
           return (
             <li>
               <a 
-                href={getRelativeLocaleUrl(locale)} 
+                href={getRelativeLocaleUrl(locale, plainPathNoLocale)} 
                 class:list={["dropdown-link", { "is-active": locale === currentLocale }]}
                 aria-current={locale === currentLocale ? "page" : undefined}
                 title={localeName} 
