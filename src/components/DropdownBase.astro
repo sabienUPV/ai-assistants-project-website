@@ -1,0 +1,163 @@
+---
+/**
+ * DropdownBase: Base headless component for dropdowns
+ * The idea is that you wrap your dropdown component in this, and it will import the necessary CSS and JS for it to work.
+ * The JS will handle the interactions automatically with accessibility in mind (updating aria-expanded, keyboard support by closing on Escape, etc).
+ * Then for the CSS, you use the following classes inside your component:
+ * - dropdown-wrapper: The main wrapper around the trigger and the menu. This is what the JS uses to find the dropdowns on the page.
+ * - dropdown-trigger: The element that triggers the dropdown (usually a button). The JS will add aria-expanded to this element.
+ * - dropdown-menu: The actual dropdown menu that shows/hides. This should be a sibling of the trigger inside the wrapper.
+ * - dropdown-list: The list inside the dropdown menu (usually a ul). This is just for styling purposes.
+ * - dropdown-link: The links/items inside the dropdown. This is just for styling purposes, but it also adds some interaction styles (hover, focus, active).
+ */
+---
+
+<slot />
+
+<style is:global>
+  /* Shared Dropdown Logic */
+  .dropdown-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .dropdown-trigger {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 0.5rem;
+    font-family: inherit;
+  }
+
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0; /* Default alignment */
+    
+    background-color: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    z-index: 50;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    
+    /* Make sure all content shows properly,
+    while ensuring it doesn't overflow horizontally */
+    width: max-content;
+    max-width: calc(100vw - 2rem);
+
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  /* Show logic: Hover or Focus Within */
+  .dropdown-wrapper:hover .dropdown-menu,
+  .dropdown-wrapper:focus-within .dropdown-menu {
+    display: flex;
+  }
+
+  /* Chevron Animation (if present) */
+  .chevron {
+    margin-top: 0.5rem; /* Adjusted for centered vertical alignment */
+    transition: transform 0.2s ease;
+    transform-origin: 50% 25%;
+  }
+
+  .dropdown-wrapper:hover .chevron,
+  .dropdown-wrapper:focus-within .chevron {
+    transform: rotate(180deg);
+  }
+
+  /* --- Shared List Styling --- */
+  .dropdown-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* --- Shared Link/Item Styling --- */
+  .dropdown-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    color: var(--color-text-on-secondary);
+    text-decoration: none;
+    font-weight: bold;
+    white-space: nowrap;
+    
+    padding: 0.6rem 0.9rem;
+    border-radius: 0.5rem;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    cursor: pointer;
+  }
+
+  .dropdown-link:hover,
+  .dropdown-link:focus-visible,
+  .dropdown-link.is-active {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* --- Mobile Landscape: Switch to row layout to save vertical space --- */
+  /* We use 450px to catch most phones in landscape orientation */
+  @media (max-width: 790px) and (max-height: 450px) {
+      .dropdown-list {
+          flex-direction: row;
+          flex-wrap: wrap;
+          gap: 1rem;
+          justify-content: center;
+      }
+  }
+</style>
+
+{/*
+  Accessibility JS script so that ARIA attributes are properly updated based on user interactions (hover, focus, keyboard). This is important for screen readers.
+  It also includes a small enhancement to allow closing the dropdown with the Escape key.
+  Note: Astro will make sure that this script is only included once on the page, even if you use DropdownBase multiple times, so you don't have to worry about duplication.
+*/}
+<script>
+  function setupDropdownAccessibilityModifiers() {
+    const wrappers = document.querySelectorAll('.dropdown-wrapper');
+
+    wrappers.forEach(wrapper => {
+      const trigger = wrapper.querySelector('.dropdown-trigger');
+      if (!trigger) return;
+
+      // Main function: Checks if CSS is showing the menu
+      const syncAriaExpanded = () => {
+        // Use a small setTimeout(0) to let the browser
+        // process focus changes before checking state.
+        setTimeout(() => {
+          // matches() checks if the element matches those CSS selectors
+          const isOpen = wrapper.matches(':hover, :focus-within');
+          trigger.setAttribute('aria-expanded', String(isOpen));
+        }, 0);
+      };
+
+      // Listen to any event that might make CSS change
+      wrapper.addEventListener('mouseenter', syncAriaExpanded);
+      wrapper.addEventListener('mouseleave', syncAriaExpanded);
+      wrapper.addEventListener('focusin', syncAriaExpanded);
+      wrapper.addEventListener('focusout', syncAriaExpanded);
+      
+      // Escape key still works to close the dropdown: removing focus
+      // triggers the 'focusout' above and syncs automatically.
+      wrapper.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          document.activeElement?.blur(); 
+        }
+      });
+    });
+  }
+
+  setupDropdownAccessibilityModifiers();
+</script>

@@ -1,6 +1,7 @@
 ---
 import { Icon } from 'astro-icon/components';
-import '@styles/dropdown-selector.css';
+
+import DropdownBase from './DropdownBase.astro';
 
 const { homeLocale: home, t } = Astro.locals;
 
@@ -12,23 +13,25 @@ interface Props {
 const { class: className, ...attributes } = Astro.props;
 ---
 
-<div class:list={["nav-wrapper dropdown-wrapper", className]} {...attributes}>
-    {/* Mobile Trigger (Hamburger) */}
-    <button class="hamburger-btn dropdown-trigger" aria-label="Toggle navigation">
-        <Icon name="hamburger" width="32" height="32" aria-hidden="true" />
-    </button>
+<DropdownBase>
+    <div class:list={["nav-wrapper dropdown-wrapper", className]} {...attributes}>
+        {/* Mobile Trigger (Hamburger) */}
+        <button class="hamburger-btn dropdown-trigger" aria-label="Toggle navigation">
+            <Icon name="hamburger" width="32" height="32" aria-hidden="true" />
+        </button>
 
-    {/* Menu Items (Row on Desktop, Dropdown on Mobile) */}
-    <nav aria-label="Main navigation" class="nav-content dropdown-menu">
-        <ul class="dropdown-list">
-            <li><a class="dropdown-link" href={`${home()}#top`}>{t('nav_home')}</a></li>
-            <li><a class="dropdown-link" href={`${home()}#objectives`}>{t('nav_objectives')}</a></li>
-            <li><a class="dropdown-link" href={`${home()}#organisers`}>{t('nav_organisers')}</a></li>
-            <li><a class="dropdown-link" href={`${home()}#contact`}>{t('nav_contact')}</a></li>
-            <li><a class="dropdown-link" href={`${home()}#resources`}>{t('nav_resources')}</a></li>
-        </ul>
-    </nav>
-</div>
+        {/* Menu Items (Row on Desktop, Dropdown on Mobile) */}
+        <nav aria-label="Main navigation" class="nav-content dropdown-menu">
+            <ul class="dropdown-list">
+                <li><a class="dropdown-link" href={`${home()}#top`}>{t('nav_home')}</a></li>
+                <li><a class="dropdown-link" href={`${home()}#objectives`}>{t('nav_objectives')}</a></li>
+                <li><a class="dropdown-link" href={`${home()}#organisers`}>{t('nav_organisers')}</a></li>
+                <li><a class="dropdown-link" href={`${home()}#contact`}>{t('nav_contact')}</a></li>
+                <li><a class="dropdown-link" href={`${home()}#resources`}>{t('nav_resources')}</a></li>
+            </ul>
+        </nav>
+    </div>
+</DropdownBase>
 
 <style>
     /* --- Desktop/Tablet Overrides (Disable dropdown behavior) --- */

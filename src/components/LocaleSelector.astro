@@ -3,7 +3,8 @@ import { locales } from "@languages";
 import { tForLocale } from "@utils/translation";
 import { Icon } from "astro-icon/components";
 import { getRelativeLocaleUrl } from "astro:i18n";
-import '@styles/dropdown-selector.css';
+
+import DropdownBase from "./DropdownBase.astro";
 
 const { locale: currentLocale } = Astro.locals;
 const { ...attributes } = Astro.props;
@@ -12,37 +13,39 @@ const currentLocaleName = tForLocale(currentLocale, "locale_name");
 const localeSelectorLabel = tForLocale(currentLocale, "locale_selector_label");
 ---
 
-<div class="locale-selector dropdown-wrapper" {...attributes}>
-  {/* Desktop Dropdown Trigger */}
-  <button class="dropdown-trigger dropdown-link" aria-haspopup="true" aria-expanded="false" aria-label={`${localeSelectorLabel}. ${tForLocale(currentLocale, "locale_selector_current_label_template", false, currentLocaleName)}`} title={currentLocaleName}>
-    <Icon name={`circle-flags:${currentLocale}`} class="flag-icon" width="24" height="24" aria-hidden="true" />
-    <span class="locale-label">{currentLocaleName}</span>
-    <Icon name="arrow" width="14" height="14" class="chevron" aria-hidden="true" />
-  </button>
+<DropdownBase>
+  <div class="locale-selector dropdown-wrapper" {...attributes}>
+    {/* Desktop Dropdown Trigger */}
+    <button class="dropdown-trigger dropdown-link" aria-haspopup="true" aria-expanded="false" aria-label={`${localeSelectorLabel}. ${tForLocale(currentLocale, "locale_selector_current_label_template", false, currentLocaleName)}`} title={currentLocaleName}>
+      <Icon name={`circle-flags:${currentLocale}`} class="flag-icon" width="24" height="24" aria-hidden="true" />
+      <span class="locale-label">{currentLocaleName}</span>
+      <Icon name="arrow" width="14" height="14" class="chevron" aria-hidden="true" />
+    </button>
 
-  {/* The List of Locales */}
-  <nav class="dropdown-menu" aria-label={`${localeSelectorLabel}`}>
-    <ul class="dropdown-list">
-      {locales.map((locale) => {
-        const localeName = tForLocale(locale, "locale_name");
-        return (
-          <li>
-            <a 
-              href={getRelativeLocaleUrl(locale)} 
-              class:list={["dropdown-link", { "is-active": locale === currentLocale }]}
-              aria-current={locale === currentLocale ? "page" : undefined}
-              title={localeName} 
-              aria-label={tForLocale(locale, "locale_selector_switch_label_template", false, localeName)}
-            >
-              <Icon name={`circle-flags:${locale}`} class="flag-icon" width="24" height="24" aria-hidden="true" /> 
-              <span class="locale-label">{localeName}</span>
-            </a>
-          </li>
-        );
-      })}
-    </ul>
-  </nav>
-</div>
+    {/* The List of Locales */}
+    <nav class="dropdown-menu" aria-label={`${localeSelectorLabel}`}>
+      <ul class="dropdown-list">
+        {locales.map((locale) => {
+          const localeName = tForLocale(locale, "locale_name");
+          return (
+            <li>
+              <a 
+                href={getRelativeLocaleUrl(locale)} 
+                class:list={["dropdown-link", { "is-active": locale === currentLocale }]}
+                aria-current={locale === currentLocale ? "page" : undefined}
+                title={localeName} 
+                aria-label={tForLocale(locale, "locale_selector_switch_label_template", false, localeName)}
+              >
+                <Icon name={`circle-flags:${locale}`} class="flag-icon" width="24" height="24" aria-hidden="true" /> 
+                <span class="locale-label">{localeName}</span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  </div>
+</DropdownBase>
 
 <style>
   /* We only need to define specific overrides here */
