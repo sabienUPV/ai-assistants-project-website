@@ -16,7 +16,7 @@ const localeSelectorLabel = tForLocale(currentLocale, "locale_selector_label");
 <DropdownBase>
   <div class="locale-selector dropdown-wrapper" {...attributes}>
     {/* Desktop Dropdown Trigger */}
-    <button class="dropdown-trigger dropdown-link" aria-haspopup="true" aria-expanded="false" aria-label={`${localeSelectorLabel}. ${tForLocale(currentLocale, "locale_selector_current_label_template", false, currentLocaleName)}`} title={currentLocaleName}>
+    <button class="dropdown-trigger dropdown-link" aria-haspopup="true" aria-label={`${localeSelectorLabel}. ${tForLocale(currentLocale, "locale_selector_current_label_template", false, currentLocaleName)}`} title={currentLocaleName}>
       <Icon name={`circle-flags:${currentLocale}`} class="flag-icon" width="24" height="24" aria-hidden="true" />
       <span class="locale-label">{currentLocaleName}</span>
       <Icon name="arrow" width="14" height="14" class="chevron" aria-hidden="true" />
