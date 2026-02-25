@@ -134,6 +134,10 @@
 
       // Main function: Checks if CSS is showing the menu
       const syncAriaExpanded = () => {
+        // We first make sure that the trigger is displayed
+        // (some triggers are only be visible on mobile, like a hamburger menu)
+        if (!trigger.checkVisibility()) return;
+
         // Use a small setTimeout(0) to let the browser
         // process focus changes before checking state.
         setTimeout(() => {
