@@ -38,9 +38,8 @@ import Contact from '@components/Contact.astro';
 	</section>
 </Layout>
 <style>
-	{/* Only for subtitles in partners and resources sections */}
-	section#partners > p,
-	section#resources > p {
+	{/* Only for subtitles in sections that have one as a direct child */}
+	section > p {
 		font-size: 1.2rem;
 		color: var(--color-text);
 		margin-bottom: 1.5rem;
