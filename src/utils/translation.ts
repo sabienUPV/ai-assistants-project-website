@@ -115,16 +115,7 @@ export function getGlossaryHtmlForTermInLocale(locale: Locale, term: string, con
 }
 
 function getGlossaryHtml(term: string, definition: string, punctuation?: string, containerEl = 'span', textEl = 'span'): string {
-  return `
-  <${containerEl} class="tooltip-container">
-  ${glossaryTermIconSvg}
-  <${textEl} class="pid-text">${term}</${textEl}>${punctuation || ''}
-  <span class="tooltip-content">
-  ${definition}
-  ${tooltipArrowSvg}
-  </span>
-  </${containerEl}>
-  `;
+  return `<${containerEl} class="tooltip-container">${glossaryTermIconSvg}<${textEl} class="pid-text">${term}</${textEl}>${punctuation || ''}<span class="tooltip-content" aria-hidden="true">${definition}${tooltipArrowSvg}</span></${containerEl}>`;
 }
 
 /**
