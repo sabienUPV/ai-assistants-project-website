@@ -1,5 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
-import { getTranslationHelperFn, getGlossaryHtmlForTermFn } from "@utils/translation";
+import { getTranslationHelperFn } from "@utils/translation";
+import { getGlossaryHtmlForTermFn } from "@utils/glossary";
 import { getHomeHelperFn } from "@utils/localizedUrl"; // URL helper for locale-aware links
 import { defaultLocale, type Locale } from "@languages";
 

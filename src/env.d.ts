@@ -1,7 +1,8 @@
 /// <reference path="../.astro/types.d.ts" />
 
 // 1. imports make this file a module
-import type { TranslationHelper, GlossaryHelper } from '@utils/translation';
+import type { TranslationHelper } from '@utils/translation';
+import type { GlossaryHelper } from '@utils/glossary';
 import type { HomeHelper } from '@utils/localizedUrl';
 import type { Locale } from '@languages';
 
