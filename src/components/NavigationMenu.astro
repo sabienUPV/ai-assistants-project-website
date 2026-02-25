@@ -16,7 +16,7 @@ const { class: className, ...attributes } = Astro.props;
 <DropdownBase>
     <div class:list={["nav-wrapper dropdown-wrapper", className]} {...attributes}>
         {/* Mobile Trigger (Hamburger) */}
-        <button class="hamburger-btn dropdown-trigger" aria-haspopup="true" aria-label="Toggle navigation">
+        <button class="hamburger-btn dropdown-trigger" aria-haspopup="true" aria-expanded="false" aria-label="Toggle navigation">
             <Icon name="hamburger" width="32" height="32" aria-hidden="true" />
         </button>
 
