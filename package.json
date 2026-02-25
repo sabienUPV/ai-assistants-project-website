@@ -8,6 +8,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "generate-icons": "node generate-icons.js",
+    "i18n-import-excel": "node import-i18n-content-from-excel-to-csv.js",
     "extract-and-convert-eu-logos": "node extract-and-convert-eu-logos.js"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "adm-zip": "^0.5.16",
-    "svgo": "^4.0.0"
+    "svgo": "^4.0.0",
+    "xlsx": "^0.18.5"
   }
 }
