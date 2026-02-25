@@ -132,6 +132,9 @@
       const trigger = wrapper.querySelector('.dropdown-trigger');
       if (!trigger) return;
 
+      const menu = wrapper.querySelector('.dropdown-menu');
+      if (!menu) return;
+
       // Main function: Checks if CSS is showing the menu
       const syncAriaExpanded = () => {
         // We first make sure that the trigger is displayed
@@ -141,8 +144,7 @@
         // Use a small setTimeout(0) to let the browser
         // process focus changes before checking state.
         setTimeout(() => {
-          // matches() checks if the element matches those CSS selectors
-          const isOpen = wrapper.matches(':hover, :focus-within');
+          const isOpen = menu.checkVisibility();
           trigger.setAttribute('aria-expanded', String(isOpen));
         }, 0);
       };
