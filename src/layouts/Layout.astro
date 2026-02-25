@@ -13,15 +13,21 @@ import '@styles/global.css';
 import '@styles/tooltips.css';
 
 import { PROJECT_NAME } from '@utils/constants';
-
 import { homeNoLocale } from '@utils/url.ts';
-import { defaultLocale } from '@languages';
+import { getPlainPathNoLocale, getAbsoluteLocaleUrlFromOrigin} from '@utils/localizedUrl.ts';
+import { locales, defaultLocale } from '@languages';
+
 import Header from '@components/Header.astro';
 import Footer from '@components/Footer.astro';
 import SkipLink from '@components/SkipLink.astro';
 import BackToTopButton from '@components/BackToTopButton.astro';
 
 const locale = Astro.currentLocale || defaultLocale;
+
+const origin = Astro.site ? Astro.site.origin : Astro.url.origin;
+
+// Get the locale-agnostic path (e.g., 'contact' instead of '/en/contact' or '/my-repo/en/contact')
+const plainPathNoLocale = getPlainPathNoLocale(Astro.url.pathname, locale);
 
 interface Props {
 	title: string;
@@ -42,6 +48,23 @@ const { title } = Astro.props;
 		<link rel="apple-touch-icon" href={homeNoLocale('apple-touch-icon.png')} /> {/* Icon for iOS Safari */}
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+
+		{/* --- SEO: HREFLANG TAGS (for search engines to serve links in the user's language) --- */}
+    {/* x-default (mandatory fallback to default locale, usually points to English) */}
+    <link 
+      rel="alternate" 
+      hreflang="x-default" 
+      href={getAbsoluteLocaleUrlFromOrigin(origin, defaultLocale, plainPathNoLocale)} 
+    />
+    
+    {/* Dynamically map all our supported locales */}
+    {locales.map((loc) => (
+      <link 
+        rel="alternate" 
+        hreflang={loc} 
+        href={getAbsoluteLocaleUrlFromOrigin(origin, loc, plainPathNoLocale)} 
+      />
+    ))}
 	</head>
 	<body id="top">
 		<SkipLink />
