@@ -41,7 +41,7 @@
   border-radius: 4px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   z-index: 50;
-  text-align: center;
+  text-align: left;
 }
 
 /* The Arrow */
@@ -57,7 +57,9 @@
 
 /* Hover State */
 .tooltip-container:hover .tooltip-content {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .tooltip-container:hover {
   border-bottom: 1px dotted var(--color-link-hover);
