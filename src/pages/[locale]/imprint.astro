@@ -11,10 +11,10 @@ import {
   COORDINATOR_REP,
   CONTACT_EMAIL,
   TECH_PROVIDER_NAME,
-  TECH_PROVIDER_URL
+  getTechProviderUrlForLocale
 } from "@utils/constants";
 
-const { t } = Astro.locals;
+const { t, locale } = Astro.locals;
 ---
 
 <Layout title={t('imprint_title')}>
@@ -47,7 +47,7 @@ const { t } = Astro.locals;
       <h2>{t('imprint_tech_title')}</h2>
       <p>
         {t('imprint_tech_desc')} 
-        <a href={TECH_PROVIDER_URL} target="_blank" rel="noopener noreferrer">{TECH_PROVIDER_NAME}</a>.
+        <a href={getTechProviderUrlForLocale(locale)} target="_blank" rel="noopener noreferrer">{TECH_PROVIDER_NAME}</a>.
       </p>
     </section>
 

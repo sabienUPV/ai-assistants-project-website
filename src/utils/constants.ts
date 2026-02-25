@@ -11,4 +11,5 @@ export const COORDINATOR_VAT = "ESA12345678"; // NIF, CIF o VAT Number
 export const COORDINATOR_REP = "Nombre del Representante Legal (Opcional)"; // Legal Representative (Optional)
 
 export const TECH_PROVIDER_NAME = "ITACA-SABIEN, UPV";
-export const TECH_PROVIDER_URL = "https://www.sabien.upv.es/en/";
+export const getTechProviderUrlForLocale = (locale: string) =>
+  "https://www.sabien.upv.es/" + (locale.toLowerCase() === 'es' ? "" : "en/");
