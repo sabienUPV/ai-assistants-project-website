@@ -7,15 +7,15 @@ const { t } = Astro.locals;
 
 <Cards title={t('objectives_title')} columns={2}>
   <Card title={t('objective_literacy_title')}>
-    <Fragment set:html={t('objective_literacy_content', true)} />
+    <p style="margin: 0;" set:html={t('objective_literacy_content', true)} />
   </Card>
   <Card title={t('objective_living_title')}>
-    <Fragment set:html={t('objective_living_content', true)} />
+    <p style="margin: 0;" set:html={t('objective_living_content', true)} />
   </Card>
   <Card title={t('objective_resources_title')}>
-    <Fragment set:html={t('objective_resources_content', true)} />
+    <p style="margin: 0;" set:html={t('objective_resources_content', true)} />
   </Card>
   <Card title={t('objective_support_title')}>
-    <Fragment set:html={t('objective_support_content', true)} />
+    <p style="margin: 0;" set:html={t('objective_support_content', true)} />
   </Card>
 </Cards>

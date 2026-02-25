@@ -7,6 +7,6 @@ const { t } = Astro.locals;
 ---
 
 <Cards title={t('description_title', false, PROJECT_NAME)}>
-  <Card set:html={t('description_content', true, PROJECT_NAME)} />      
-  <Card set:html={t('description_mission', true)} />
+  <Card><p style="margin: 0;" set:html={t('description_content', true, PROJECT_NAME)}/></Card>      
+  <Card><p style="margin: 0;" set:html={t('description_mission', true)}/></Card>
 </Cards>
