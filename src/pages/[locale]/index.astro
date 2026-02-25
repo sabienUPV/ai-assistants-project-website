@@ -20,26 +20,27 @@ import Contact from '@components/Contact.astro';
 	<section id="description">
 		<Description />
 	</section>
-	<section id={t('nav_objectives').toLowerCase()}>
+	<section id="objectives">
 		<Objectives />
 	</section>
-	<section id={t('nav_partners').toLowerCase()}>
+	<section id="partners">
 		<h2>{t('nav_partners')}</h2>
 		<p>{t('partners_subtitle')}</p>
 		<Partners />
 	</section>
-	<section id={t('nav_contact').toLowerCase()}>
+	<section id="contact">
 		<Contact />
 	</section>
-	<section id={t('nav_resources').toLowerCase()}>
+	<section id="resources">
 		<h2>{t('nav_resources')}</h2>
 		<p>{t('resources_subtitle')}</p>
 		<Documents />
 	</section>
 </Layout>
 <style>
-	{/* Only for subtitles in sections that have one as a direct child */}
-	section > p {
+	{/* Only for subtitles in partners and resources sections */}
+	section#partners > p,
+	section#resources > p {
 		font-size: 1.2rem;
 		color: var(--color-text);
 		margin-bottom: 1.5rem;

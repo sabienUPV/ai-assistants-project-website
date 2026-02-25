@@ -24,10 +24,10 @@ const { class: className, ...attributes } = Astro.props;
         <nav aria-label={t('nav_menu_label')} class="nav-content dropdown-menu">
             <ul class="dropdown-list">
                 <li><a class="dropdown-link" href={`${home()}#top`}>{t('nav_home')}</a></li>
-                <li><a class="dropdown-link" href={`${home()}#${t('nav_objectives').toLowerCase()}`}>{t('nav_objectives')}</a></li>
-                <li><a class="dropdown-link" href={`${home()}#${t('nav_partners').toLowerCase()}`}>{t('nav_partners')}</a></li>
-                <li><a class="dropdown-link" href={`${home()}#${t('nav_contact').toLowerCase()}`}>{t('nav_contact')}</a></li>
-                <li><a class="dropdown-link" href={`${home()}#${t('nav_resources').toLowerCase()}`}>{t('nav_resources')}</a></li>
+                <li><a class="dropdown-link" href={`${home()}#objectives`}>{t('nav_objectives')}</a></li>
+                <li><a class="dropdown-link" href={`${home()}#partners`}>{t('nav_partners')}</a></li>
+                <li><a class="dropdown-link" href={`${home()}#contact`}>{t('nav_contact')}</a></li>
+                <li><a class="dropdown-link" href={`${home()}#resources`}>{t('nav_resources')}</a></li>
             </ul>
         </nav>
     </div>
