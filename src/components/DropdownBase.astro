@@ -126,7 +126,7 @@
 */}
 <script>
   function setupDropdownAccessibilityModifiers() {
-    const wrappers = document.querySelectorAll('.dropdown-wrapper');
+    const wrappers = document.querySelectorAll<HTMLElement>('.dropdown-wrapper');
 
     wrappers.forEach(wrapper => {
       const trigger = wrapper.querySelector('.dropdown-trigger');
@@ -153,7 +153,9 @@
       // triggers the 'focusout' above and syncs automatically.
       wrapper.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-          document.activeElement?.blur(); 
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur(); 
+          }
         }
       });
     });
