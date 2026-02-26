@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import logo from '@assets/images/LOGO_AI-ASSISTANTS_NO-TEXT.svg';
 import type { HTMLAttributes } from 'astro/types';
-import { PROJECT_NAME } from '@utils/constants';
+import { PROJECT_NAME, PROJECT_NAME_FOR_SCREEN_READERS } from '@utils/constants';
 
 interface Props {
   includeLogo?: boolean;
@@ -33,7 +33,8 @@ const { includeLogo = false, includeSubtitle = false, loading, class: className,
   )}
   <div class="text">
     <div class="title">
-      <span class="title-first">AI</span><span class="title-second">-</span><span class="title-third">ASSISTANTS 4PIDS</span>
+      <span aria-hidden="true"><span class="title-first">AI</span><span class="title-second">-</span><span class="title-third">ASSISTANTS 4PIDS</span></span>
+      <span class="sr-only">{PROJECT_NAME_FOR_SCREEN_READERS}</span>
     </div>
     {includeSubtitle && (
       <p class="subtitle">
@@ -73,15 +74,15 @@ const { includeLogo = false, includeSubtitle = false, loading, class: className,
     line-height: 1.1;
   }
 
-  .title > .title-first {
+  .title .title-first {
     color: var(--color-logo-light-blue);
   }
 
-  .title > .title-second {
+  .title .title-second {
     color: var(--color-subtitle, var(--color-logo-dark-grey));
   }
 
-  .title > .title-third {
+  .title .title-third {
     color: var(--color-logo-medium-blue);
   }
 
