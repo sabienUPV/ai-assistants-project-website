@@ -11,10 +11,10 @@ export const CONTACT_EMAIL = 'test@example.com'; // TODO: Update with actual con
 
 // Info for the Imprint ("Aviso Legal" in Spanish)
 // TODO: Update with actual coordinator and tech provider information
-export const COORDINATOR_NAME = "Nombre de la Institución Coordinadora";
-export const COORDINATOR_ADDRESS = "Calle Principal 123, 28000 Ciudad, País";
-export const COORDINATOR_VAT = "ESA12345678"; // NIF, CIF o VAT Number
-export const COORDINATOR_REP = "Nombre del Representante Legal (Opcional)"; // Legal Representative (Optional)
+export const COORDINATOR_NAME = "Coordinating Institution Name";
+export const COORDINATOR_ADDRESS = "123 Main Street, 28000 City, Country";
+export const COORDINATOR_VAT = "ESA12345678"; // NIF, CIF or VAT Number
+export const COORDINATOR_REP = "Legal Representative Name (Optional)"; // Legal Representative (Optional)
 
 export const TECH_PROVIDER_NAME = "ITACA-SABIEN, UPV";
 export const getTechProviderUrlForLocale = (locale: string) =>
