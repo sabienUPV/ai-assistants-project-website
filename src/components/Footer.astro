@@ -1,6 +1,7 @@
 ---
 import EuLogo from "@components/EuLogo.astro";
-import { PROJECT_NAME, COPYRIGHT_YEARS } from "@utils/constants";
+import { COPYRIGHT_YEARS } from "@utils/constants";
+import { PROJECT_NAME_HTML } from "@utils/a11y";
 
 const { homeLocale: home, t } = Astro.locals;
 ---
@@ -12,7 +13,7 @@ const { homeLocale: home, t } = Astro.locals;
         </ul>
     </nav>
     <div class="copyright-text">
-        Copyright © {COPYRIGHT_YEARS} {t('copyright_text', false, PROJECT_NAME)}
+        Copyright © {COPYRIGHT_YEARS} <Fragment set:html={t('copyright_text', false, PROJECT_NAME_HTML)} />
     </div>
     <div class="eu-logo-wrapper">
         <EuLogo showDisclaimer={true} />

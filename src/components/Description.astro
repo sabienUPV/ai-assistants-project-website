@@ -1,12 +1,12 @@
 ---
 import Card from "@components/Card.astro";
 import Cards from "@components/Cards.astro";
-import { PROJECT_NAME } from "@utils/constants";
+import { PROJECT_NAME_HTML } from "@utils/a11y";
 
 const { t } = Astro.locals;
 ---
 
-<Cards title={t('description_title', false, PROJECT_NAME)}>
-  <Card><p style="margin: 0;" set:html={t('description_content', true, PROJECT_NAME)}/></Card>      
+<Cards title={t('description_title', false, PROJECT_NAME_HTML)} isTitleHtml={true}>
+  <Card><p style="margin: 0;" set:html={t('description_content', true, PROJECT_NAME_HTML)}/></Card>      
   <Card><p style="margin: 0;" set:html={t('description_mission', true)}/></Card>
 </Cards>

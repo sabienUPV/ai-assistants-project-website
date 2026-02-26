@@ -10,16 +10,17 @@
 
 interface Props {
   title?: string;
+  isTitleHtml?: boolean; // If true, the title will be rendered as HTML (use with caution)
   columns?: number;
   class?: string;
   [key: string]: any;
 }
 
-const { title, columns = 1, class: className, ...attributes } = Astro.props;
+const { title, isTitleHtml = false, columns = 1, class: className, ...attributes } = Astro.props;
 ---
 
 <div class:list={['cards-grid', className]} {...attributes}>
-  {title && <h2 class="cards-title">{title}</h2>}
+  {title && <h2 class="cards-title">{isTitleHtml ? <Fragment set:html={title} /> : title}</h2>}
   <ul class='cards-list'>
     <slot />
   </ul>
