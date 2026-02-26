@@ -95,5 +95,7 @@ h3 { font-size: 1rem; }
   margin: -1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
   border: 0;
+  user-select: none; /* Prevent selection of the hidden element */
 }
