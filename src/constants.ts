@@ -1,10 +1,10 @@
-export const PROJECT_NAME = 'AI-ASSISTANTS 4PIDS';
+export const PROJECT_NAME = 'AI-ASSISTANTS 4PID';
 export const PROJECT_SUBTITLE = 'AI-Assisted Solutions for Enhancing the Independent Living of Persons with Intellectual Disabilities'
 
 /**
  * This is the same as {@link PROJECT_NAME} but with spaces for screen readers to read it correctly
  */
-export const PROJECT_NAME_FOR_SCREEN_READERS = 'A I Assistants For PIDs';
+export const PROJECT_NAME_FOR_SCREEN_READERS = 'A I Assistants For PID';
 
 export const COPYRIGHT_YEARS = '2026'; // Update with the actual year(s) of the project
 
