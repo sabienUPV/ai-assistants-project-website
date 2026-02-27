@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import logo from '@assets/images/LOGO_AI-ASSISTANTS_NO-TEXT.svg';
 import type { HTMLAttributes } from 'astro/types';
-import { PROJECT_NAME, PROJECT_NAME_FOR_SCREEN_READERS } from '@constants';
+import { PROJECT_NAME, PROJECT_NAME_FOR_SCREEN_READERS, PROJECT_SUBTITLE } from '@constants';
 
 interface Props {
   includeLogo?: boolean;
@@ -15,6 +15,10 @@ interface Props {
 const { t } = Astro.locals;
 
 const { includeLogo = false, includeSubtitle = false, loading, class: className, ...attributes } = Astro.props;
+
+// Split by the hyphen to separate "AI" and "ASSISTANTS 4PID" to show each part in a different color, as per the logo design.
+const projectNameSeparator = '-';
+const projectNameParts = PROJECT_NAME.split(projectNameSeparator, 2);
 ---
 
 <div 
@@ -35,14 +39,12 @@ const { includeLogo = false, includeSubtitle = false, loading, class: className,
   )}
   <div class="text">
     <div class="title">
-      <span aria-hidden="true"><span class="title-first">AI</span><span class="title-second">-</span><span class="title-third">ASSISTANTS 4PIDS</span></span>
+      <span aria-hidden="true"><span class="title-first">{projectNameParts[0]}</span><span class="title-second">{projectNameSeparator}</span><span class="title-third">{projectNameParts[1]}</span></span>
       <span class="sr-only">{PROJECT_NAME_FOR_SCREEN_READERS}</span>
     </div>
     {includeSubtitle && (
       <p class="subtitle" lang="en">
-        AI-Assisted Solutions for Enhancing the
-        Independent Living of Persons with
-        Intellectual Disabilities
+        {PROJECT_SUBTITLE}
       </p>
     )}
   </div>

@@ -1,4 +1,5 @@
 export const PROJECT_NAME = 'AI-ASSISTANTS 4PIDS';
+export const PROJECT_SUBTITLE = 'AI-Assisted Solutions for Enhancing the Independent Living of Persons with Intellectual Disabilities'
 
 /**
  * This is the same as {@link PROJECT_NAME} but with spaces for screen readers to read it correctly
