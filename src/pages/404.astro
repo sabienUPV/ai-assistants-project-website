@@ -1,16 +1,18 @@
 ---
 import Layout from "@layouts/Layout.astro";
+
+const { t } = Astro.locals;
 ---
 
-<Layout title="Page Not Found | 404">
+<Layout title={`${t("404_title")} | 404`}>
   <div class="error-container">
     <div class="error-content">
       <h1>404</h1>
-      <h2>Page Not Found</h2>
-      <p>The page you are looking for doesn't exist or has been moved.</p>
+      <h2>{t("404_title")}</h2>
+      <p>{t("404_description")}</p>
       
       <a href="/" class="back-button">
-        Go back to Home
+        {t("404_back_home")}
       </a>
     </div>
   </div>
