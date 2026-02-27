@@ -1,6 +1,6 @@
 // a11y (accessibility) utilities and constants
 
-import { PROJECT_NAME, PROJECT_NAME_FOR_SCREEN_READERS } from "@utils/constants";
+import { PROJECT_NAME, PROJECT_NAME_FOR_SCREEN_READERS } from "@constants";
 
 /**
  * Helper constant with accessible HTML for the project name, including a visually hidden version for screen readers.
