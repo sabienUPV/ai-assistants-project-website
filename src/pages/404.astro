@@ -1,7 +1,7 @@
 ---
 import Layout from "@layouts/Layout.astro";
 
-const { t } = Astro.locals;
+const { t, homeLocale } = Astro.locals;
 ---
 
 <Layout title={`${t("404_title")} | 404`}>
@@ -11,7 +11,7 @@ const { t } = Astro.locals;
       <h2>{t("404_title")}</h2>
       <p>{t("404_description")}</p>
       
-      <a href="/" class="back-button">
+      <a href={homeLocale()} class="back-button">
         {t("404_back_home")}
       </a>
     </div>
