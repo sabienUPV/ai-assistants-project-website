@@ -19,7 +19,7 @@ const dataForAllLocales = locales.reduce((acc, locale) => {
 ---
 
 <Layout title={`404: ${tForLocale(defaultLocale, "404_title")}`}>
-  <div id="error-container" class="error-container" data-locales={JSON.stringify(dataForAllLocales)}>
+  <div id="error-container" class="error-container" data-locales={JSON.stringify(dataForAllLocales)} data-default-locale={defaultLocale}>
     <div class="error-content">
       <h1>404</h1>
       <h2 id="404-title">{tForLocale(defaultLocale, "404_title")}</h2>
@@ -56,7 +56,7 @@ const dataForAllLocales = locales.reduce((acc, locale) => {
       const backHomeElement = document.getElementById("404-back-home") as HTMLAnchorElement | null;
 
       // Update text content and hrefs immediately to provide a localized error experience
-      if (titleElement && descriptionElement && backHomeElement) {
+      if (titleElement && detectedLocale !== container.dataset.defaultLocale && descriptionElement && backHomeElement) {
         const separator = " - ";
         document.title += separator + title;
         titleElement.textContent += separator + title;
