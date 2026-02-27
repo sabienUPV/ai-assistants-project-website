@@ -67,6 +67,18 @@ const dataForAllLocales = locales.reduce((acc, locale) => {
   }
 </script>
 
+{/*
+Hide the Locale Selector in the 404 page
+to hide the fact that it doesn't detect the language from the path like we do here
+(it's okay since it doesn't make a lot of sense to switch languages from a 404 page in the first place,
+just go back to the homepage or any other page and switch from there if needed)
+*/}
+<style is:global>
+  .locale-selector {
+    display: none;
+  }
+</style>
+
 <style>
   .error-container {
     display: flex;
