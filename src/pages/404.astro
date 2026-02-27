@@ -1,25 +1,73 @@
 ---
 import Layout from "@layouts/Layout.astro";
+import { homeNoLocale } from "@utils/url";
+import { tForLocale } from "@utils/translation";
+import { locales, defaultLocale } from "@languages";
+import { getRelativeLocaleUrl } from "astro:i18n";
 
-const { t, homeLocale } = Astro.locals;
+// Pre-calculate translations and routes for all available locales during the build step.
+// This creates a dictionary that avoids fetching data on the client side, keeping the page static.
+const dataForAllLocales = locales.reduce((acc, locale) => {
+  acc[locale] = {
+    title: tForLocale(locale, "404_title"),
+    description: tForLocale(locale, "404_description"),
+    backHome: tForLocale(locale, "404_back_home"),
+    homeLink: getRelativeLocaleUrl(locale),
+  };
+  return acc;
+}, {} as Record<string, { title: string; description: string; backHome: string; homeLink: string }>);
 ---
 
-<Layout title={`${t("404_title")} | 404`}>
-  <div class="error-container">
+<Layout title={`${tForLocale(defaultLocale, "404_title")} | 404`}>
+  <div id="error-container" class="error-container" data-locales={JSON.stringify(dataForAllLocales)}>
     <div class="error-content">
       <h1>404</h1>
-      <h2>{t("404_title")}</h2>
-      <p>{t("404_description")}</p>
+      <h2 id="404-title">{tForLocale(defaultLocale, "404_title")}</h2>
+      <p id="404-description">{tForLocale(defaultLocale, "404_description")}</p>
       
-      <a href={homeLocale()} class="back-button">
-        {t("404_back_home")}
+      <a id="404-back-home" href={homeNoLocale()} class="back-button">
+        {tForLocale(defaultLocale, "404_back_home")}
       </a>
     </div>
   </div>
 </Layout>
 
+<script>
+  // Import the shared utility function to strictly enforce DRY (Don't Repeat Yourself) principles
+  import { extractLocaleFromPath } from "@utils/localizedUrl";
+
+  // 1. Retrieve the container element that holds our serialized locale data
+  const container = document.getElementById("error-container");
+  
+  if (container && container.dataset.locales) {
+    // 2. Parse the pre-calculated dictionary from the data attribute
+    const dataForAllLocales = JSON.parse(container.dataset.locales);
+    
+    // 3. Determine the user's intended locale based on the current URL path
+    const currentPath = window.location.pathname;
+    const detectedLocale = extractLocaleFromPath(currentPath);
+
+    // 4. If a valid locale is found, dynamically update the DOM elements to match that language
+    if (detectedLocale && dataForAllLocales[detectedLocale]) {
+      const { title, description, backHome, homeLink } = dataForAllLocales[detectedLocale];
+      
+      const titleElement = document.getElementById("404-title");
+      const descriptionElement = document.getElementById("404-description");
+      const backHomeElement = document.getElementById("404-back-home") as HTMLAnchorElement | null;
+
+      // Update text content and hrefs immediately to provide a localized error experience
+      if (titleElement && descriptionElement && backHomeElement) {
+        document.title = `${title} | 404`;
+        titleElement.textContent = title;
+        descriptionElement.textContent = description;
+        backHomeElement.href = homeLink;
+        backHomeElement.textContent = backHome;
+      }
+    }
+  }
+</script>
+
 <style>
-  /* Mismos estilos de antes */
   .error-container {
     display: flex;
     align-items: center;
