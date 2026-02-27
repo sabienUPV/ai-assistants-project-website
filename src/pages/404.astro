@@ -18,7 +18,7 @@ const dataForAllLocales = locales.reduce((acc, locale) => {
 }, {} as Record<string, { title: string; description: string; backHome: string; homeLink: string }>);
 ---
 
-<Layout title={`${tForLocale(defaultLocale, "404_title")} | 404`}>
+<Layout title={`404: ${tForLocale(defaultLocale, "404_title")}`}>
   <div id="error-container" class="error-container" data-locales={JSON.stringify(dataForAllLocales)}>
     <div class="error-content">
       <h1>404</h1>
@@ -57,11 +57,12 @@ const dataForAllLocales = locales.reduce((acc, locale) => {
 
       // Update text content and hrefs immediately to provide a localized error experience
       if (titleElement && descriptionElement && backHomeElement) {
-        document.title = `${title} | 404`;
-        titleElement.textContent = title;
-        descriptionElement.textContent = description;
+        const separator = " - ";
+        document.title += separator + title;
+        titleElement.textContent += separator + title;
+        descriptionElement.textContent += separator + description;
         backHomeElement.href = homeLink;
-        backHomeElement.textContent = backHome;
+        backHomeElement.textContent += separator + backHome;
       }
     }
   }
