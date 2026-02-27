@@ -3,15 +3,11 @@ import { getStaticPathsFromLocales as getStaticPaths } from '@utils/translation'
 
 export { getStaticPaths };
 
-import Layout from "@layouts/Layout.astro"; 
+import Layout from "@layouts/Layout.astro";
 import { 
-  COORDINATOR_NAME, 
-  COORDINATOR_ADDRESS, 
-  COORDINATOR_VAT, 
-  COORDINATOR_REP,
-  CONTACT_EMAIL,
-  TECH_PROVIDER_NAME,
-  getTechProviderUrlForLocale
+  IAT_NAME, IAT_ADDRESS, IAT_EMAIL, IAT_LEGAL_REP,
+  WH_NAME, WH_ADDRESS, WH_PHONE, WH_EMAIL, WH_VAT, WH_LEGAL_REP,
+  TECH_PROVIDER_NAME, getTechProviderUrlForLocale, CONTACT_EMAIL
 } from "@utils/constants";
 
 const { t, locale } = Astro.locals;
@@ -22,24 +18,46 @@ const { t, locale } = Astro.locals;
     <h1>{t('imprint_title')}</h1>
 
     <section class="imprint-section">
-      <h2>{t('imprint_owner_title')}</h2>
-      <p>{t('imprint_owner_desc')}</p>
-      
-      <address class="coordinator-details">
-        <strong>{COORDINATOR_NAME}</strong><br />
-        {COORDINATOR_ADDRESS}<br /><br />
-        
-        <strong>{t('imprint_vat_label')}:</strong> {COORDINATOR_VAT}<br />
-        {COORDINATOR_REP && <Fragment><strong>{t('imprint_representative')}:</strong> {COORDINATOR_REP}<br /></Fragment>}
-        <br />
-        <strong>{t('imprint_contact_label')}:</strong> <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+      <h2>{t('imprint_resp_content')}</h2>
+      <address class="legal-block">
+        <strong>{IAT_NAME}</strong><br />
+        {IAT_ADDRESS}<br /><br />
+        <strong>{t('imprint_email_label')}:</strong> <a href={`mailto:${IAT_EMAIL}`}>{IAT_EMAIL}</a><br />
+        <strong>{t('imprint_project_contact_label')}:</strong> <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
       </address>
+      
+      <p class="sub-block">
+        <strong>{t('imprint_legal_rep')}:</strong><br />
+        {IAT_LEGAL_REP}
+      </p>
     </section>
 
     <section class="imprint-section">
-      <h2>{t('imprint_eu_funding_title')}</h2>
-      <p class="eu-disclaimer">
-        {t('eu_disclaimer')}
+      <p>{t('imprint_parent_org_desc')}</p>
+      
+      <address class="legal-block">
+        <strong>{WH_NAME}</strong><br />
+        {WH_ADDRESS}<br /><br />
+        <strong>{t('imprint_phone_label')}:</strong> {WH_PHONE}<br />
+        <strong>{t('imprint_email_label')}:</strong> <a href={`mailto:${WH_EMAIL}`}>{WH_EMAIL}</a>
+      </address>
+
+      <p class="sub-block">
+        {t('imprint_public_law')}
+      </p>
+
+      <p class="sub-block">
+        <strong>{t('imprint_legal_rep')}:</strong><br />
+        {WH_LEGAL_REP}
+      </p>
+
+      <p class="sub-block">
+        <strong>{t('imprint_supervisory_title')}:</strong><br />
+        {t('imprint_supervisory_desc')}
+      </p>
+
+      <p class="sub-block">
+        <strong>{t('imprint_vat_label')}:</strong> {WH_VAT}
       </p>
     </section>
 
@@ -47,13 +65,19 @@ const { t, locale } = Astro.locals;
       <h2>{t('imprint_tech_title')}</h2>
       <p>
         {t('imprint_tech_desc')} 
-        <a href={getTechProviderUrlForLocale(locale)} target="_blank" rel="noopener noreferrer">{TECH_PROVIDER_NAME}</a>.
+        <a href={getTechProviderUrlForLocale(locale)} target="_blank" rel="noopener noreferrer">
+          {TECH_PROVIDER_NAME}
+        </a>.
       </p>
     </section>
 
-    <section class="imprint-section">
-      <h2>{t('imprint_liability_title')}</h2>
-      <p>{t('imprint_liability_text')}</p>
+    <section class="imprint-section disclaimer-section">
+      <h2>{t('imprint_disclaimer_title')}</h2>
+      <p>{t('imprint_disclaimer_p1')}</p>
+      <p>{t('imprint_disclaimer_p2')}</p>
+      <p>{t('imprint_copyright_p3')}</p>
+      
+      <p class="eu-disclaimer">{t('eu_disclaimer')}</p>
     </section>
 
   </main>
@@ -63,26 +87,37 @@ const { t, locale } = Astro.locals;
   .imprint-container {
     max-width: 800px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 3rem 1rem;
     color: var(--color-text);
   }
 
-  h1 { font-size: 2.5rem; margin-bottom: 2rem; }
-  h2 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--color-secondary); }
+  h1 { font-size: 2.5rem; margin-bottom: 2.5rem; }
+  h2 { font-size: 1.5rem; margin-bottom: 1.2rem; color: var(--color-secondary); border-bottom: 1px solid #eaeaea; padding-bottom: 0.5rem; }
   
-  .imprint-section { margin-bottom: 2.5rem; }
+  .imprint-section { margin-bottom: 3rem; }
   
-  .coordinator-details {
+  .legal-block {
     font-style: normal;
     background-color: rgba(0, 0, 0, 0.03); 
     padding: 1.5rem;
     border-radius: 8px;
     line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .sub-block { margin-top: 1rem; line-height: 1.5; }
+
+  .disclaimer-section p {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #555;
   }
 
   .eu-disclaimer {
     border-left: 4px solid var(--color-secondary);
     padding-left: 1rem;
+    margin-top: 2rem;
   }
 
   a { color: var(--color-secondary); text-decoration: underline; }
