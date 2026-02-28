@@ -9,13 +9,13 @@ import { PROJECT_NAME, PROJECT_NAME_FOR_SCREEN_READERS } from "@constants";
 export const PROJECT_NAME_HTML = htmlTextWithScreenReaderSupport(PROJECT_NAME, PROJECT_NAME_FOR_SCREEN_READERS);
 
 /**
- * Create accessible HTML that contains both the original text and a visually hidden version for screen readers.
+ * Create accessible HTML that contains both the original text and a descriptive label for screen readers.
  * @param text The original text, as displayed on the screen
  * @param screenReaderText The adapted text so screen readers read it pronouncing it properly. It doesn't need to make sense visually, but it should be clear for screen readers.
  * @returns The resulting HTML containing both versions of the text
  */
 export function htmlTextWithScreenReaderSupport(text: string, screenReaderText: string): string {
-  return `<span aria-hidden="true">${text}</span><span class="sr-only">${screenReaderText}</span>`;
+  return `<span aria-label="${screenReaderText}">${text}</span>`;
 }
 
 /**
