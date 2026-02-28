@@ -30,14 +30,20 @@ export function injectGlossariesHtml(locale: Locale, text: string): string {
   if (!terms) return text;
 
   // 2. Create ONE regex matching ANY of the terms: \b(term1|term2|term3)\b([.,;:!?]?)
+  // We also match HTML tags (<[^>]+>) to ignore them (so we don't replace inside attributes)
   const escapedTerms = Object.keys(terms).map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-  const combinedRegex = new RegExp(`\\b(${escapedTerms.join('|')})\\b([.,;:!?]?)`, 'gi');
+  const combinedRegex = new RegExp(`(<[^>]+>)|\\b(${escapedTerms.join('|')})\\b([.,;:!?]?)`, 'gi');
 
   // Keep track of what we've replaced so we only do the first occurrence
   const replacedTerms = new Set<string>();
 
   // 3. Run a single replace pass
-  text = text.replace(combinedRegex, (match, termMatch, punctuation) => {
+  text = text.replace(combinedRegex, (match, tagMatch, termMatch, punctuation) => {
+    // If we matched an HTML tag, return it unchanged
+    if (tagMatch) {
+      return tagMatch;
+    }
+
     const lowerTerm = termMatch.toLowerCase();
     
     // If we already added a tooltip for this word, just return the word normally
