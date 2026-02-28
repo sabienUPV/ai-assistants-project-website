@@ -13,7 +13,7 @@ import { baseUrlPath as base } from "@utils/url"
     <meta http-equiv="refresh" content={`0;url=${base}/${defaultLocale}/`} />
 
     <script is:inline define:vars={{ locales, base, defaultLocale }}>
-      window.location.replace(`${base}/${locales.find(l => navigator.language?.startsWith(l)) || defaultLocale}/`);
+      window.location.replace(`${base}/${locales.find(l=>navigator.language?.startsWith(l))||defaultLocale}/`)
     </script>
 
     <style>
