@@ -1,25 +1,57 @@
 ---
+import { Icon } from 'astro-icon/components';
 import { randomId } from "@utils/a11y";
 
 interface Props {
   class?: string;
   id?: string;
   position?: 'left' | 'right';
+  title?: string;
+  iconName?: string;
+  iconSize?: number;
+  iconClass?: string;
+  includeChevron?: boolean;
+  mobileOnly?: boolean;
+  buttonSharesLinkStyle?: boolean;
+  buttonAriaLabel?: string;
+  [key: string]: any;
 }
 
-const { class: className, id = randomId(), position = 'right' } = Astro.props;
+const {
+  class: className,
+  id = randomId('dropdown-'),
+  position = 'right',
+  title,
+  iconName = 'hamburger',
+  iconSize = 24,
+  iconClass,
+  includeChevron = false,
+  mobileOnly = false,
+  buttonSharesLinkStyle = false,
+  buttonAriaLabel,
+  ...attributes
+  } = Astro.props;
 ---
 
-<div class:list={["dropdown-wrapper", className]}>
-  <slot name="button" />
-
+<div class:list={["dropdown-wrapper", mobileOnly && "mobile-only", className]} {...attributes}>
+  <button
+      slot="button"
+      class:list={["dropdown-trigger", buttonSharesLinkStyle && "dropdown-link"]}
+      popovertarget={id}
+      aria-label={buttonAriaLabel}
+      title={title}
+    >
+      <Icon name={iconName} width={iconSize} height={iconSize} class={iconClass} aria-hidden="true" />
+      { title && <span>{title}</span> }
+      {includeChevron && <Icon name="arrow" width="14" height="14" class="chevron" aria-hidden="true" />}
+    </button>
   <div id={id} popover class:list={["dropdown-menu", `is-${position}`]}>
     <ul class="dropdown-list">
-      <slot name="menu-items" />
+      {/* Menu Items (Row on Desktop, Dropdown on Mobile) */}
+      <slot />
     </ul>
   </div>
 </div>
-
 
 <style>
   /* Shared Dropdown Logic */
@@ -29,20 +61,16 @@ const { class: className, id = randomId(), position = 'right' } = Astro.props;
     align-items: center;
   }
 
-  /* Make sure the direct descendant button of the slot is a popover-trigger */
-  .dropdown-wrapper > :global(button) {
+  .dropdown-trigger {
     background: transparent;
     border: none;
+    color: white;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0.5rem;
     font-family: inherit;
-  }
-
-  .dropdown-wrapper > :global(button:not(.dropdown-link)) {
-    color: white;
   }
 
   /* Popover API: https://developer.mozilla.org/en-US/docs/Web/API/Popover_API */
@@ -71,7 +99,7 @@ const { class: className, id = randomId(), position = 'right' } = Astro.props;
       /* Note: The popover API creates an implicit anchor association, so we can use anchor() without defining an explicit anchor */
       /* https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Anchor_positioning/Using#implicit_anchor_association */
       
-      top: anchor(bottom, 0.2rem);
+      top: anchor(bottom);
 
       &.is-left {
         left: anchor(left);
@@ -89,14 +117,14 @@ const { class: className, id = randomId(), position = 'right' } = Astro.props;
 
 
   /* Chevron Animation (if present) */
-  .dropdown-wrapper :global(.chevron) {
+  .chevron {
     margin-top: 0.5rem; /* Adjusted for centered vertical alignment */
     transition: transform 0.2s ease;
     transform-origin: 50% 25%;
   }
 
   /* We use the :has selector to check if the popover is open inside the wrapper */
-  .dropdown-wrapper:has(.dropdown-menu:popover-open) :global(.chevron) {
+  .dropdown-wrapper:has(.dropdown-menu:popover-open) .chevron {
     transform: rotate(180deg);
   }
 
@@ -110,7 +138,8 @@ const { class: className, id = randomId(), position = 'right' } = Astro.props;
   }
 
   /* --- Shared Link/Item Styling --- */
-  :global(.dropdown-link) {
+  .dropdown-link,
+  .dropdown-list :global(a) {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -126,9 +155,12 @@ const { class: className, id = randomId(), position = 'right' } = Astro.props;
     cursor: pointer;
   }
 
-  :global(.dropdown-link:hover),
-  :global(.dropdown-link:focus-visible),
-  :global(.dropdown-link.is-active) {
+  .dropdown-link:hover,
+  .dropdown-link:focus-visible,
+  .dropdown-link.is-active,
+  .dropdown-list :global(a:hover),
+  .dropdown-list :global(a:focus-visible),
+  .dropdown-list :global(a.is-active) {
     color: white;
     background-color: rgba(255, 255, 255, 0.1);
   }
@@ -142,5 +174,27 @@ const { class: className, id = randomId(), position = 'right' } = Astro.props;
           gap: 1rem;
           justify-content: center;
       }
+  }
+
+  /* --- Disable dropdown on desktop/tablet --- */
+  @media (min-width: 791px) {
+    .mobile-only .dropdown-trigger {
+      display: none;
+    }
+
+    /* Since we're using a generic component now, we need to be more specific on what to override */
+    .mobile-only .dropdown-menu {
+      display: block !important; /* Always visible: we need to use important because of the popover API */
+      position: static;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+    }
+
+    .mobile-only .dropdown-list {
+      flex-direction: row;
+      gap: 1.5rem;
+    }
   }
 </style>

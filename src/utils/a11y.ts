@@ -50,8 +50,8 @@ export function getAriaCurrentPage(currentPath: string, href: string): "page" | 
 
 /**
  * Generates a random ID to be used for ARIA attributes, for example
- * @returns A random ID string with a 'id-' prefix
+ * @returns A random ID string with a given prefix (default: 'id-')
  */
-export function randomId() {
-  return `id-${Math.random().toString(36).substring(2, 9)}`;
+export function randomId(prefix = "id-") {
+  return `${prefix}${Math.random().toString(36).substring(2, 10)}`;
 }

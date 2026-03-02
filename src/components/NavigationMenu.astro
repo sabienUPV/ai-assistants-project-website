@@ -1,9 +1,6 @@
 ---
-import { Icon } from 'astro-icon/components';
-
-import DropdownBase from './DropdownBase.astro';
+import Dropdown from './Dropdown.astro';
 import { getAriaCurrentPage } from '@utils/a11y';
-import { randomId } from '@utils/a11y';
 
 const { homeLocale: home, t } = Astro.locals;
 
@@ -21,52 +18,17 @@ const menuItems = [
   { href: `${home()}#contact`, label: t('nav_contact') },
   { href: `${home()}#resources`, label: t('nav_resources') },
 ];
-const popoverId = randomId();
 ---
 
-<div class:list={["nav-wrapper", className]}>
-  <DropdownBase {...attributes} id={popoverId} position="left">
-    {/* Mobile Trigger (Hamburger) */}
-    <button 
-      slot="button"
-      class="hamburger-btn" 
-      popovertarget={popoverId}
-      aria-label={t('nav_menu_button_label')}
-    >
-      <Icon name="hamburger" width="32" height="32" aria-hidden="true" />
-    </button>
-
-    {/* Menu Items (Row on Desktop, Dropdown on Mobile) */}
-    <Fragment slot="menu-items">
-      {menuItems.map(item => (
-        <li><a class="dropdown-link" href={item.href} aria-current={getAriaCurrentPage(Astro.url.pathname, item.href)}>{item.label}</a></li>
-      ))}
-    </Fragment>
-  </DropdownBase>
-</div>
-
-<style>
-  /* --- Desktop/Tablet Overrides (Disable dropdown behavior) --- */
-  @media (min-width: 791px) {
-    .nav-wrapper :global(.hamburger-btn) {
-      display: none;
-    }
-
-    /* Since we're using a generic component now, we need to be more specific on what to override */
-    .nav-wrapper :global(.dropdown-menu) {
-      display: block !important; /* Always visible: we need to use important because of the popover API */
-      position: static;
-      background: transparent;
-      border: none;
-      box-shadow: none;
-      padding: 0;
-    }
-
-    .nav-wrapper :global(.dropdown-list) {
-      flex-direction: row;
-      gap: 1.5rem;
-    }
-  }
-
-  /* --- Mobile Overrides are handled by dropdown-selector.css + Header grid positioning --- */
-</style>
+<Dropdown {...attributes}
+  class:list={["navigation-menu", className]}
+  position="left"
+  iconName="hamburger"
+  iconSize={32}
+  includeChevron={false}
+  mobileOnly={true}
+  buttonAriaLabel={t('nav_menu_button_label')}>
+  {menuItems.map(item => (
+      <li><a class="dropdown-link" href={item.href} aria-current={getAriaCurrentPage(Astro.url.pathname, item.href)}>{item.label}</a></li>
+    ))}
+</Dropdown>
