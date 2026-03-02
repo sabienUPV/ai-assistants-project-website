@@ -33,30 +33,32 @@ const dataForAllLocales = locales.reduce((acc, locale) => {
 </Layout>
 
 <script>
-  // Import the shared utility function to strictly enforce DRY (Don't Repeat Yourself) principles
   import { extractLocaleFromPath } from "@utils/localizedUrl";
 
-  // 1. Retrieve the container element that holds our serialized locale data
   const container = document.getElementById("error-container");
   
   if (container && container.dataset.locales) {
-    // 2. Parse the pre-calculated dictionary from the data attribute
     const dataForAllLocales = JSON.parse(container.dataset.locales);
     
-    // 3. Determine the user's intended locale based on the current URL path
-    const currentPath = window.location.pathname;
-    const detectedLocale = extractLocaleFromPath(currentPath);
+    // 1. Get base browser language (e.g., "en" from "en-US") to ensure dictionary matching
+    const browserLang = navigator.language.split('-')[0];
+    
+    // 2. Order of priority: Path locale first, browser locale second. Array is fine here since we will exit early.
+    const userLocales = [extractLocaleFromPath(window.location.pathname), browserLang];
 
-    // 4. If a valid locale is found, dynamically update the DOM elements to match that language
-    if (detectedLocale && dataForAllLocales[detectedLocale]) {
-      const { title, description, backHome, homeLink } = dataForAllLocales[detectedLocale];
+    // 3. Find the first valid locale that isn't the default
+    const targetLocale = userLocales.find(locale => 
+      locale && dataForAllLocales[locale] && locale !== container.dataset.defaultLocale
+    );
+
+    if (targetLocale) {
+      const { title, description, backHome, homeLink } = dataForAllLocales[targetLocale];
       
       const titleElement = document.getElementById("404-title");
       const descriptionElement = document.getElementById("404-description");
       const backHomeElement = document.getElementById("404-back-home") as HTMLAnchorElement | null;
 
-      // Update text content and hrefs immediately to provide a localized error experience
-      if (titleElement && detectedLocale !== container.dataset.defaultLocale && descriptionElement && backHomeElement) {
+      if (titleElement && descriptionElement && backHomeElement) {
         const separator = " - ";
         document.title += separator + title;
         titleElement.textContent += separator + title;
