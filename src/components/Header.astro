@@ -41,8 +41,14 @@ const { homeLocale: home } = Astro.locals;
         /* We define the visual layout here using names */
         grid-template-areas:
             "branding nav locale";
-            
+
+        /* Redefine the text color for the header, using the on-secondary color token */
         --color-text: var(--color-text-on-secondary);
+
+        /* Set color here too so elements that inherit colors get the correct color from the header (such as img) */
+        color: var(--color-text);
+
+        /* Also redefine the subtitle color so it doesn't use the default logo subtitle color, which is too dark for the header */
         --color-subtitle: var(--color-text);
     }
 
