@@ -1,70 +1,105 @@
-/* Tooltip Container */
-.tooltip-container {
-  display: inline-flex; /* Use inline-flex to keep icon and text aligned */
-  align-items: center;
-  gap: 4px; /* Space between icon and text */
-  position: relative;
-  cursor: help;
-  /*border-bottom: 1px dotted #6b7280;*/ /* Gray-500 */
-  border-bottom: 1px dotted var(--color-secondary);
+:root {
+  --tooltip-background-color: #1e293b; /* slate-800 */
 }
 
-.pid-icon {
+/* Tooltip Container */
+.tooltip-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: help;
+  border-bottom: 1px dotted var(--color-secondary);
+
+  /* Define and isolate the anchor to prevent conflicts with other tooltips */
+  anchor-name: --tooltip-container;
+  anchor-scope: --tooltip-container;
+}
+
+.tooltip-icon {
   width: 14px;
   height: 14px; 
   flex-shrink: 0;
-  /* color: #6b7280;*/ /* Gray-500, matches the underline */
   color: var(--color-secondary);
   stroke-width: 3.5;
 }
 
-/* Ensure the text still looks like part of the link */
-.pid-text {
+.tooltip-text {
   display: inline;
   color: var(--color-secondary);
   font-weight: bold;
 }
 
-/* The Popup Box */
+/* The Tooltip Content Box */
 .tooltip-content {
-  display: none;
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-bottom: 8px;
-  width: 12rem; /* 192px / w-48 */
+  position: fixed;
+  position-anchor: --tooltip-container;
+
+  /* Default position: Above the trigger with a gap */
+  bottom: calc(anchor(top) + 12px);
+  justify-self: anchor-center;
+
+  /* flip-inline = Shift horizontally if it hits left/right */
+  position-try-fallbacks: flip-inline;
+
+  visibility: hidden;
+  opacity: 0;
+  width: 12rem;
+  max-width: calc(100vw - 32px); /* Safety margin for mobile screens */
   padding: 8px;
-  background-color: #1e293b; /* Slate-800 */
+  background-color: var(--tooltip-background-color);
   color: #ffffff;
-  font-size: 0.75rem; /* text-xs */
+  font-size: 0.75rem;
   border-radius: 4px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   z-index: 50;
   text-align: left;
+  transition: opacity 0.2s ease;
 }
 
-/* The Arrow */
-.tooltip-arrow {
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%); /* Center the arrow under the tooltip */
-  height: 12px;
-  width: 16px; /* Give it a fixed width so it doesn't vanish */
-  fill: #1e293b; /* Matches slate-800 */
-}
+/* The Tooltip Arrow Wrapper */
+.tooltip-arrow-wrapper {
+  position: fixed;
+  position-anchor: --tooltip-container;
 
-/* Hover State */
-.tooltip-container:hover .tooltip-content {
+  /* Keep the arrow static: always exactly on top of the text */
+  bottom: anchor(top);
+  justify-self: anchor-center;
+
+  /* Use flexbox to align the SVG properly within its wrapper */
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
+
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 51; /* Ensure the arrow is visually above the tooltip box */
 }
-.tooltip-container:hover {
+
+/* The SVG Arrow */
+.tooltip-arrow {
+  width: 16px;
+  height: 12px;
+  fill: var(--tooltip-background-color);
+}
+
+/* Hover & Focus States */
+.tooltip-container:hover .tooltip-content,
+.tooltip-container:hover .tooltip-arrow-wrapper,
+.tooltip-container:focus-within .tooltip-content,
+.tooltip-container:focus-within .tooltip-arrow-wrapper {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltip-container:hover,
+.tooltip-container:focus-within {
   border-bottom: 1px dotted var(--color-link-hover);
 }
-.tooltip-container:hover .pid-text,
-.tooltip-container:hover .pid-icon {
+
+.tooltip-container:hover .tooltip-text,
+.tooltip-container:hover .tooltip-icon,
+.tooltip-container:focus-within .tooltip-text,
+.tooltip-container:focus-within .tooltip-icon {
   color: var(--color-link-hover);
 }

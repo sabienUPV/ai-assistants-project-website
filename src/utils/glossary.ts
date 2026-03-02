@@ -90,15 +90,15 @@ function getGlossaryHtml(term: string, definition: string, punctuation?: string,
   <${containerEl} class="tooltip-container">
     ${glossaryTermIconSvg}
     
-    <${textEl} class="pid-text" tabindex="0" aria-describedby="${tooltipId}">
+    <${textEl} class="tooltip-text" tabindex="0" aria-describedby="${tooltipId}">
       ${term}
     </${textEl}>${punctuation || ''}
     
     <span id="${tooltipId}" role="tooltip" class="tooltip-content">
-      
       <span class="sr-only"> - </span>
-      
       ${definition}
+    </span>
+    <span class="tooltip-arrow-wrapper">
       ${tooltipArrowSvg}
     </span>
   </${containerEl}>
