@@ -4,6 +4,7 @@ import glossaryTermIconSvg from '@assets/icons/glossary-term.svg?raw';
 import tooltipArrowSvg from '@assets/icons/arrow.svg?raw';
 
 import { locales, type Locale } from '@languages';
+import { randomId } from '@utils/a11y';
 
 // Load data once (Astro optimizes this at build time)
 const glossaryEntries = await getCollection('glossary');
@@ -83,7 +84,7 @@ export function getGlossaryHtmlForTermInLocale(locale: Locale, term: string, con
 
 function getGlossaryHtml(term: string, definition: string, punctuation?: string, containerEl = 'span', textEl = 'span'): string {
   // Generate a unique ID for aria-describedby to link the term to its tooltip
-  const tooltipId = `glossary-${generateUniqueId()}`;
+  const tooltipId = randomId('glossary-');
 
   return `
   <${containerEl} class="tooltip-container">
@@ -102,11 +103,4 @@ function getGlossaryHtml(term: string, definition: string, punctuation?: string,
     </span>
   </${containerEl}>
   `;
-}
-
-function generateUniqueId() {
-  // Generate a unique ID safely: use native Web Crypto if available, otherwise fallback to Base36
-  return typeof crypto !== 'undefined' && crypto.randomUUID 
-    ? crypto.randomUUID() 
-    : Math.random().toString(36).substring(2, 11);
 }
