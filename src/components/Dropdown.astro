@@ -1,0 +1,200 @@
+---
+import { Icon } from 'astro-icon/components';
+import { randomId } from "@utils/a11y";
+
+interface Props {
+  class?: string;
+  id?: string;
+  position?: 'left' | 'right';
+  title?: string;
+  iconName?: string;
+  iconSize?: number;
+  iconClass?: string;
+  includeChevron?: boolean;
+  mobileOnly?: boolean;
+  buttonSharesLinkStyle?: boolean;
+  buttonAriaLabel?: string;
+  [key: string]: any;
+}
+
+const {
+  class: className,
+  id = randomId('dropdown-'),
+  position = 'right',
+  title,
+  iconName = 'hamburger',
+  iconSize = 24,
+  iconClass,
+  includeChevron = false,
+  mobileOnly = false,
+  buttonSharesLinkStyle = false,
+  buttonAriaLabel,
+  ...attributes
+  } = Astro.props;
+---
+
+<div class:list={["dropdown-wrapper", mobileOnly && "mobile-only", className]} {...attributes}>
+  <button
+      slot="button"
+      class:list={["dropdown-trigger", buttonSharesLinkStyle && "dropdown-link"]}
+      popovertarget={id}
+      aria-label={buttonAriaLabel}
+      title={title}
+    >
+      <Icon name={iconName} width={iconSize} height={iconSize} class={iconClass} aria-hidden="true" />
+      { title && <span>{title}</span> }
+      {includeChevron && <Icon name="arrow" width="14" height="14" class="chevron" aria-hidden="true" />}
+    </button>
+  <div id={id} popover class:list={["dropdown-menu", `is-${position}`]}>
+    <ul class="dropdown-list">
+      {/* Menu Items (Row on Desktop, Dropdown on Mobile) */}
+      <slot />
+    </ul>
+  </div>
+</div>
+
+<style>
+  /* Shared Dropdown Logic */
+  .dropdown-wrapper {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .dropdown-trigger {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    font-family: inherit;
+  }
+
+  /* Popover API: https://developer.mozilla.org/en-US/docs/Web/API/Popover_API */
+  .dropdown-menu {
+    background-color: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    z-index: 50;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    
+    /* Make sure all content shows properly,
+    while ensuring it doesn't overflow horizontally */
+    width: max-content;
+    max-width: calc(100vw - 2rem);
+
+    flex-direction: column;
+    gap: 0.2rem;
+
+    /* Popover styles */
+    &[popover] {
+      position: absolute;
+      inset: unset; /* We need to do this to override the default popover styles */
+      
+      /* Use anchor positioning to position the popover relative to the button */
+      /* Note: The popover API creates an implicit anchor association, so we can use anchor() without defining an explicit anchor */
+      /* https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Anchor_positioning/Using#implicit_anchor_association */
+      
+      top: anchor(bottom);
+
+      &.is-left {
+        left: anchor(left);
+      }
+
+      &.is-right {
+        right: anchor(right);
+      }
+    }
+  }
+
+  .dropdown-menu:popover-open {
+    display: flex;
+  }
+
+
+  /* Chevron Animation (if present) */
+  .chevron {
+    margin-top: 0.5rem; /* Adjusted for centered vertical alignment */
+    transition: transform 0.2s ease;
+    transform-origin: 50% 25%;
+  }
+
+  /* We use the :has selector to check if the popover is open inside the wrapper */
+  .dropdown-wrapper:has(.dropdown-menu:popover-open) .chevron {
+    transform: rotate(180deg);
+  }
+
+  /* --- Shared List Styling --- */
+  .dropdown-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* --- Shared Link/Item Styling --- */
+  .dropdown-link,
+  .dropdown-list :global(a) {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    color: var(--color-text-on-secondary);
+    text-decoration: none;
+    font-weight: bold;
+    white-space: nowrap;
+    
+    padding: 0.6rem 0.9rem;
+    border-radius: 0.5rem;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    cursor: pointer;
+  }
+
+  .dropdown-link:hover,
+  .dropdown-link:focus-visible,
+  .dropdown-link.is-active,
+  .dropdown-list :global(a:hover),
+  .dropdown-list :global(a:focus-visible),
+  .dropdown-list :global(a.is-active) {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* --- Mobile Landscape: Switch to row layout to save vertical space --- */
+  /* We use 450px to catch most phones in landscape orientation */
+  @media (max-width: 790px) and (max-height: 450px) {
+      .dropdown-list {
+          flex-direction: row;
+          flex-wrap: wrap;
+          gap: 1rem;
+          justify-content: center;
+      }
+  }
+
+  /* --- Disable dropdown on desktop/tablet --- */
+  @media (min-width: 791px) {
+    .mobile-only .dropdown-trigger {
+      display: none;
+    }
+
+    /* Since we're using a generic component now, we need to be more specific on what to override */
+    .mobile-only .dropdown-menu {
+      display: block !important; /* Always visible: we need to use important because of the popover API */
+      position: static;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+    }
+
+    .mobile-only .dropdown-list {
+      flex-direction: row;
+      gap: 1.5rem;
+    }
+  }
+</style>

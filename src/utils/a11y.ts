@@ -47,3 +47,11 @@ export function getAriaCurrentPage(currentPath: string, href: string): "page" | 
   // 5. If the base paths match exactly, it is the current page
   return normalizedPath === normalizedBaseHref ? "page" : undefined;
 }
+
+/**
+ * Generates a random ID to be used for ARIA attributes, for example
+ * @returns A random ID string with a given prefix (default: 'id-')
+ */
+export function randomId(prefix = "id-") {
+  return `${prefix}${Math.random().toString(36).substring(2, 10)}`;
+}
