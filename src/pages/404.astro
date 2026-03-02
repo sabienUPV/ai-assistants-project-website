@@ -1,6 +1,5 @@
 ---
 import Layout from "@layouts/Layout.astro";
-import { homeNoLocale } from "@utils/url";
 import { tForLocale } from "@utils/translation";
 import { locales, defaultLocale } from "@languages";
 import { getRelativeLocaleUrl } from "astro:i18n";
@@ -25,7 +24,7 @@ const dataForAllLocales = locales.reduce((acc, locale) => {
       <h2 id="404-title">{tForLocale(defaultLocale, "404_title")}</h2>
       <p id="404-description">{tForLocale(defaultLocale, "404_description")}</p>
       
-      <a id="404-back-home" href={homeNoLocale()} class="back-button">
+      <a id="404-back-home" href={getRelativeLocaleUrl(defaultLocale)} class="back-button">
         {tForLocale(defaultLocale, "404_back_home")}
       </a>
     </div>
