@@ -22,6 +22,9 @@
   /* Additional colors */
   --color-dark-blue: #15434d;
   --color-semi-transparent-white: #FFFFFFAA;
+
+  /* Other properties */
+  --default-line-height: 1.8;
 }
 html {
   background-color: var(--color-background);
@@ -45,7 +48,7 @@ body {
   /* Accessibility boost: 14px size (set with rem for better accessibility for people that need larger font sizes), readable line height and no text justification */
   /* (as defined in "lectura fácil" standards) */
   font-size: 0.875rem; /* 14px */
-  line-height: 1.8; /* Lectura fácil recommends 1.5, but I think it's based on Microsoft Word's way of calculating line height which is different from how browsers do it. In my tests, 1.8 seems to provide a similar amount of spacing between lines as Word's 1.5, while 1.5 looks too cramped in the browser.) */
+  line-height: var(--default-line-height); /* Lectura fácil recommends 1.5, but I think it's based on Microsoft Word's way of calculating line height which is different from how browsers do it. In my tests, 1.8 seems to provide a similar amount of spacing between lines as Word's 1.5, while 1.5 looks too cramped in the browser.) */
   text-align: left;
   overflow-x: hidden; /* Prevent horizontal scrollbars from minor overflows */
 }

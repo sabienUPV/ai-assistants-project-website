@@ -1,5 +1,7 @@
 :root {
   --tooltip-background-color: #1e293b; /* slate-800 */
+  --tooltip-arrow-width: 16px;
+  --tooltip-arrow-height: 12px;
 }
 
 /* Tooltip Container */
@@ -34,8 +36,8 @@
   position: fixed;
   position-anchor: --tooltip-container;
 
-  /* Default position: Above the trigger with a gap */
-  bottom: calc(anchor(top) + 12px);
+  /* Default position: Above the trigger */
+  bottom: anchor(top);
   justify-self: anchor-center;
 
   /* flip-inline = Shift horizontally if it hits left/right */
@@ -49,6 +51,8 @@
   background-color: var(--tooltip-background-color);
   color: #ffffff;
   font-size: 0.75rem;
+  font-weight: normal;
+  line-height: var(--default-line-height, 1.8);
   border-radius: 4px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   z-index: 50;
@@ -61,8 +65,8 @@
   position: fixed;
   position-anchor: --tooltip-container;
 
-  /* Keep the arrow static: always exactly on top of the text */
-  bottom: anchor(top);
+  /* Keep the arrow static: always exactly on top of the text (offsetting by the arrow height so it shows up) */
+  bottom: calc(anchor(top) - var(--tooltip-arrow-height));
   justify-self: anchor-center;
 
   /* Use flexbox to align the SVG properly within its wrapper */
@@ -78,8 +82,8 @@
 
 /* The SVG Arrow */
 .tooltip-arrow {
-  width: 16px;
-  height: 12px;
+  width: var(--tooltip-arrow-width);
+  height: var(--tooltip-arrow-height);
   fill: var(--tooltip-background-color);
 }
 
