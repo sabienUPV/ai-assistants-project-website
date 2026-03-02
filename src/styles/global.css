@@ -71,11 +71,13 @@ main {
   }
 }
 
-/* In titles, it looks better with less line height than the 1.8 we use by default */
+/* In titles, it looks better with less line height than the 1.2 we use by default */
+/* but add padding-block so that the vertical space they occupy is similar to texts with the default line height, so spacing between tooltips and their texts is consistent */
 h1, h2, h3 {
   line-height: 1.2;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+  margin-top: 1.8rem;
+  margin-bottom: 0.8rem;
+  padding-block: 0.2rem;
 }
 h1, h2 {
   text-align: center;
