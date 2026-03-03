@@ -1,11 +1,19 @@
 ---
 import { Image } from 'astro:assets';
+import { defaultLocale } from '@languages';
 
 const { t, locale } = Astro.locals;
 
 // Get the logo from the current locale (the file starts with the locale code in uppercase, e.g. "EN_")
 // (Note: our "locale" from Astro.locals already falls back to the default locale)
-const euLogo = (await import(`../assets/images/eu/${locale.toUpperCase()}_Co-fundedbytheEU_RGB_NEG.svg`)).default;
+const importEuLogo = async (locale: string) => (await import(`../assets/images/eu/${locale.toUpperCase()}_Co-fundedbytheEU_RGB_NEG.svg`)).default;
+let euLogo;
+try {
+  euLogo = await importEuLogo(locale);
+} catch (error) {
+  console.error(`Error loading EU logo for locale "${locale}", falling back to default locale "${defaultLocale}"`, error);
+  euLogo = await importEuLogo(defaultLocale);
+}
 
 interface Props {
   showDisclaimer?: boolean;
