@@ -43,7 +43,7 @@ try {
         // Convert to CSV
         // 'FS' is the Field Separator. We force it to a comma.
         // It automatically handles wrapping inner commas with double quotes!
-        const csvContent = XLSX.utils.sheet_to_csv(worksheet, { FS: ',' });
+        const csvContent = XLSX.utils.sheet_to_csv(worksheet, { FS: ',', blankrows: false });
         
         // 4. Save the file
         // Note: You might want to sanitize the sheetName here if it has weird characters
