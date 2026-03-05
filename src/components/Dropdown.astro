@@ -243,3 +243,17 @@ const {
     }
   }
 </style>
+
+<script>
+  // Close mobile-only popovers when resizing to desktop.
+  // This prevents the element from staying in the "top layer" (fixed at 0,0)
+  // when CSS tries to render it statically in the document flow.
+  const mediaQuery = window.matchMedia('(min-width: 791px)');
+  
+  mediaQuery.addEventListener('change', (e) => {
+    if (e.matches) {
+      document.querySelectorAll<HTMLElement>('.mobile-only .dropdown-menu:popover-open')
+        .forEach((el) => el.hidePopover());
+    }
+  });
+</script>
