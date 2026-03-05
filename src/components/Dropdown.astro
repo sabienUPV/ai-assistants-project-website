@@ -212,7 +212,7 @@ const {
 
   /* --- Mobile Landscape: Switch to row layout to save vertical space --- */
   /* We use 450px to catch most phones in landscape orientation */
-  @media (max-width: 790px) and (max-height: 450px) {
+  @media (max-width: 850px) and (max-height: 450px) {
       .dropdown-list {
           flex-direction: row;
           flex-wrap: wrap;
@@ -222,7 +222,7 @@ const {
   }
 
   /* --- Disable dropdown on desktop/tablet --- */
-  @media (min-width: 791px) {
+  @media (min-width: 850px) {
     .mobile-only.dropdown-wrapper:not(:has(.dropdown-menu:popover-open)) .dropdown-trigger {
       display: none;
     }
@@ -235,6 +235,8 @@ const {
       border: none;
       box-shadow: none;
       padding: 0;
+      width: auto;
+      max-width: 100%;
     }
 
     .mobile-only .dropdown-menu:not(:popover-open) .dropdown-list {
@@ -248,7 +250,7 @@ const {
   // Close mobile-only popovers when resizing to desktop.
   // This prevents the element from staying in the "top layer" (fixed at 0,0)
   // when CSS tries to render it statically in the document flow.
-  const mediaQuery = window.matchMedia('(min-width: 791px)');
+  const mediaQuery = window.matchMedia('(min-width: 850px)');
   
   mediaQuery.addEventListener('change', (e) => {
     if (e.matches) {
