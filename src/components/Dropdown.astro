@@ -223,12 +223,12 @@ const {
 
   /* --- Disable dropdown on desktop/tablet --- */
   @media (min-width: 791px) {
-    .mobile-only .dropdown-trigger {
+    .mobile-only.dropdown-wrapper:not(:has(.dropdown-menu:popover-open)) .dropdown-trigger {
       display: none;
     }
 
     /* Since we're using a generic component now, we need to be more specific on what to override */
-    .mobile-only .dropdown-menu {
+    .mobile-only .dropdown-menu:not(:popover-open) {
       display: block !important; /* Always visible: we need to use important because of the popover API */
       position: static;
       background: transparent;
@@ -237,7 +237,7 @@ const {
       padding: 0;
     }
 
-    .mobile-only .dropdown-list {
+    .mobile-only .dropdown-menu:not(:popover-open) .dropdown-list {
       flex-direction: row;
       gap: 1.5rem;
     }
