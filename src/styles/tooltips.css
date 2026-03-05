@@ -61,19 +61,19 @@
   transition: opacity 0.2s ease;
 }
 
-/* The Tooltip Arrow Wrapper */
-.tooltip-arrow-wrapper {
+/* The Tooltip Arrow */
+/* (.arrow-down is defined in "global.css" as a reusable CSS shape) */
+.tooltip-container .arrow-down {
   position: fixed;
   position-anchor: --tooltip-container;
 
   /* Keep the arrow static: always exactly on top of the text (offsetting by the arrow height so it shows up) */
-  bottom: calc(anchor(top) - var(--tooltip-arrow-height) + var(--tooltip-gap));
+  bottom: calc(anchor(top) - var(--tooltip-arrow-height) + var(--tooltip-gap) + 2px); /* Extra 2px to slightly overlap the tooltip box and hide any gap between them */
   justify-self: anchor-center;
 
-  /* Use flexbox to align the SVG properly within its wrapper */
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  width: var(--tooltip-arrow-width);
+  height: var(--tooltip-arrow-height);
+  background-color: var(--tooltip-background-color);
 
   visibility: hidden;
   opacity: 0;
@@ -81,18 +81,11 @@
   z-index: 51; /* Ensure the arrow is visually above the tooltip box */
 }
 
-/* The SVG Arrow */
-.tooltip-arrow {
-  width: var(--tooltip-arrow-width);
-  height: var(--tooltip-arrow-height);
-  fill: var(--tooltip-background-color);
-}
-
 /* Hover & Focus States */
 .tooltip-container:hover .tooltip-content,
-.tooltip-container:hover .tooltip-arrow-wrapper,
+.tooltip-container:hover .arrow-down,
 .tooltip-container:focus-within .tooltip-content,
-.tooltip-container:focus-within .tooltip-arrow-wrapper {
+.tooltip-container:focus-within .arrow-down {
   visibility: visible;
   opacity: 1;
 }

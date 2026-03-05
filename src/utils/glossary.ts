@@ -1,7 +1,6 @@
 import { getCollection } from 'astro:content';
 
 import glossaryTermIconSvg from '@assets/icons/glossary-term.svg?raw';
-import tooltipArrowSvg from '@assets/icons/arrow.svg?raw';
 
 import { locales, type Locale } from '@languages';
 import { randomId } from '@utils/a11y';
@@ -98,9 +97,7 @@ function getGlossaryHtml(term: string, definition: string, punctuation?: string,
       <span class="sr-only"> - </span>
       ${definition}
     </span>
-    <span class="tooltip-arrow-wrapper">
-      ${tooltipArrowSvg}
-    </span>
+    <span class="arrow-down" aria-hidden="true"></span>
   </${containerEl}>
   `;
 }

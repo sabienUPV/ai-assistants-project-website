@@ -104,3 +104,11 @@ h3 { font-size: 1rem; }
   border: 0;
   user-select: none; /* Prevent selection of the hidden element */
 }
+
+/* CSS styled shapes */
+.arrow-down {
+  width: 12px;
+  height: 8px;
+  background-color: var(--color-text);
+  clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+}

@@ -43,7 +43,7 @@ const {
     >
       <Icon name={iconName} width={iconSize} height={iconSize} class={iconClass} aria-hidden="true" />
       { title && <span>{title}</span> }
-      {includeChevron && <Icon name="arrow" width="14" height="14" class="chevron" aria-hidden="true" />}
+      {includeChevron && <span class:list={["arrow-down", "chevron"]} aria-hidden="true"></span>}
     </button>
   <div id={id} popover class:list={["dropdown-menu", `is-${position}`]}>
     <ul class="dropdown-list">
@@ -118,9 +118,10 @@ const {
 
   /* Chevron Animation (if present) */
   .chevron {
-    margin-top: 0.5rem; /* Adjusted for centered vertical alignment */
+    background-color: var(--color-text-on-secondary); /* Override the default color of the CSS arrow */
+    margin-top: 0.25rem; /* Adjusted for centered vertical alignment */
     transition: transform 0.2s ease;
-    transform-origin: 50% 25%;
+    transform-origin: center center;
   }
 
   /* We use the :has selector to check if the popover is open inside the wrapper */
