@@ -7,9 +7,11 @@ interface Props {
   id?: string;
   position?: 'left' | 'right';
   title?: string;
-  iconName?: string;
+  iconName: string;
   iconSize?: number;
   iconClass?: string;
+  iconOpenName?: string; // Optional separate icon for the open state (e.g., a close "X" icon)
+  iconOpenClass?: string; // Optional class for the open state icon
   includeChevron?: boolean;
   mobileOnly?: boolean;
   buttonSharesLinkStyle?: boolean;
@@ -22,9 +24,11 @@ const {
   id = randomId('dropdown-'),
   position = 'right',
   title,
-  iconName = 'hamburger',
+  iconName,
+  iconOpenName,
   iconSize = 24,
   iconClass,
+  iconOpenClass,
   includeChevron = false,
   mobileOnly = false,
   buttonSharesLinkStyle = false,
@@ -41,7 +45,10 @@ const {
       aria-label={buttonAriaLabel}
       title={title}
     >
-      <Icon name={iconName} width={iconSize} height={iconSize} class={iconClass} aria-hidden="true" />
+      <span class="icon-wrapper" style={`width: ${iconSize}px; height: ${iconSize}px`}>
+        <Icon name={iconName} width={iconSize} height={iconSize} class:list={["dropdown-icon", "dropdown-icon-closed", iconClass]} aria-hidden="true" />
+        { iconOpenName && <Icon name={iconOpenName} width={iconSize} height={iconSize} class:list={["dropdown-icon", "dropdown-icon-open", iconOpenClass]} aria-hidden="true" /> }
+      </span>
       { title && <span>{title}</span> }
       {includeChevron && <span class:list={["arrow-down", "chevron"]} aria-hidden="true"></span>}
     </button>
@@ -127,6 +134,33 @@ const {
   /* We use the :has selector to check if the popover is open inside the wrapper */
   .dropdown-wrapper:has(.dropdown-menu:popover-open) .chevron {
     transform: rotate(180deg);
+  }
+
+  /* Icon animation between open/close states */
+  .icon-wrapper {
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+
+  .dropdown-icon {
+    grid-area: 1 / 1;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .dropdown-icon-open {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.5);
+  }
+
+  .dropdown-wrapper:has(.dropdown-icon-open):has(.dropdown-menu:popover-open) .dropdown-icon-closed {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.5);
+  }
+
+  .dropdown-wrapper:has(.dropdown-menu:popover-open) .dropdown-icon-open {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
   }
 
   /* --- Shared List Styling --- */
