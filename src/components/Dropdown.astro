@@ -127,13 +127,18 @@ const {
   .chevron {
     background-color: var(--color-text-on-secondary); /* Override the default color of the CSS arrow */
     margin-top: 0.2rem; /* Adjusted for centered vertical alignment */
-    transition: transform 0.2s ease;
     transform-origin: center center;
   }
 
   /* We use the :has selector to check if the popover is open inside the wrapper */
   .dropdown-wrapper:has(.dropdown-menu:popover-open) .chevron {
     transform: rotate(180deg);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .chevron {
+      transition: transform 0.2s ease;
+    }
   }
 
   /* Icon animation between open/close states */
@@ -145,7 +150,6 @@ const {
 
   .dropdown-icon {
     grid-area: 1 / 1;
-    transition: transform 0.3s ease, opacity 0.3s ease;
   }
 
   .dropdown-icon-open {
@@ -161,6 +165,12 @@ const {
   .dropdown-wrapper:has(.dropdown-menu:popover-open) .dropdown-icon-open {
     opacity: 1;
     transform: rotate(0deg) scale(1);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .dropdown-icon {
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
   }
 
   /* --- Shared List Styling --- */
