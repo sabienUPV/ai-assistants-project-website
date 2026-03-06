@@ -2,11 +2,10 @@ import { baseUrlPath } from '@utils/url';
 import { locales } from '@languages';
 import { getRelativeLocaleUrl } from "astro:i18n";
 
-export type HomeHelper = (path?: Parameters<typeof getRelativeLocaleUrl>[1], options?: Parameters<typeof getRelativeLocaleUrl>[2]) => ReturnType<typeof getRelativeLocaleUrl>;
-
-export function getHomeHelperFn(locale: string): HomeHelper {
-  return (path, options) => getRelativeLocaleUrl(locale, path, options);
+export function getHomeHelperFn(locale: string) {
+  return (path: Parameters<typeof getRelativeLocaleUrl>[1], options: Parameters<typeof getRelativeLocaleUrl>[2]) => getRelativeLocaleUrl(locale, path, options);
 }
+export type HomeHelper = ReturnType<typeof getHomeHelperFn>;
 
 /**
  * Extracts the "clean" path, removing the base_url and the current locale.

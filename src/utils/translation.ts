@@ -21,10 +21,10 @@ const i18nMap = i18nEntries.reduce((acc, entry) => {
   return acc;
 }, {} as Record<Locale, Record<string, string>>);
 
-export type TranslationHelper = (key: string, htmlWithGlossaries?: boolean, ...args: Parameters<typeof formatString>[1][]) => string;
-export function getTranslationHelperFn(locale: Locale) : TranslationHelper {
+export function getTranslationHelperFn(locale: Locale) {
   return (key: string, htmlWithGlossaries: boolean = false, ...args: Parameters<typeof formatString>[1][]) => tForLocale(locale, key, htmlWithGlossaries, ...args);
 }
+export type TranslationHelper = ReturnType<typeof getTranslationHelperFn>;
 
 export function tForLocale(locale: Locale, key: string, htmlWithGlossaries: boolean = false, ...args: Parameters<typeof formatString>[1][]) : string {
   const translations = i18nMap[locale];

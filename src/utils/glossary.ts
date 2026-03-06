@@ -64,10 +64,11 @@ export function injectGlossariesHtml(locale: Locale, text: string): string {
   return text;
 }
 
-export type GlossaryHelper = ReturnType<typeof getGlossaryHtmlForTermFn>;
 export function getGlossaryHtmlForTermFn(locale: Locale) {
   return (term: string, containerEl = 'span', textEl = 'span') => getGlossaryHtmlForTermInLocale(locale, term, containerEl, textEl);
 }
+export type GlossaryHelper = ReturnType<typeof getGlossaryHtmlForTermFn>;
+
 export function getGlossaryHtmlForTermInLocale(locale: Locale, term: string, containerEl = 'span', textEl = 'span'): string | null {
   // Get all terms for this language
   const terms = glossaryTermsByLanguage[locale];
