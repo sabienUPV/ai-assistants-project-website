@@ -5,6 +5,12 @@ import LocaleSelector from './LocaleSelector.astro';
 import NavigationMenu from './NavigationMenu.astro';
 
 const { homeLocale: home } = Astro.locals;
+
+interface Props {
+	includeLocaleSelector?: boolean;
+}
+
+const { includeLocaleSelector = true } = Astro.props;
 ---
 
 <header>
@@ -19,9 +25,11 @@ const { homeLocale: home } = Astro.locals;
 
     <NavigationMenu class="nav-wrapper" />
 
+    { includeLocaleSelector && (
     <div class="locale">
         <LocaleSelector class="locale-selector" />
     </div>
+    )}
 </header>
 
 <style>
