@@ -3,7 +3,7 @@ import { locales } from '@languages';
 import { getRelativeLocaleUrl } from "astro:i18n";
 
 export function getHomeHelperFn(locale: string) {
-  return (path: Parameters<typeof getRelativeLocaleUrl>[1], options: Parameters<typeof getRelativeLocaleUrl>[2]) => getRelativeLocaleUrl(locale, path, options);
+  return (path?: Parameters<typeof getRelativeLocaleUrl>[1], options?: Parameters<typeof getRelativeLocaleUrl>[2]) => getRelativeLocaleUrl(locale, path, options);
 }
 export type HomeHelper = ReturnType<typeof getHomeHelperFn>;
 
