@@ -34,7 +34,7 @@
 
 /* The Tooltip Content Box */
 .tooltip-content {
-  position: absolute;
+  position: fixed;
   position-anchor: --tooltip-container;
 
   /* Default position: Above the trigger with a gap */
@@ -43,15 +43,12 @@
 
   /* flip-inline = Shift horizontally if it hits left/right */
   position-try-fallbacks: flip-inline;
-  position-try-order: normal;
 
   visibility: hidden;
   opacity: 0;
-  width: max-content;
-  max-width: min(12rem, calc(100vw - 32px)); /* Force to wrap at reasonable size + Safety margin for mobile screens */
-  padding-block: 8px;
-  padding-inline-start: 8px;
-  padding-inline-end: 10px;
+  width: 12rem;
+  max-width: calc(100vw - 32px); /* Safety margin for mobile screens */
+  padding: 8px;
   background-color: var(--tooltip-background-color);
   color: #ffffff;
   font-size: 0.75rem;
@@ -67,7 +64,7 @@
 /* The Tooltip Arrow */
 /* (.arrow-down is defined in "global.css" as a reusable CSS shape) */
 .tooltip-container .arrow-down {
-  position: absolute;
+  position: fixed;
   position-anchor: --tooltip-container;
 
   /* Keep the arrow static: always exactly on top of the text (offsetting by the arrow height so it shows up) */
@@ -82,14 +79,6 @@
   opacity: 0;
   transition: opacity 0.2s ease;
   z-index: 51; /* Ensure the arrow is visually above the tooltip box */
-}
-
-.css-anchor-positioning-polyfill .tooltip-content,
-.css-anchor-positioning-polyfill .arrow-down {
-  /* The polyfill doesn't support the "justify-self: anchor-center" property, so we need to center the tooltip around the anchor manually */
-  left: anchor(left);
-  right: anchor(right);
-  justify-self: center;
 }
 
 /* Hover & Focus States */

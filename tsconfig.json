@@ -10,7 +10,6 @@
       "@layouts/*": ["src/layouts/*"],
       "@pages/*": ["src/pages/*"],
       "@styles/*": ["src/styles/*"],
-      "@scripts/*": ["src/scripts/*"],
       "@utils/*": ["src/utils/*"],
       "@languages": ["src/languages.ts"],
       "@constants": ["src/constants.ts"]
