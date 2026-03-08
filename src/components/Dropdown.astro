@@ -82,6 +82,10 @@ const {
 
   /* Popover API: https://developer.mozilla.org/en-US/docs/Web/API/Popover_API */
   .dropdown-menu {
+    /* Hidden by default, shown when popover is open */
+    /* This is redundant with popover API, BUT helps the polyfill keep menus hidden before polyfill CSS loads, preventing a flash of unstyled content (FOUC) */
+    display: none;
+
     background-color: #1a1a1a;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 0.5rem;
