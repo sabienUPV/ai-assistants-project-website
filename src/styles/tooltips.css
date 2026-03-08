@@ -46,9 +46,11 @@
 
   visibility: hidden;
   opacity: 0;
-  width: 12rem;
-  max-width: calc(100vw - 32px); /* Safety margin for mobile screens */
-  padding: 8px;
+  width: max-content;
+  max-width: min(12rem, calc(100vw - 32px)); /* Force to wrap at reasonable size + Safety margin for mobile screens */
+  padding-block: 8px;
+  padding-inline-start: 8px;
+  padding-inline-end: 10px;
   background-color: var(--tooltip-background-color);
   color: #ffffff;
   font-size: 0.75rem;
