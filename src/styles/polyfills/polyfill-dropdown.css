@@ -1,0 +1,64 @@
+/* Polyfill styles for dropdowns in browsers that don't support CSS anchor positioning */
+
+/* Hide the menu by default and position it absolutely */
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  margin-top: 0.25rem;
+}
+
+.dropdown-menu.is-left {
+  left: 0;
+}
+
+.dropdown-menu.is-right {
+  right: 0;
+}
+
+/* Show the menu when the wrapper has the .is-open class */
+.dropdown-wrapper.is-open .dropdown-menu {
+  display: flex;
+}
+
+/*
+  Since :has() is not supported in many older browsers,
+  we use the .is-open class for animations.
+*/
+.dropdown-wrapper.is-open .chevron {
+  transform: rotate(180deg);
+}
+
+/* Since icon animations are only meant when both open and closed icons are present, we check for an .animate-icon class that the JS polyfill can add when it detects both icons. This way we avoid weird animations if only one icon is present. */
+.dropdown-wrapper.animate-icon.is-open .dropdown-icon-closed {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.5);
+}
+
+.dropdown-wrapper.animate-icon.is-open .dropdown-icon-open {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+/* Replicate mobile-only styles for desktop in fallback */
+@media (min-width: 850px) {
+  .mobile-only.dropdown-wrapper:not(.is-open) .dropdown-trigger {
+    display: none;
+  }
+
+  .mobile-only .dropdown-menu {
+    display: block !important;
+    position: static;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    width: auto;
+    max-width: 100%;
+  }
+
+  .mobile-only .dropdown-menu .dropdown-list {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+}

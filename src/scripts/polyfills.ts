@@ -2,7 +2,11 @@
  * Polyfill for dropdowns that don't support CSS anchor positioning.
  * Instead of relying on the popover API, we use JavaScript to toggle the visibility of the dropdown menu and manage ARIA attributes for accessibility.
  */
-export function dropdownPolyfill(mediaQuery?: MediaQueryList) {
+export async function dropdownPolyfill(mediaQuery?: MediaQueryList) {
+  // Dynamically load the CSS for the dropdown polyfill. This way we only load it when necessary, avoiding unnecessary CSS for modern browsers.
+  await import('@styles/polyfills/polyfill-dropdown.css');
+
+  // Setup dropdowns on the page
   document.querySelectorAll('.dropdown-wrapper').forEach(wrapper => {
     const trigger = wrapper.querySelector<HTMLButtonElement>('.dropdown-trigger');
     const menu = wrapper.querySelector<HTMLDivElement>('.dropdown-menu');
