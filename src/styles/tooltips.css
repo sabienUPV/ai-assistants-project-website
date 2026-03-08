@@ -34,7 +34,7 @@
 
 /* The Tooltip Content Box */
 .tooltip-content {
-  position: fixed;
+  position: absolute;
   position-anchor: --tooltip-container;
 
   /* Default position: Above the trigger with a gap */
@@ -64,7 +64,7 @@
 /* The Tooltip Arrow */
 /* (.arrow-down is defined in "global.css" as a reusable CSS shape) */
 .tooltip-container .arrow-down {
-  position: fixed;
+  position: absolute;
   position-anchor: --tooltip-container;
 
   /* Keep the arrow static: always exactly on top of the text (offsetting by the arrow height so it shows up) */
