@@ -1,5 +1,5 @@
 export function supportsCssAnchorPositioning() : boolean {
-  return false;//window.CSS && CSS.supports && CSS.supports('top', 'anchor(bottom)');
+  return window.CSS && CSS.supports && CSS.supports('top', 'anchor(bottom)');
 }
 
 export const needsDropdownPolyfill : () => boolean = () => !supportsCssAnchorPositioning();
