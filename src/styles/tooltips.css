@@ -32,25 +32,21 @@
   font-weight: bold;
 }
 
-/* The Tooltip Content Box */
+/* The Tooltip Content Box (DEFAULT: Mobile + No Anchor Support) */
 .tooltip-content {
-  position: absolute;
-  position-anchor: --tooltip-container;
-
-  /* Default position: Above the trigger with a gap */
-  bottom: calc(anchor(top) + var(--tooltip-gap));
-  justify-self: anchor-center;
-
-  /* flip-inline = Shift horizontally if it hits left/right */
-  position-try-fallbacks: flip-inline;
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
 
   visibility: hidden;
   opacity: 0;
+
   width: max-content;
-  max-width: min(12rem, calc(100vw - 32px)); /* Force to wrap at reasonable size + Safety margin for mobile screens */
+  max-width: 70vw; /* Because it's fixed on the bottom left of the screen, we can use more space, but make sure it doesn't overflow and it doesn't cover the BackToTop button on the bottom right */
   padding-block: 8px;
   padding-inline-start: 8px;
   padding-inline-end: 10px;
+  
   background-color: var(--tooltip-background-color);
   color: #ffffff;
   font-size: 0.75rem;
@@ -63,38 +59,22 @@
   transition: opacity 0.2s ease;
 }
 
-/* The Tooltip Arrow */
+/* The Tooltip Arrow (Hidden by default) */
 /* (.arrow-down is defined in "global.css" as a reusable CSS shape) */
 .tooltip-container .arrow-down {
-  position: absolute;
-  position-anchor: --tooltip-container;
-
-  /* Keep the arrow static: always exactly on top of the text (offsetting by the arrow height so it shows up) */
-  bottom: calc(anchor(top) - var(--tooltip-arrow-height) + var(--tooltip-gap) + 2px); /* Extra 2px to slightly overlap the tooltip box and hide any gap between them */
-  justify-self: anchor-center;
-
-  width: var(--tooltip-arrow-width);
-  height: var(--tooltip-arrow-height);
-  background-color: var(--tooltip-background-color);
-
   visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  z-index: 51; /* Ensure the arrow is visually above the tooltip box */
 }
 
 /* Hover & Focus States */
 .tooltip-container:hover .tooltip-content,
-.tooltip-container:hover .arrow-down,
-.tooltip-container:focus-within .tooltip-content,
-.tooltip-container:focus-within .arrow-down {
+.tooltip-container:focus-within .tooltip-content {
   visibility: visible;
   opacity: 1;
 }
 
 .tooltip-container:hover,
 .tooltip-container:focus-within {
-  border-bottom: 1px dotted var(--color-link-hover);
+  border-bottom: 3px solid var(--color-link-hover);
 }
 
 .tooltip-container:hover .tooltip-text,
@@ -102,4 +82,51 @@
 .tooltip-container:focus-within .tooltip-text,
 .tooltip-container:focus-within .tooltip-icon {
   color: var(--color-link-hover);
+}
+
+/* ENHANCEMENT: Desktop + Anchor Positioning Support */
+@supports (anchor-name: --tooltip-container) {
+  @media (min-width: 1024px) {
+    /* The Tooltip Content Box */
+    .tooltip-content {
+      position: absolute;
+      position-anchor: --tooltip-container;
+      inset: auto; /* Reset fixed positioning */
+
+      /* Default position: Above the trigger with a gap */
+      bottom: calc(anchor(top) + var(--tooltip-gap));
+      justify-self: anchor-center;
+
+      /* flip-inline = Shift horizontally if it hits left/right */
+      position-try-fallbacks: flip-inline;
+
+      max-width: min(12rem, calc(80vw - 32px)); /* Force to wrap at reasonable size (tooltips on top of text should not be very wide) + Safety margin for mobile screens */
+    }
+
+    /* The Tooltip Arrow */
+    .tooltip-container .arrow-down {
+      position: absolute;
+      position-anchor: --tooltip-container;
+
+      /* Keep the arrow static: always exactly on top of the text (offsetting by the arrow height so it shows up) */
+      bottom: calc(anchor(top) - var(--tooltip-arrow-height) + var(--tooltip-gap) + 2px); /* Extra 2px to slightly overlap the tooltip box and hide any gap between them */
+      justify-self: anchor-center;
+
+      width: var(--tooltip-arrow-width);
+      height: var(--tooltip-arrow-height);
+      background-color: var(--tooltip-background-color);
+
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 51; /* Ensure the arrow is visually above the tooltip box */
+    }
+
+    /* Hover & Focus States (for the arrow, for the content it's already defined in the default state) */
+    .tooltip-container:hover .arrow-down,
+    .tooltip-container:focus-within .arrow-down {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
 }
