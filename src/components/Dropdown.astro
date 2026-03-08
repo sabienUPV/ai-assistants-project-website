@@ -118,7 +118,7 @@ const {
     }
   }
 
-  .dropdown-menu:popover-open {
+  :is(.dropdown-menu:popover-open, .dropdown-menu.\:popover-open) {
     display: flex;
   }
 
@@ -131,7 +131,7 @@ const {
   }
 
   /* We use the :has selector to check if the popover is open inside the wrapper */
-  .dropdown-wrapper:has(.dropdown-menu:popover-open) .chevron {
+  .dropdown-wrapper:has(:is(.dropdown-menu:popover-open, .dropdown-menu.\:popover-open)) .chevron {
     transform: rotate(180deg);
   }
 
@@ -157,12 +157,12 @@ const {
     transform: rotate(-90deg) scale(0.5);
   }
 
-  .dropdown-wrapper:has(.dropdown-icon-open):has(.dropdown-menu:popover-open) .dropdown-icon-closed {
+  .dropdown-wrapper:has(.dropdown-icon-open):has(:is(.dropdown-menu:popover-open, .dropdown-menu.\:popover-open)) .dropdown-icon-closed {
     opacity: 0;
     transform: rotate(90deg) scale(0.5);
   }
 
-  .dropdown-wrapper:has(.dropdown-menu:popover-open) .dropdown-icon-open {
+  .dropdown-wrapper:has(:is(.dropdown-menu:popover-open, .dropdown-menu.\:popover-open)) .dropdown-icon-open {
     opacity: 1;
     transform: rotate(0deg) scale(1);
   }
@@ -223,7 +223,7 @@ const {
 
   /* --- Disable dropdown on desktop/tablet --- */
   @media (min-width: 850px) {
-    .mobile-only.dropdown-wrapper:not(:has(.dropdown-menu:popover-open)) .dropdown-trigger {
+    .mobile-only.dropdown-wrapper:not(:has(:is(.dropdown-menu:popover-open, .dropdown-menu.\:popover-open))) .dropdown-trigger {
       display: none;
     }
 
@@ -247,6 +247,12 @@ const {
 </style>
 
 <script>
+  import { loadPopoverPolyfill } from "@scripts/polyfills";
+  // Load the popover polyfill for older browser versions that don't support it
+  loadPopoverPolyfill();
+</script>
+
+<script>
   // Close mobile-only popovers when resizing to desktop.
   // This prevents the element from staying in the "top layer" (fixed at 0,0)
   // when CSS tries to render it statically in the document flow.
@@ -254,7 +260,7 @@ const {
   
   mediaQuery.addEventListener('change', (e) => {
     if (e.matches) {
-      document.querySelectorAll<HTMLElement>('.mobile-only .dropdown-menu:popover-open')
+      document.querySelectorAll<HTMLElement>('.mobile-only :is(.dropdown-menu:popover-open, .dropdown-menu.\:popover-open)')
         .forEach((el) => el.hidePopover());
     }
   });

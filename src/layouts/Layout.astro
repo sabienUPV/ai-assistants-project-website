@@ -77,3 +77,13 @@ const { title, includeLocaleSelector = true } = Astro.props;
 		<BackToTopButton />
 	</body>
 </html>
+
+{/* 
+Global script for loading polyfill for CSS anchor positioning for older browser versions that don't support it
+Note: We need this to be global because the tooltip CSS relies on CSS anchor positioning, and since we dynamically inject tooltips at build time, tooltips.css must be globally imported (see on the top of this file), so we also need the polyfill to be globally imported.
+*/}
+<script>
+	import { loadCssAnchorPositioningPolyfill } from "@scripts/polyfills";
+	// Load the CSS anchor positioning polyfill for older browser versions that don't support it
+	await loadCssAnchorPositioningPolyfill(document);
+</script>
