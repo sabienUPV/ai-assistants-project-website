@@ -329,7 +329,7 @@ const {
 
   // 2. Fallback logic for browsers that don't support anchor positioning.
   import { supportsCssAnchorPositioning } from '@utils/browserSupport.ts';
-  if (!supportsCssAnchorPositioning(document)) {
+  if (!supportsCssAnchorPositioning()) {
     // Dynamic import so we only load the polyfill when necessary, avoiding unnecessary JS for modern browsers.
     const { dropdownPolyfill } = await import('@scripts/polyfills.ts');
     dropdownPolyfill();
