@@ -246,7 +246,7 @@ const {
   }
 
   /* Fallback for browsers that don't support anchor positioning */
-  @supports (top: anchor(bottom)) {
+  @supports not (top: anchor(bottom)) {
     /* Hide the menu by default and position it absolutely */
     .dropdown-menu {
       display: none;
