@@ -4,6 +4,7 @@ import glossaryTermIconSvg from '@assets/icons/glossary-term.svg?raw';
 
 import { locales, type Locale } from '@languages';
 import { randomId } from '@utils/a11y';
+import { tForLocale } from '@utils/translation';
 
 // Load data once (Astro optimizes this at build time)
 const glossaryEntries = await getCollection('glossary');
@@ -79,10 +80,10 @@ export function getGlossaryHtmlForTermInLocale(locale: Locale, term: string, con
   if (!definition) return null;
 
   // Return the HTML for this term
-  return getGlossaryHtml(term, definition, undefined, containerEl, textEl);
+  return getGlossaryHtml(locale, term, definition, undefined, containerEl, textEl);
 }
 
-function getGlossaryHtml(term: string, definition: string, punctuation?: string, containerEl = 'span', textEl = 'span'): string {
+function getGlossaryHtml(locale: Locale, term: string, definition: string, punctuation?: string, containerEl = 'span', textEl = 'span'): string {
   // Generate a unique ID for aria-describedby to link the term to its tooltip
   const tooltipId = randomId('glossary-');
 
@@ -90,12 +91,12 @@ function getGlossaryHtml(term: string, definition: string, punctuation?: string,
   <${containerEl} class="tooltip-container">
     ${glossaryTermIconSvg}
     
-    <${textEl} class="tooltip-text" tabindex="0" aria-describedby="${tooltipId}">
+    <${textEl} class="tooltip-text" tabindex="0" role="button" aria-describedby="${tooltipId}" aria-haspopup="true">
       ${term}
     </${textEl}>${punctuation || ''}
     
     <span id="${tooltipId}" role="tooltip" class="tooltip-content">
-      <span class="sr-only"> - </span>
+      <span class="sr-only">${tForLocale(locale, 'tooltip_definition_label')}: </span>
       ${definition}
     </span>
     <span class="arrow-down" aria-hidden="true"></span>
