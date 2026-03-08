@@ -85,7 +85,7 @@
 }
 
 /* ENHANCEMENT: Desktop + Anchor Positioning Support */
-@supports (anchor-name: --tooltip-container) {
+@supports (position-anchor: --tooltip-container) and (bottom: anchor(top)) and (justify-self: anchor-center) and (position-try-fallbacks: flip-inline) {
   @media (min-width: 1024px) {
     /* The Tooltip Content Box */
     .tooltip-content {
