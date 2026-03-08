@@ -39,7 +39,7 @@ export function injectGlossariesHtml(locale: Locale, text: string): string {
   const replacedTerms = new Set<string>();
 
   // 3. Run a single replace pass
-  text = text.replace(combinedRegex, (match, tagMatch, termMatch, punctuation) => {
+  text = text.replace(combinedRegex, (match: string, tagMatch: string | undefined, termMatch: string, punctuation: string | undefined) => {
     // If we matched an HTML tag, return it unchanged
     if (tagMatch) {
       return tagMatch;
@@ -59,7 +59,7 @@ export function injectGlossariesHtml(locale: Locale, text: string): string {
     replacedTerms.add(lowerTerm);
 
     // 4. Inject using the ?raw SVG variables!
-    return getGlossaryHtml(termMatch, definition, punctuation);
+    return getGlossaryHtml(locale, termMatch, definition, punctuation);
   });
 
   return text;
