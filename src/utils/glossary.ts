@@ -91,7 +91,7 @@ function getGlossaryHtml(locale: Locale, term: string, definition: string, punct
   <${containerEl} class="tooltip-container">
     ${glossaryTermIconSvg}
     
-    <${textEl} class="tooltip-text" tabindex="0" aria-describedby="${tooltipId}" aria-haspopup="true">
+    <${textEl} class="tooltip-text" tabindex="0" role="link" aria-describedby="${tooltipId}" aria-haspopup="true">
       ${term}
     </${textEl}>${punctuation || ''}
     
