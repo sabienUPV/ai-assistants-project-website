@@ -45,9 +45,9 @@ body {
   font-family: 'Roboto', 'Arial', system-ui, sans-serif;
   font-weight: 400;
   color: var(--color-text);
-  /* Accessibility boost: 14px size (set with rem for better accessibility for people that need larger font sizes), readable line height and no text justification */
-  /* (as defined in "lectura fácil" standards) */
-  font-size: 0.875rem; /* 14px */
+  /* Accessibility boost: 1rem = 16px = 12pt size (set with rem for better accessibility for people that need larger font sizes), readable line height and no text justification */
+  /* (in "lectura fácil" standards they define 12pt to 14pt which is bigger than px!) */
+  font-size: 1rem; /* 16px = 12pt */
   line-height: var(--default-line-height); /* Lectura fácil recommends 1.5, but I think it's based on Microsoft Word's way of calculating line height which is different from how browsers do it. In my tests, 1.8 seems to provide a similar amount of spacing between lines as Word's 1.5, while 1.5 looks too cramped in the browser.) */
   text-align: left;
   overflow-x: hidden; /* Prevent horizontal scrollbars from minor overflows */
