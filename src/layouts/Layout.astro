@@ -1,12 +1,5 @@
 ---
-// Importing the Roboto font for consistent typography across the site
-// Note: For optimization, we are only importing the specific weights and styles we need.
-// If we ever need more weights or styles, we can easily add them here.
-
-// NOTE: For accessibility, we should NOT use italics. So we should be fine with just regular and bold weights.
-
-import '@fontsource/roboto/400.css'; // Regular weight
-import '@fontsource/roboto/700.css'; // Bold weight
+import { Font } from 'astro:assets';
 
 // Import global CSS here
 import '@styles/global.css';
@@ -43,6 +36,7 @@ const { title, includeLocaleSelector = true } = Astro.props;
 		<meta charset="UTF-8" />
 		<meta name="description" content={`${PROJECT_NAME} Project Website`} />
 		<meta name="viewport" content="width=device-width" />
+		<Font cssVariable="--font-roboto" preload />
 		<link rel="icon" type="image/svg+xml" href={homeNoLocale('favicon.svg')} /> {/* Default SVG icon for modern browsers */}
 		<link rel="icon" sizes="any" href={homeNoLocale('favicon.ico')} /> {/* Fallback ICO for older browsers */}
     <link rel="icon" type="image/png" sizes="192x192" href={homeNoLocale('icon-192.png')} /> {/* Icon for Android Chrome */}

@@ -42,7 +42,7 @@ html {
 
 body {
   margin: 0;
-  font-family: 'Roboto', 'Arial', system-ui, sans-serif;
+  font-family: var(--font-roboto); /* Use the Roboto font using the new Astro v6 Font API */
   font-weight: 400;
   color: var(--color-text);
   /* Accessibility boost: 1rem = 16px = 12pt size (set with rem for better accessibility for people that need larger font sizes), readable line height and no text justification */
