@@ -1,5 +1,7 @@
-import { baseUrlPath } from '@utils/url';
-import { locales } from '@languages';
+import { tryRemoveBaseUrlFromPath } from '@utils/url';
+
+// IMPORTANT: Since Astro 6, we can no longer import server-side only modules like astro:i18n in client-side scripts.
+// So we can no longer import this file directly in client-side scripts, since it depends on astro:i18n for some of its functions.
 import { getRelativeLocaleUrl } from "astro:i18n";
 
 export function getHomeHelperFn(locale: string) {
@@ -24,29 +26,6 @@ export function getPlainPathNoLocale(pathname: string, currentLocale: string): s
 
   // 3. Clean up leading/trailing slashes to leave the pure path string
   return path.replace(/^\/|\/$/g, '');
-}
-
-/**
- * Extracts the locale from the given path. It checks if the path starts with any of the supported locales.
- * If it does, it returns that locale. If not, it returns null.
- * It also handles the case where the path might include the baseUrlPath (e.g., for deployments in subfolders like GitHub Pages) by first removing it before checking for locales.
- */
-export function extractLocaleFromPath(path: string): string | null {
-  // First, try to remove the baseUrlPath if it exists (e.g., for deployments in subfolders like GitHub Pages)
-  const cleanPath = tryRemoveBaseUrlFromPath(path);
-
-  // Check if the pathname starts with any of the supported locales
-  return locales.find(locale => cleanPath === `/${locale}` || cleanPath.startsWith(`/${locale}/`)) || null;
-}
-
-/**
- * Remove {@link baseUrlPath} from the start of the path if it exists (e.g., for deployments in subfolders like GitHub Pages)
- */
-function tryRemoveBaseUrlFromPath(path: string): string {
-  if (baseUrlPath && path.startsWith(baseUrlPath)) {
-    return path.slice(baseUrlPath.length);
-  }
-  return path;
 }
 
 /**

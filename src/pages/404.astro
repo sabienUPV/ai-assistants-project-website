@@ -38,7 +38,10 @@ just go back to the homepage or any other page and switch from there if needed)
 </Layout>
 
 <script>
-  import { extractLocaleFromPath } from "@utils/localizedUrl";
+  // NOTE: Since Astro 6, we can no longer import server-side only modules like astro:i18n in client-side scripts.
+  // So we can't import @utils/localizedUrl or any function that depends on astro:i18n in this script, since it runs on the client side.
+  // Instead, we created @scripts/url which only contains client-side safe functions and can be imported in client-side scripts, and we moved the extractLocaleFromPath function there since it's needed in the 404 page script.
+  import { extractLocaleFromPath } from "@scripts/url";
 
   const container = document.getElementById("error-container");
   
