@@ -61,6 +61,7 @@ p {
 
 main {
   padding: 1.5rem;
+  padding-top: 0.5rem;
   max-width: 1200px; /* Prevents lines from getting too long/hard to read */
   margin: 0 auto;
 }
@@ -68,6 +69,7 @@ main {
 @media (max-width: 767px) {
   main {
     padding: 1rem;
+    padding-top: 0.5rem;
   }
 }
 
