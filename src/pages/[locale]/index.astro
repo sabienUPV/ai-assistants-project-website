@@ -46,10 +46,10 @@ import Contact from '@components/Contact.astro';
 		text-align: center;
 	}
 
-	/* Add some padding to sections on larger screens */
+	/* Add some spacing between sections on larger screens */
 	@media (min-width: 768px) {
-		section {
-			padding: 2rem;
+		section + section {
+			margin-top: 2rem;
 		}
 	}
 </style>
