@@ -13,7 +13,7 @@ export default defineConfig({
       provider: fontProviders.fontsource(),
       weights: [400, 700], // Regular and Bold weights
       styles: ['normal'], // Only normal style, no italics for better accessibility
-      subsets: ['latin'] // Only the Latin subset, which is sufficient for our languages and helps reduce font file size
+      subsets: ['latin', 'latin-ext'] // Only the Latin subset and latin-ext for Croatian characters, which is sufficient for our languages and helps reduce font file size
     },
   ],
 
