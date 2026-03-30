@@ -1,6 +1,6 @@
 ---
 import EuLogo from "@components/EuLogo.astro";
-import { COPYRIGHT_YEARS } from "@constants";
+import { COPYRIGHT_YEARS, PROJECT_NUMBER_EU } from "@constants";
 import { getAriaCurrentPage, PROJECT_NAME_HTML } from "@utils/a11y";
 
 const { homeLocale: home, t } = Astro.locals;
@@ -20,6 +20,9 @@ const footerLinks = [
   </nav>
   <div class="copyright-text">
     Copyright © {COPYRIGHT_YEARS} <Fragment set:html={t('copyright_text', false, PROJECT_NAME_HTML)} />
+  </div>
+  <div class="project-number-eu">
+    {PROJECT_NUMBER_EU}
   </div>
   <div class="eu-logo-wrapper">
     <EuLogo showDisclaimer={true} />
