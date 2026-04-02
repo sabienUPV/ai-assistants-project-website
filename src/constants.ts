@@ -9,7 +9,7 @@ export const PROJECT_NAME_FOR_SCREEN_READERS = 'A I Assistants For P I D';
 
 export const COPYRIGHT_YEARS = '2026'; // Update with the actual year(s) of the project
 
-export const CONTACT_EMAIL = 'test@example.com'; // TODO: Update with actual contact email (when the project email alias is set up)
+export const CONTACT_EMAIL = 'ai4pid@upv.es';
 
 // Info for the Imprint ("Aviso Legal" in Spanish)
 
