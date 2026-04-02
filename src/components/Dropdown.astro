@@ -266,6 +266,14 @@ const {
   });
 
   // 2. Fallback logic for browsers that don't support anchor positioning.
+  // PERFORMANCE NOTE (Micro-optimization): 
+  // Both functions are statically imported here on purpose. 
+  // loadDropdownPolyfill is tiny. If we try to dynamically import it 
+  // only when needsDropdownPolyfill is true, Vite/Rollup will struggle with nested 
+  // dynamic imports, creating a "Network Waterfall" (sequential HTTP requests). 
+  // For the small percentage of users who actually need the polyfill (who likely have slower connections), 
+  // that latency penalty would be terrible. It's much better to bundle these few bytes 
+  // upfront and let the bundler's Tree-Shaking handle the rest.
   import { needsDropdownPolyfill, loadDropdownPolyfill } from '@utils/browserSupport.ts';
   if (needsDropdownPolyfill()) {
     loadDropdownPolyfill(mediaQuery);
