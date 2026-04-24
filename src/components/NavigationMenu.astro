@@ -11,7 +11,7 @@ interface Props {
 
 const { class: className, ...attributes } = Astro.props;
 
-const menuItems = [
+const menuItems : { href: string; label: string }[] = [
   { href: `${home()}#top`, label: t('nav_home') },
   { href: `${home()}#objectives`, label: t('nav_objectives') },
   { href: `${home()}#partners`, label: t('nav_partners') },
