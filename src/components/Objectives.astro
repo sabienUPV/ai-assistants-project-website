@@ -6,10 +6,10 @@ const { t } = Astro.locals;
 ---
 
 <Cards title={t('objectives_title')} columns={2}>
-  <Card title={t('objective_literacy_title')}>
+  <Card title={t('objective_literacy_title')} titleHasGlossary={true}>
     <p style="margin: 0;" set:html={t('objective_literacy_content', true)} />
   </Card>
-  <Card title={t('objective_living_title')}>
+  <Card title={t('objective_living_title')} titleHasGlossary={true}>
     <p style="margin: 0;" set:html={t('objective_living_content', true)} />
   </Card>
   <Card title={t('objective_resources_title')}>

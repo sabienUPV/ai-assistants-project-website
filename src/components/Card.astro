@@ -3,12 +3,13 @@ const { getGlossaryHtmlForTerm } = Astro.locals;
 
 interface Props {
   title?: string;
+  titleHasGlossary?: boolean; // If true, the title will be looked up in the glossary for HTML rendering
   [key: string]: any;
 }
 
 const { title, titleHasGlossary, ...attributes } = Astro.props;
 
-const titleGlossaryHtml = title ? getGlossaryHtmlForTerm(title, 'h3') : null;
+const titleGlossaryHtml = title && titleHasGlossary ? getGlossaryHtmlForTerm(title, 'h3') : null;
 ---
 
 <li class="card" {...attributes}>
