@@ -2,6 +2,15 @@ export const PROJECT_NAME = 'AI-ASSISTANTS 4PID';
 export const PROJECT_SUBTITLE = 'AI-Assisted Solutions for Enhancing the Independent Living of Persons with Intellectual Disabilities'
 export const PROJECT_NUMBER_EU = '2025-1-DE02-KA220-ADU-000360510';
 
+// --- SEO CONFIGURATION ---
+export const SEO_TITLE = 'AI Assistants for PID - Enhancing Independent Living with AI Solutions';
+export const SEO_DESCRIPTION = 'Discover how AI assistants are revolutionizing the lives of persons with intellectual disabilities (PID) by providing innovative solutions for independent living. Learn about our project, its goals, and the impact we aim to achieve.';
+
+/**
+ * Theme color, set as the primary color for the website, used in the "theme-color" meta tag for the address bar color on mobile devices
+ */
+export const THEME_COLOR = '#3BA6BC';
+
 /**
  * This is the same as {@link PROJECT_NAME} but with spaces for screen readers to read it correctly
  */

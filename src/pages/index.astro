@@ -1,4 +1,6 @@
 ---
+import HeadIcons from "@components/Head/HeadIcons.astro";
+import HeadMeta from "@components/Head/HeadMeta.astro";
 import { locales, defaultLocale } from "@languages";
 import { baseUrlPath as base } from "@utils/url"
 ---
@@ -8,7 +10,9 @@ import { baseUrlPath as base } from "@utils/url"
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>Redirecting...</title>
+    
+    <HeadMeta />
+    <HeadIcons />
 
     <meta http-equiv="refresh" content={`0;url=${base}/${defaultLocale}/`} />
 

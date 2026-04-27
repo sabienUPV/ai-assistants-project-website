@@ -1,0 +1,10 @@
+---
+import { homeNoLocale } from '@utils/url.ts';
+import { THEME_COLOR } from '@constants';
+---
+<link rel="icon" type="image/svg+xml" href={homeNoLocale('favicon.svg')} />  {/* Default SVG icon for modern browsers */}
+<link rel="icon" sizes="any" href={homeNoLocale('favicon.ico')} /> {/* Fallback ICO for older browsers */}
+<link rel="icon" type="image/png" sizes="192x192" href={homeNoLocale('icon-192.png')} /> {/* Icon for Android Chrome */}
+<link rel="apple-touch-icon" href={homeNoLocale('apple-touch-icon.png')} /> {/* Icon for iOS Safari */}
+
+<meta name="theme-color" content={THEME_COLOR} /> {/* Sets the browser's address bar color on mobile devices */}
