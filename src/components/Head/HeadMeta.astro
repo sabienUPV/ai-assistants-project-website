@@ -2,8 +2,8 @@
 import { SEO_TITLE, SEO_DESCRIPTION, SEO_IMAGE } from '@constants';
 import { homeNoLocale } from '@utils/url.ts';
 
-// Construimos la URL canónica (sin parámetros raros y forzando cómo queremos que se lea)
-// Astro.url.pathname nos da la ruta actual
+// Build the canonical URL (without extra parameters, forcing how we want it to be read)
+// Astro.url.pathname gives us the current path
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
 
 interface Props {
@@ -17,6 +17,11 @@ const {
   description = SEO_DESCRIPTION,
   image = SEO_IMAGE,
 } = Astro.props;
+
+// Absolute Image URL:
+// homeNoLocale(image) gives us "/path/social-preview.png"
+// new URL(...) prepends the domain: "https://yourdomain.com/path/social-preview.png"
+const absoluteImageUrl = new URL(homeNoLocale(image), Astro.site || Astro.url.origin);
 ---
 <title>{title}</title>
 <meta name="description" content={description} />
@@ -27,9 +32,9 @@ const {
 <meta property="og:description" content={description} />
 <meta property="og:type" content="website" />
 <meta property="og:url" content={canonicalURL.href} />
-<meta property="og:image" content={homeNoLocale(image)} />
+<meta property="og:image" content={absoluteImageUrl.href} />
 
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
-<meta name="twitter:image" content={homeNoLocale(image)} />
+<meta name="twitter:image" content={absoluteImageUrl.href} />
