@@ -1,19 +1,35 @@
 ---
-import { SEO_TITLE, SEO_DESCRIPTION } from '@constants';
+import { SEO_TITLE, SEO_DESCRIPTION, SEO_IMAGE } from '@constants';
+import { homeNoLocale } from '@utils/url.ts';
+
+// Construimos la URL canónica (sin parámetros raros y forzando cómo queremos que se lea)
+// Astro.url.pathname nos da la ruta actual
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
 
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
 }
 
 const { 
-  title = SEO_TITLE, 
-  description = SEO_DESCRIPTION 
+  title = SEO_TITLE,
+  description = SEO_DESCRIPTION,
+  image = SEO_IMAGE,
 } = Astro.props;
 ---
 <title>{title}</title>
 <meta name="description" content={description} />
 
+<link rel="canonical" href={canonicalURL.href} />
+
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:type" content="website" />
+<meta property="og:url" content={canonicalURL.href} />
+<meta property="og:image" content={homeNoLocale(image)} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={homeNoLocale(image)} />
