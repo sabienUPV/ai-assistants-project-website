@@ -1,4 +1,15 @@
 import { config, fields, collection } from '@keystatic/core';
+import type { Post } from '@sabien-upv-astro-cms/core';
+
+// 1. CREAMOS EL TIPO MAPEADO
+// Le exigimos a TS que este objeto tenga obligatoriamente todas las keys de tu Post de Zod.
+// Usamos `any` como valor porque no nos importa el tipo interno de Keystatic (fields.text, etc.),
+// solo nos importa que la KEY (title, author, pubDate) exista.
+type KeystaticPostSchema = {
+  [K in keyof Post]: any; 
+} & {
+  content: any; // Añadimos 'content' porque Keystatic lo necesita para el Markdoc
+};
 
 export default config({
   storage: {
@@ -12,6 +23,9 @@ export default config({
       format: { contentField: 'content' },
       schema: {
         title: fields.slug({ name: { label: 'Title' } }),
+        pubDate: fields.date({ label: 'Date', defaultValue: { kind: 'today' } }),
+        description: fields.text({ label: 'Description' }),
+        author: fields.text({ label: 'Author' }),
         content: fields.markdoc({
           label: 'Content',
           options: {
@@ -41,7 +55,7 @@ export default config({
             },
           },
         }),
-      },
+      } satisfies KeystaticPostSchema, // 2. LE DECIMOS A TS QUE ESTE OBJETO DEBE CUMPLIR EL TIPO MAPEADO. SI VES "satisfies" EN ROJO, ES QUE FALTA ALGÚN CAMPO DE TU POST, REVISA EN EL PROYECTO core/src/schemas/posts.ts Y ASEGÚRATE DE QUE TODOS LOS CAMPOS ESTÉN AQUÍ
     }),
   },
 });
