@@ -1,0 +1,26 @@
+{
+  "name": "@sabien-upv-astro-cms/web",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "generate-icons": "node generate-icons.js",
+    "i18n-import-excel": "node import-i18n-content-from-excel-to-csv.js",
+    "extract-and-convert-eu-logos": "node extract-and-convert-eu-logos.js"
+  },
+  "dependencies": {
+    "@sabien-upv-astro-cms/core": "0.0.0",
+    "@iconify-json/circle-flags": "^1.2.10",
+    "astro": "^6.0.4",
+    "astro-icon": "^1.1.5",
+    "csv-parse": "^6.1.0"
+  },
+  "devDependencies": {
+    "adm-zip": "^0.5.16",
+    "svgo": "^4.0.0",
+    "xlsx": "^0.18.5"
+  }
+}

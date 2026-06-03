@@ -1,0 +1,9 @@
+{
+  "name": "@sabien-upv-astro-cms/core",
+  "version": "0.0.0",
+  "main": "index.ts",
+  "private": true,
+  "dependencies": {
+    "astro": "^6.0.4"
+  }
+}
