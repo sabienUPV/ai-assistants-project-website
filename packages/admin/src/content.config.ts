@@ -1,4 +1,3 @@
-// @ts-ignore
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { postSchema } from '@sabien-upv-astro-cms/core';

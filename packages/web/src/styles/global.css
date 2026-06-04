@@ -11,6 +11,7 @@
   --color-tertiary: var(--color-logo-light-blue);
   --color-text: #555555;
   --color-text-on-secondary: var(--color-semi-transparent-white);
+  --color-link: #0066cc;
   --color-link-hover: #26718f; /* A middle ground between the medium blue and the dark blue, for better contrast on hover */
 
   /* Logo palette colors */
@@ -92,6 +93,16 @@ h1, h2 {
 h1 { font-size: 2.2rem; }
 h2 { font-size: 1.5rem; }
 h3 { font-size: 1rem; }
+
+a {
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-link-hover);
+  text-decoration: underline;
+}
 
 /* Help people using screen readers skip to the main content */
 .sr-only {

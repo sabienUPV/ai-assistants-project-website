@@ -1,7 +1,8 @@
 import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
-import { file } from 'astro/loaders';
+import { file, glob } from 'astro/loaders';
 import { parse as parseCsv } from 'csv-parse/sync';
+import { postSchema } from '@sabien-upv-astro-cms/core';
 
 // 1. Import the supported languages and their types
 // from a single source of truth
@@ -51,4 +52,10 @@ const glossary = defineCollection({
   }),
 });
 
-export const collections = { i18n, glossary };
+const posts = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdoc}', base: './src/content/posts' }),
+  // Type-check frontmatter using a schema
+  schema: postSchema,
+});
+
+export const collections = { i18n, glossary, posts };

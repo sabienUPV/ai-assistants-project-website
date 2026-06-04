@@ -4,6 +4,8 @@ import { defaultLocale, locales } from './src/languages';
 
 import icon from 'astro-icon';
 
+import markdoc from '@astrojs/markdoc';
+
 // https://astro.build/config
 export default defineConfig({
   fonts: [
@@ -31,5 +33,5 @@ export default defineConfig({
   integrations: [icon({
     // We use the "astro-icon" integration to easily use icons from various icon libraries in our components
     iconDir: 'src/assets/icons',
-  })]
+  }), markdoc()]
 });
