@@ -5,17 +5,27 @@
       "type": "chrome",
       "request": "launch",
       "name": "Start Web + Chrome (dev)",
-      "url": "http://localhost:4321", // Default port for website
+      "url": "http://localhost:4321",
       "webRoot": "${workspaceFolder}/packages/web",
-      "preLaunchTask": "Start Astro (dev): Web"
+      "preLaunchTask": "Start Astro (dev): Web",
+      "port": 9222,
+      "userDataDir": "${workspaceFolder}/.vscode/chrome-profile-web"
     },
     {
       "type": "chrome",
       "request": "launch",
       "name": "Start Admin + Chrome (dev)",
-      "url": "http://localhost:4322", // Default port for admin
+      "url": "http://localhost:4322",
       "webRoot": "${workspaceFolder}/packages/admin",
-      "preLaunchTask": "Start Astro (dev): Admin"
+      "preLaunchTask": "Start Astro (dev): Admin",
+      "port": 9223,
+      "userDataDir": "${workspaceFolder}/.vscode/chrome-profile-admin"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "🚀 Start Full Stack (Web + Admin) (dev)",
+      "configurations": ["Start Web + Chrome (dev)", "Start Admin + Chrome (dev)"]
     }
   ]
 }
