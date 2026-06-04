@@ -4,7 +4,7 @@
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "paths": {
-      "@assets/*": ["./src/assets/*"]
+      "@admin-assets/*": ["./src/assets/*"]
     }
   }
 }

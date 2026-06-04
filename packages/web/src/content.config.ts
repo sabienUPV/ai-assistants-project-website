@@ -53,7 +53,7 @@ const glossary = defineCollection({
 });
 
 const posts = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdoc}', base: './src/content/posts' }),
+  loader: glob({ pattern: '**/*.{md,mdoc}', base: '../admin/src/content/posts' }),
   // Type-check frontmatter using a schema
   schema: postSchema,
 });

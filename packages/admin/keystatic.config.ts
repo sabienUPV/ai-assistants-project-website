@@ -31,7 +31,8 @@ export default config({
           options: {
             image: {
               directory: 'src/assets/images/posts',
-              publicPath: '@assets/images/posts/',
+              // IMPORTANT: "@admin-assets" is an alias defined in tsconfig.json, that should be defined in BOTH the ADMIN and WEB projects, and BOTH should point to the /admin/src/assets folder. This way, when we upload an image from the admin, it will be stored in the admin's assets folder, but we can access it from the web using the @admin-assets alias.
+              publicPath: '@admin-assets/images/posts/',
               // Muy útil para arreglar nombres de archivos con tildes, espacios, mayúsculas, etc. que pueden dar problemas al subirlos a la web
               transformFilename: (filename) => {
                 // Separamos el nombre de la extensión

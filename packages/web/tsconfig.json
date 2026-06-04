@@ -12,7 +12,8 @@
       "@styles/*": ["./src/styles/*"],
       "@utils/*": ["./src/utils/*"],
       "@languages": ["./src/languages.ts"],
-      "@constants": ["./src/constants.ts"]
+      "@constants": ["./src/constants.ts"],
+      "@admin-assets/*": ["../admin/src/assets/*"]
     }
   }
 }
