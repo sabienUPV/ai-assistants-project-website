@@ -25,9 +25,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  BUILD_PATH: "." # default value when not using subfolders
-  # BUILD_PATH: subfolder
-
+  # CHANGE FOR MONOREPO: We set the BUILD_PATH to the subfolder where the Astro public website is located. This is used in the steps below to run commands in that subfolder and to upload the built artifact from that subfolder.
+  BUILD_PATH: packages/web
+  # BUILD_PATH: "." # default value when not using subfolders
 jobs:
   build:
     name: Build
@@ -59,13 +59,17 @@ jobs:
         with:
           node-version: "24"
           cache: ${{ steps.detect-package-manager.outputs.manager }}
-          cache-dependency-path: ${{ env.BUILD_PATH }}/${{ steps.detect-package-manager.outputs.lockfile }}
+          # CHANGE FOR MONOREPO: We remove ${{ env.BUILD_PATH }}/ so that it looks for the lockfile in the root of the monorepo
+          cache-dependency-path: ${{ steps.detect-package-manager.outputs.lockfile }}
+          #cache-dependency-path: ${{ env.BUILD_PATH }}/${{ steps.detect-package-manager.outputs.lockfile }}
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
       - name: Install dependencies
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
-        working-directory: ${{ env.BUILD_PATH }}
+        # CHANGE FOR MONOREPO: We force it to install in the root (.) so that it links the @sabien-upv-astro-cms/core package
+        working-directory: .
+        #working-directory: ${{ env.BUILD_PATH }}
       - name: Build with Astro
         run: |
           ${{ steps.detect-package-manager.outputs.runner }} astro build \

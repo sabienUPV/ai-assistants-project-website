@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Astro (dev): Web",
+      "type": "shell",
+      "command": "npm run dev -w @sabien-upv-astro-cms/web",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "pattern": [{ "regexp": ".", "file": 1, "location": 2, "message": 3 }],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "ready in|Local|reload|watch" 
+        }
+      }
+    },
+    {
+      "label": "Start Astro (dev): Admin",
+      "type": "shell",
+      "command": "npm run dev -w @sabien-upv-astro-cms/admin -- --port 4322",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "pattern": [{ "regexp": ".", "file": 1, "location": 2, "message": 3 }],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "ready in|Local|reload|watch" 
+        }
+      }
+    }
+  ]
+}

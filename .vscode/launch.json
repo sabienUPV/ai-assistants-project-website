@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Start Web + Chrome (dev)",
+      "url": "http://localhost:4321", // Default port for website
+      "webRoot": "${workspaceFolder}/packages/web",
+      "preLaunchTask": "Start Astro (dev): Web"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Start Admin + Chrome (dev)",
+      "url": "http://localhost:4322", // Default port for admin
+      "webRoot": "${workspaceFolder}/packages/admin",
+      "preLaunchTask": "Start Astro (dev): Admin"
+    }
+  ]
+}
