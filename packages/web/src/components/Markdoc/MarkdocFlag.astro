@@ -1,0 +1,17 @@
+---
+import { Icon } from 'astro-icon/components';
+
+export interface Props {
+  country: string; // ISO country code (e.g., "us", "fr", "de")
+}
+
+const { country } = Astro.props;
+---
+<Icon name={`circle-flags:${country}`} class="flag-icon" width="24" height="24" />
+
+<style>
+.flag-icon {
+  display: inline-block;
+  vertical-align: middle;
+}
+</style>
