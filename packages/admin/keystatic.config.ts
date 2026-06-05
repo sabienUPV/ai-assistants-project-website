@@ -2,6 +2,7 @@ import { config, fields, collection } from '@keystatic/core';
 import { inline } from '@keystatic/core/content-components';
 import type { Post } from '@sabien-upv-astro-cms/core';
 import { markdocTagAttributes } from '@sabien-upv-astro-cms/core';
+import React from 'react';
 
 // 1. CREAMOS EL TIPO MAPEADO
 // Le exigimos a TS que este objeto tenga obligatoriamente todas las keys de tu Post de Zod.
@@ -23,6 +24,17 @@ const flagComponent = inline({
       description: markdocTagAttributes.flag.attributes.country.description 
     }),
   },
+  // Customizing how the inline tag looks inside the editor canvas
+  ContentView: (props) => {
+    // 'props.value' contains the current state of our schema fields
+    const countryCode = props.value?.country || '...';
+    
+    return React.createElement(
+      'span',
+      { style: { color: '#0284c7', fontWeight: 'bold' } },
+      `🚩 flag: '${countryCode}'`
+    );
+  }
 });
 
 export default config({
