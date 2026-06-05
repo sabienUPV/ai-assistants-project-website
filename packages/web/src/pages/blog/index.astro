@@ -28,7 +28,7 @@ const sortedPosts = allPosts.sort((a, b) => {
               <a href={`/blog/${post.id}`}>{post.data.title}</a>
             </h2>
             <div class="card-date">
-              {post.data.pubDate?.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+              {post.data.pubDate?.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
             </div>
             <p class="card-excerpt">
               {post.data.description || "Click to read the full article."}
