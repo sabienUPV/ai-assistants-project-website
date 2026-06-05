@@ -35,6 +35,11 @@ env:
   # CHANGE FOR MONOREPO: We set the BUILD_PATH to the subfolder where the Astro public website is located. This is used in the steps below to run commands in that subfolder and to upload the built artifact from that subfolder.
   BUILD_PATH: packages/web
   # BUILD_PATH: "." # default value when not using subfolders
+  # FIX FOR NODE 20 DEPRECATION:
+  # This forces GitHub to execute all JavaScript actions using Node 24 immediately,
+  # silencing the warnings and guaranteeing stability before the June 16th, 2026 deadline.
+  # (note: once the deadline is passed, this will have no effect as Node 24 will be the default and only version available for actions)
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 jobs:
   build:
     name: Build
