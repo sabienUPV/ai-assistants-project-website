@@ -1,5 +1,7 @@
 import { config, fields, collection } from '@keystatic/core';
+import { inline } from '@keystatic/core/content-components';
 import type { Post } from '@sabien-upv-astro-cms/core';
+import { markdocTagAttributes } from '@sabien-upv-astro-cms/core';
 
 // 1. CREAMOS EL TIPO MAPEADO
 // Le exigimos a TS que este objeto tenga obligatoriamente todas las keys de tu Post de Zod.
@@ -10,6 +12,18 @@ type KeystaticPostSchema = {
 } & {
   content: any; // Añadimos 'content' porque Keystatic lo necesita para el Markdoc
 };
+
+// Define the custom inline component for Keystatic using shared core attributes
+const flagComponent = inline({
+  label: 'Flag',
+  schema: {
+    // Safely accessing the description metadata from the shared core configuration for consistency
+    country: fields.text({ 
+      label: 'Country Code (e.g., eu, es)', 
+      description: markdocTagAttributes.flag.attributes.country.description 
+    }),
+  },
+});
 
 export default config({
   storage: {
@@ -55,6 +69,9 @@ export default config({
               }
             },
           },
+          components: {
+            flag: flagComponent, // Register the custom component in Markdoc options
+          }
         }),
       } satisfies KeystaticPostSchema, // 2. LE DECIMOS A TS QUE ESTE OBJETO DEBE CUMPLIR EL TIPO MAPEADO. SI VES "satisfies" EN ROJO, ES QUE FALTA ALGÚN CAMPO DE TU POST, REVISA EN EL PROYECTO core/src/schemas/posts.ts Y ASEGÚRATE DE QUE TODOS LOS CAMPOS ESTÉN AQUÍ
     }),

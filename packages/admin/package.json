@@ -7,10 +7,12 @@
     "@astrojs/react": "^5.0.3",
     "@keystatic/astro": "^5.1.0",
     "@keystatic/core": "^0.5.50",
+    "@iconify-json/circle-flags": "^1.2.10",
     "@sabien-upv-astro-cms/core": "0.0.0",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "astro": "^6.1.8",
+    "astro-icon": "^1.1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sharp": "^0.34.5"
