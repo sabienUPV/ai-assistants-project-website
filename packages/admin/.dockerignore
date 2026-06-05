@@ -1,0 +1,28 @@
+# Git
+.git
+.gitignore
+
+# Build y Caché de Astro
+dist/
+.astro/
+
+# Dependencias
+node_modules/
+
+# Logs y errores
+*-debug.log*
+*-error.log*
+
+# Variables de entorno
+.env
+.env.*
+
+# Archivos de sistema y editores
+.DS_Store
+.idea/
+.vscode/
+
+# Docker
+Dockerfile
+.dockerignore
+compose.yaml
