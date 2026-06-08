@@ -1,5 +1,4 @@
 # Global scope: Workspace
-# NOTE: If you are deploying this with Coolify, you should go to "Configuration > Advanced > Build" and DISABLE "Inject Build Args to Dockerfile". If you don't do this, Coolify will inject a "true" value to the ARG by default, breaking this build. If you want to still inject them, you should find a way to manually inject back the correct value (the exact same one defined right here).
 ARG WORKSPACE=packages/admin
 
 # Stage 1: Dependencies
@@ -50,4 +49,4 @@ COPY --from=builder /app/${WORKSPACE}/dist ./${WORKSPACE}/dist
 EXPOSE 3000
 ENV PORT=3000
 
-CMD ["sh", "-c", "npm run start -w ${WORKSPACE}"]
+CMD sh -c "npm run start -w ${WORKSPACE}"
