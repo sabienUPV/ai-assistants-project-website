@@ -10,4 +10,7 @@ export default defineConfig({
   output: 'server',
   adapter: node({ mode: 'standalone' }),
   integrations: [react(), markdoc(), keystatic(), icon()],
+  redirects: {
+    '/': '/keystatic' // Redirect the root URL to the Keystatic admin interface
+  },
 });
