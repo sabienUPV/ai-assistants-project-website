@@ -1,4 +1,4 @@
-# Etapa 1: Construcción
+# Stage 1: Build
 FROM node:lts-alpine AS build
 WORKDIR /app
 
@@ -10,7 +10,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Etapa 2: Servidor de producción
+# Stage 2: Serve with Nginx
 FROM nginx:stable-alpine
 
 # Copiar los archivos estáticos desde la etapa de construcción
