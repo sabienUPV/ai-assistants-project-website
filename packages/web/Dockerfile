@@ -11,7 +11,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Serve with Nginx
-FROM nginx:stable-alpine
+FROM nginx:stable-alpine AS serve
 
 # Copiar los archivos estáticos desde la etapa de construcción
 # Por defecto, Astro los guarda en /dist
