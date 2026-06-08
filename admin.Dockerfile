@@ -39,6 +39,9 @@ ENV NODE_ENV=production
 # Note: Declaring it without a value makes it inherit the global ARG on top
 ARG WORKSPACE
 
+# IMPORTANT: We need to set the WORKSPACE as an environment variable in the final image so that it's available at runtime, since the CMD will need to know which workspace to start, and ARG is NOT available at runtime, only during build time.
+ENV WORKSPACE=${WORKSPACE}
+
 COPY package*.json ./
 COPY packages/core/package*.json ./packages/core/
 COPY ${WORKSPACE}/package*.json ./${WORKSPACE}/
@@ -49,4 +52,4 @@ COPY --from=builder /app/${WORKSPACE}/dist ./${WORKSPACE}/dist
 EXPOSE 3000
 ENV PORT=3000
 
-CMD sh -c "npm run start -w ${WORKSPACE}"
+CMD ["sh", "-c", "npm run start -w ${WORKSPACE}"]
