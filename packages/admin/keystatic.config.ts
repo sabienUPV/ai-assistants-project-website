@@ -1,4 +1,4 @@
-import { config, fields, collection } from '@keystatic/core';
+import { config, fields, collection, type Config } from '@keystatic/core';
 import { inline } from '@keystatic/core/content-components';
 import type { Post } from '@sabien-upv-astro-cms/core';
 import { markdocTagAttributes } from '@sabien-upv-astro-cms/core';
@@ -37,10 +37,27 @@ const flagComponent = inline({
   }
 });
 
+// Select storage kind based on environment variable:
+// - In local development, we default to 'local' storage for simplicity.
+// - In production, we default to 'cloud' storage (Keystatic Cloud) to deploy directly to the production environment (the GitHub repository).
+// If we manually set the environment variable KEYSTATIC_STORAGE_LOCAL to 'true' or 'false', it will override the defaults.
+const isLocal = import.meta.env.KEYSTATIC_STORAGE_LOCAL 
+  ? import.meta.env.KEYSTATIC_STORAGE_LOCAL === 'true'
+  : import.meta.env.DEV;
+
 export default config({
-  storage: {
-    kind: 'local',
+  storage: isLocal ? {
+    kind: 'local'
+  } : {
+    kind: 'cloud',
+    pathPrefix: 'packages/admin'
   },
+  // This block is only required (and evaluated) if kind is 'cloud'
+  ...(!isLocal && {
+    cloud: {
+      project: 'ai-assistants-4-pid/ai4pid-web',  
+    } satisfies Config['cloud']
+  }),
   collections: {
     posts: collection({
       label: 'Posts',
