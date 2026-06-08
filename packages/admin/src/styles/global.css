@@ -1,0 +1,129 @@
+/* NOTE: This file is a copy-paste of the global.css file from the website package, to match the styling without having to move it to the core package and share it (for now). In the future, ideally we should unify it in the core package */
+
+/* Apply border-box globally to prevent padding from affecting width */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+:root {
+  /* Website base colors */
+  --color-background: #F4F4F4;
+  --color-primary: var(--color-logo-medium-blue);
+  --color-secondary: var(--color-dark-blue);
+  --color-tertiary: var(--color-logo-light-blue);
+  --color-text: #555555;
+  --color-text-on-secondary: var(--color-semi-transparent-white);
+  --color-link: #0066cc;
+  --color-link-hover: #26718f; /* A middle ground between the medium blue and the dark blue, for better contrast on hover */
+
+  /* Logo palette colors */
+  --color-logo-light-blue: #A8D4DC;
+  --color-logo-medium-blue: #3BA6BC;
+  --color-logo-green: #95C11F;
+  --color-logo-dark-grey: #657176;
+
+  /* Additional colors */
+  --color-dark-blue: #15434d;
+  --color-semi-transparent-white: #FFFFFFAA;
+
+  /* Other properties */
+  --default-line-height: 1.8;
+}
+html {
+  background-color: var(--color-background);
+
+  /* Default jump-scroll for maximum accessibility */
+  scroll-behavior: auto;
+}
+
+/* Enable smooth scroll ONLY if the user doesn't have a motion sensitivity setting */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-roboto); /* Use the Roboto font using the new Astro v6 Font API */
+  font-weight: 400;
+  color: var(--color-text);
+  /* Accessibility boost: 1rem = 16px = 12pt size (set with rem for better accessibility for people that need larger font sizes), readable line height and no text justification */
+  /* (in "lectura fácil" standards they define 12pt to 14pt which is bigger than px!) */
+  font-size: 1rem; /* 16px = 12pt */
+  line-height: var(--default-line-height); /* Lectura fácil recommends 1.5, but I think it's based on Microsoft Word's way of calculating line height which is different from how browsers do it. In my tests, 1.8 seems to provide a similar amount of spacing between lines as Word's 1.5, while 1.5 looks too cramped in the browser.) */
+  text-align: left;
+  overflow-x: hidden; /* Prevent horizontal scrollbars from minor overflows */
+}
+
+/* Increased spacing between paragraphs for accessibility */
+p {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+main {
+  padding: 1.5rem;
+  padding-top: 0.5rem;
+  max-width: 1200px; /* Prevents lines from getting too long/hard to read */
+  margin: 0 auto;
+}
+
+@media (max-width: 767px) {
+  main {
+    padding: 1rem;
+    padding-top: 0.5rem;
+  }
+}
+
+/* In titles, it looks better with less line height than the 1.2 we use by default */
+/* but add padding-block so that the vertical space they occupy is similar to texts with the default line height, so spacing between tooltips and their texts is consistent */
+h1, h2, h3 {
+  line-height: 1.2;
+  margin-top: 1.8rem;
+  margin-bottom: 0.8rem;
+  padding-block: 0.2rem;
+}
+h1, h2 {
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-secondary);
+  margin-bottom: 2rem;
+  letter-spacing: 0.5px;
+}
+
+h1 { font-size: 2.2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1rem; }
+
+a {
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-link-hover);
+  text-decoration: underline;
+}
+
+/* Help people using screen readers skip to the main content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+  user-select: none; /* Prevent selection of the hidden element */
+}
+
+/* CSS styled shapes */
+.arrow-down {
+  width: 12px;
+  height: 8px;
+  background-color: var(--color-text);
+  clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+}
