@@ -1,28 +1,16 @@
 services:
-  web-publica:
-    container_name: ai4pid_web
+  admin:
     build:
-      context: ./packages/web
-      dockerfile: Dockerfile
-    ports:
-      - "8080:80"
+      context: .
+      dockerfile: admin.Dockerfile
+    expose:
+      - "3000"
     restart: unless-stopped
-    networks:
-      - ai4pid_network
 
-  admin-keystatic:
-    container_name: ai4pid_admin
+  web:
     build:
-      context: ./packages/admin
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
+      context: .
+      dockerfile: web.Dockerfile
+    expose:
+      - "80"
     restart: unless-stopped
-    networks:
-      - ai4pid_network
-
-networks:
-  ai4pid_network:
-    driver: bridge
