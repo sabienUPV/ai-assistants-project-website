@@ -9,12 +9,11 @@ on:
   push:
     branches: ["main"]
     paths:
-      # Anything in the repository triggers the workflow
-      - '**'
-      # We ignore the entire admin folder by default...
-      - '!packages/admin/**'
-      # ...BUT we override that ignore and force a deploy if content (markdown/posts) is updated!
-      - 'packages/admin/src/content/**'
+      - 'packages/web/**'      # If the web package changes, we trigger a deployment
+      - 'packages/core/**'     # If the core package changes, we trigger a deployment
+      - 'package*.json'        # If global dependencies change, we trigger a deployment
+      - 'packages/admin/src/content/**' # If CMS posts change, we trigger a deployment
+      - '.github/workflows/**' # If any GitHub Actions workflow files change, we trigger a deployment (to ensure workflow updates are deployed immediately)
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
