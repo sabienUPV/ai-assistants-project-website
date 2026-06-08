@@ -51,5 +51,7 @@ COPY --from=builder /app/${WORKSPACE}/dist ./${WORKSPACE}/dist
 
 EXPOSE 3000
 ENV PORT=3000
+# HOST: Needed so that the server accepts connections from outside the container, not just localhost
+ENV HOST=0.0.0.0
 
 CMD ["sh", "-c", "npm run start -w ${WORKSPACE}"]
