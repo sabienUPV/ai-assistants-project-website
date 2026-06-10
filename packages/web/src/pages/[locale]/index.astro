@@ -12,6 +12,7 @@ import Layout from '@layouts/Layout.astro';
 import Description from '@components/Description.astro';
 import Objectives from '@components/Objectives.astro';
 import Partners from '@components/Partners.astro';
+import Socials from '@components/Socials.astro';
 import Documents from '@components/Documents.astro';
 import Contact from '@components/Contact.astro';
 ---
@@ -34,6 +35,7 @@ import Contact from '@components/Contact.astro';
 	<section id="resources">
 		<h2>{t('nav_resources')}</h2>
 		<p>{t('resources_subtitle')}</p>
+		<Socials />
 		<Documents />
 	</section>
 </Layout>
