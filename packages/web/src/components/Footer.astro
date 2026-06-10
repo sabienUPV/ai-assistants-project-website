@@ -1,5 +1,6 @@
 ---
 import EuLogo from "@components/EuLogo.astro";
+import Socials from "@components/Socials.astro";
 import { COPYRIGHT_YEARS, PROJECT_NUMBER_EU } from "@constants";
 import { getAriaCurrentPage, PROJECT_NAME_HTML } from "@utils/a11y";
 
@@ -12,6 +13,7 @@ const footerLinks : { href: string; label: string }[] = [
 
 <footer>
   <nav class="footer-nav">
+    <Socials />
     <ul>
     {footerLinks.map(link => (
       <li><a href={link.href} class="footer-link" aria-current={getAriaCurrentPage(Astro.url.pathname, link.href)}>{link.label}</a></li>
