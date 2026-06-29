@@ -3,7 +3,7 @@ param(
     # This allows users to type -host or --host, but inside the script 
     # we safely use the variable $ollamaHost to avoid clashing with PowerShell's built-in $host
     [Alias('host')]
-    [string]$ollamaHost = "localhost:11434"
+    [string]$ollamaHost = "localhost:11434",
 
     # Workaround: Capture unrecognized arguments (like --model)
     [Parameter(ValueFromRemainingArguments=$true)]
