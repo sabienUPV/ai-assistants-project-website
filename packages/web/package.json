@@ -7,9 +7,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "generate-icons": "node generate-icons.js",
-    "i18n-import-excel": "node import-i18n-content-from-excel-to-csv.js",
-    "extract-and-convert-eu-logos": "node extract-and-convert-eu-logos.js"
+    "generate-icons": "node scripts/generate-icons.js",
+    "i18n-import-excel": "node scripts/import-i18n-content-from-excel-to-csv.js",
+    "extract-and-convert-eu-logos": "node scripts/extract-and-convert-eu-logos.js"
   },
   "dependencies": {
     "@astrojs/markdoc": "^1.0.6",
