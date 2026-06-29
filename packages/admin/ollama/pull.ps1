@@ -11,7 +11,7 @@ param(
 )
 
 # Parse any double-hyphen arguments to maintain Linux muscle memory
-if ($ExtraArgs -ne $null) {
+if ($null -ne $ExtraArgs) {
     for ($i = 0; $i -lt $ExtraArgs.Count; $i++) {
         switch ($ExtraArgs[$i]) {
             '--host'  { $ollamaHost = $ExtraArgs[++$i] }
