@@ -1,7 +1,24 @@
 param(
     [string]$model = "mistral:8b",
+    # This allows users to type -host or --host, but inside the script 
+    # we safely use the variable $ollamaHost to avoid clashing with PowerShell's built-in $host
+    [Alias('host')]
     [string]$ollamaHost = "localhost:11434"
+
+    # Workaround: Capture unrecognized arguments (like --model)
+    [Parameter(ValueFromRemainingArguments=$true)]
+    [string[]]$ExtraArgs
 )
+
+# Parse any double-hyphen arguments to maintain Linux muscle memory
+if ($ExtraArgs -ne $null) {
+    for ($i = 0; $i -lt $ExtraArgs.Count; $i++) {
+        switch ($ExtraArgs[$i]) {
+            '--host'  { $ollamaHost = $ExtraArgs[++$i] }
+            '--model' { $model = $ExtraArgs[++$i] }
+        }
+    }
+}
 
 $url = "http://$ollamaHost/api/pull"
 
