@@ -2,7 +2,7 @@
 
 # Default values
 OLLAMA_HOST="localhost:11434"
-MODEL_NAME="mistral:8b"
+MODEL_NAME="ministral-3:8b"
 PROMPT_TEXT=""
 SYSTEM_TEXT=""
 
