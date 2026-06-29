@@ -6,6 +6,10 @@ COMPOSE_FILES="-f compose.yaml"
 # Parse arguments (POSIX-compliant)
 while [ "$#" -gt 0 ]; do
   case "$1" in
+    --local)
+      COMPOSE_FILES="$COMPOSE_FILES -f compose.local.yaml"
+      shift
+      ;;
     --gpu)
       COMPOSE_FILES="$COMPOSE_FILES -f compose.gpu.yaml"
       shift
@@ -17,7 +21,7 @@ while [ "$#" -gt 0 ]; do
     *)
       # Unknown option
       echo "Unknown option: $1"
-      echo "Usage: $0 [--gpu] [--ui]"
+      echo "Usage: $0 [--local] [--gpu] [--ui]"
       exit 1
       ;;
   esac
