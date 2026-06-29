@@ -44,10 +44,11 @@ echo "Generating text with model '$MODEL_NAME' from Ollama at '$OLLAMA_HOST'..."
 
 # Construct the JSON payload.
 # Note: Ollama's /api/generate endpoint uses "model", not "name" (unlike /api/pull).
+# Note 2: We default to stream=false for simplicity, but you can modify this if you want streaming output.
 if [ -n "$SYSTEM_TEXT" ]; then
-    JSON_PAYLOAD="{\"model\": \"$MODEL_NAME\", \"prompt\": \"$PROMPT_TEXT\", \"system\": \"$SYSTEM_TEXT\"}"
+    JSON_PAYLOAD="{\"model\": \"$MODEL_NAME\", \"prompt\": \"$PROMPT_TEXT\", \"system\": \"$SYSTEM_TEXT\", \"stream\": false}"
 else
-    JSON_PAYLOAD="{\"model\": \"$MODEL_NAME\", \"prompt\": \"$PROMPT_TEXT\"}"
+    JSON_PAYLOAD="{\"model\": \"$MODEL_NAME\", \"prompt\": \"$PROMPT_TEXT\", \"stream\": false}"
 fi
 
 # Execution using curl with streaming flags

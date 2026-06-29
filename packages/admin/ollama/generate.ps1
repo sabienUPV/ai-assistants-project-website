@@ -34,9 +34,11 @@ if ([string]::IsNullOrWhiteSpace($prompt)) {
 $url = "http://$ollamaHost/api/generate"
 
 # Dynamically build the request object
+# Note: We default to stream=false for simplicity, but you can modify this if you want streaming output.
 $bodyObj = @{
     model = $model
     prompt = $prompt
+    stream = $false
 }
 
 # Only add the system prompt to the JSON if it was provided
