@@ -12,7 +12,7 @@
       "@styles/*": ["./src/styles/*"],
       "@utils/*": ["./src/utils/*"],
       "@languages": ["../core/src/languages.ts"],
-      "@constants": ["./src/constants.ts"],
+      "@constants": ["../core/src/constants.ts"],
       "@admin-assets/*": ["../admin/src/assets/*"]
     }
   }

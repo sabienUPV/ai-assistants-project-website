@@ -5,6 +5,7 @@ import Markdoc from '@markdoc/markdoc';
 import { performance } from 'node:perf_hooks'; // Native Node module for precise timing
 
 import { localeEnglishNames, type Locale } from '@languages';
+import { PROJECT_NAME } from '@constants';
 
 // LLM Engine Configuration
 const OLLAMA_URL = 'http://localhost:11434/api/generate';
@@ -92,9 +93,24 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
   // Start the high-resolution stopwatch
   const startTime = performance.now();
 
-  const prompt = `You are an expert technical translator. Translate the following text from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}. 
-Return ONLY the translation, without any markdown formatting, quotes, or introductory text.
-Original text: ${text}`;
+  // Use a URL regex to find and temporarily replace URLs in the text to prevent them from being altered during translation
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const urls: string[] = [];
+  
+  const protectedText = text.replace(urlRegex, (match) => {
+    urls.push(match);
+    return `__URL_${urls.length - 1}__`; // Turns into __URL_0__, __URL_1__, etc.
+  });
+
+  const prompt = `You are an expert technical translator. Translate the text from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}.
+
+CRITICAL RULES:
+1. DO NOT translate proper nouns, acronyms, or project names (e.g., "${PROJECT_NAME}"). Keep them exactly as they appear.
+2. Return ONLY plain text. Do not add asterisks (*), bolding, quotes, or any markdown syntax.
+3. Keep placeholders like __URL_0__ exactly as they are.
+
+Original text:
+${protectedText}`;
 
   try {
     const response = await fetch(OLLAMA_URL, {
@@ -113,12 +129,19 @@ Original text: ${text}`;
       throw new Error('No response from Ollama API');
     }
 
+    let translatedText = data.response.trim();
+
+    // Restore the original URLs back into the translated text
+    urls.forEach((url, index) => {
+      translatedText = translatedText.replace(`__URL_${index}__`, url);
+    });
+
     // Stop the stopwatch and calculate elapsed seconds
     const endTime = performance.now();
     const duration = ((endTime - startTime) / 1000).toFixed(2);
 
-    const translatedText = data.response.trim();
     console.log(`   🔹 [${duration}s] Translated: "${text.substring(0, 20)}..." -> "${translatedText.substring(0, 20)}..."`);
+    
     return translatedText;
   } catch (error) {
     const endTime = performance.now();

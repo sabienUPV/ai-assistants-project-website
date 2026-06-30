@@ -7,6 +7,7 @@
       "@admin-assets/*": ["./src/assets/*"],
       "@styles/*": ["./src/styles/*"],
       "@languages": ["../core/src/languages.ts"],
+      "@constants": ["../core/src/constants.ts"],
       "@utils/*": ["./src/utils/*"]
     }
   }
