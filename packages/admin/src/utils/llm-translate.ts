@@ -7,7 +7,7 @@ import { localeEnglishNames, type Locale } from '@languages';
 
 // LLM Engine Configuration
 const OLLAMA_URL = 'http://localhost:11434/api/generate';
-const LLM_MODEL = 'ministral-3:8b'; // Can be swapped with 'llama3.2:8b' or any other model available in your local Ollama instance
+const LLM_MODEL = 'ministral-3:3b'; // Can be swapped with 'llama3.2:8b' or any other model available in your local Ollama instance
 
 /**
  * Core function to parse, translate, and rebuild the .mdoc file
