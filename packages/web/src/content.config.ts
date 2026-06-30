@@ -52,10 +52,15 @@ const glossary = defineCollection({
   }),
 });
 
-const posts = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdoc}', base: '../admin/src/content/posts' }),
-  // Type-check frontmatter using a schema
-  schema: postSchema,
-});
+// Create one posts_<locale> collection for each supported locale
+const posts = locales.reduce((acc, locale) => {
+  acc[`posts_${locale}`] = defineCollection({
+    // Load all .md and .mdoc files in the locale-specific posts directory
+    loader: glob({ pattern: `${locale}/posts/*.{md,mdoc}`, base: '../admin/src/content' }),
+    // Type-check frontmatter using the shared postSchema from core
+    schema: postSchema,
+  });
+  return acc;
+}, {} as Record<`posts_${Locale}`, ReturnType<typeof defineCollection>>); // Type assertion for strict typing
 
-export const collections = { i18n, glossary, posts };
+export const collections = { i18n, glossary, ...posts };

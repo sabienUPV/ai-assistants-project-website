@@ -1,11 +1,20 @@
 ---
-import { getCollection } from 'astro:content';
-import Layout from '../../layouts/Layout.astro';
+import { getStaticPathsFromLocales as getStaticPaths } from '@utils/translation';
+
+export { getStaticPaths };
+
+import { getCollection, type CollectionEntry } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import type { Post } from '@sabien-upv-astro-cms/core';
+import type { Locale } from '@languages';
+import { getSlugFromEntryId } from '@utils/dynamicContent';
 
 export const prerender = true;
 
+const { locale } = Astro.locals;
+
 // 1. Fetch all entries from the posts collection
-const allPosts = await getCollection('posts');
+const allPosts = await getCollection(`posts_${locale}`) as (CollectionEntry<`posts_${Locale}`> & { data: Post })[];
 
 // 2. Sort posts by publication date (newest first)
 const sortedPosts = allPosts.sort((a, b) => {
@@ -15,7 +24,7 @@ const sortedPosts = allPosts.sort((a, b) => {
 });
 ---
 
-<Layout title="Project News & Blog" includeLocaleSelector={false}>
+<Layout title="Project News & Blog">
   <main class="blog-directory">
     <h1 class="directory-title">Latest Updates</h1>
 
@@ -25,7 +34,7 @@ const sortedPosts = allPosts.sort((a, b) => {
           <div class="card-body">
             <!-- Modified header semantic spacing to match global line-height specs -->
             <h2 class="card-title">
-              <a href={`/blog/${post.id}`}>{post.data.title}</a>
+              <a href={getSlugFromEntryId(post.id)}>{post.data.title}</a>
             </h2>
             <div class="card-date">
               {post.data.pubDate?.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -34,7 +43,7 @@ const sortedPosts = allPosts.sort((a, b) => {
               {post.data.description || "Click to read the full article."}
             </p>
           </div>
-          <a href={`/blog/${post.id}`} class="read-more-btn">
+          <a href={getSlugFromEntryId(post.id)} class="read-more-btn">
             Read article &rarr;
           </a>
         </article>
