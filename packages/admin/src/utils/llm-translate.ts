@@ -109,12 +109,18 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
     return `URLPLACEHOLDER${urls.length - 1}X`; // Turns into URLPLACEHOLDER0X, URLPLACEHOLDER1X, etc.
   });
 
+  let promptRules = `CRITICAL RULES:
+1. DO NOT translate proper nouns, acronyms, or project names (e.g., "${PROJECT_NAME}"). Keep them exactly as they appear.
+2. Return ONLY plain text. Do not add asterisks (*), bolding, quotes, or any markdown syntax.`;
+
+  // Add the placeholder rule ONLY if there are URLs in this fragment
+  if (urls.length > 0) {
+    promptRules += `\n3. Keep placeholders like URLPLACEHOLDER0X exactly as they are.`;
+  }
+
   const prompt = `You are an expert technical translator. Translate the text from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}.
 
-CRITICAL RULES:
-1. DO NOT translate proper nouns, acronyms, or project names (e.g., "${PROJECT_NAME}"). Keep them exactly as they appear.
-2. Return ONLY plain text. Do not add asterisks (*), bolding, quotes, or any markdown syntax.
-3. Keep placeholders like URLPLACEHOLDER0X exactly as they are.
+${promptRules}
 
 Original text:
 ${protectedText}`;
