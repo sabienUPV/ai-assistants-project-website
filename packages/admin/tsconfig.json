@@ -5,7 +5,9 @@
     "jsxImportSource": "react",
     "paths": {
       "@admin-assets/*": ["./src/assets/*"],
-      "@styles/*": ["./src/styles/*"]
+      "@styles/*": ["./src/styles/*"],
+      "@languages": ["../core/src/languages.ts"],
+      "@utils/*": ["./src/utils/*"]
     }
   }
 }

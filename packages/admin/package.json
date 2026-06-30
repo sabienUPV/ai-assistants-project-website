@@ -5,14 +5,16 @@
     "@astrojs/markdoc": "^1.0.3",
     "@astrojs/node": "^10.0.5",
     "@astrojs/react": "^5.0.3",
+    "@iconify-json/circle-flags": "^1.2.10",
     "@keystatic/astro": "^5.1.0",
     "@keystatic/core": "^0.5.50",
-    "@iconify-json/circle-flags": "^1.2.10",
+    "@markdoc/markdoc": "^0.5.7",
     "@sabien-upv-astro-cms/core": "0.0.0",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "astro": "^6.1.8",
     "astro-icon": "^1.1.5",
+    "gray-matter": "^4.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sharp": "^0.34.5"
@@ -22,6 +24,12 @@
     "build": "astro build",
     "preview": "astro preview",
     "start": "node ./dist/server/entry.mjs",
-    "astro": "astro"
+    "astro": "astro",
+    "llm-translate": "tsx scripts/run-llm-translate.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
   }
 }
