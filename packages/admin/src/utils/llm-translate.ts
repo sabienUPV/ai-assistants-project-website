@@ -2,17 +2,19 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import matter from 'gray-matter';
 import Markdoc from '@markdoc/markdoc';
+import { performance } from 'node:perf_hooks'; // Native Node module for precise timing
 
 import { localeEnglishNames, type Locale } from '@languages';
 
 // LLM Engine Configuration
 const OLLAMA_URL = 'http://localhost:11434/api/generate';
-const LLM_MODEL = 'ministral-3:3b'; // Can be swapped with 'llama3.2:8b' or any other model available in your local Ollama instance
+const LLM_MODEL = 'ministral-3:3b'; // Can be swapped with 'llama3.2:1b' or any other model available in your local Ollama instance
 
 /**
  * Core function to parse, translate, and rebuild the .mdoc file
  */
 export async function processDocument(inputPath: string, outputPath: string, sourceLang: Locale, targetLang: Locale) {
+  const fileStart = performance.now();
   console.log(`\n📄 Processing: ${path.basename(inputPath)} -> Target: ${targetLang.toUpperCase()} (${localeEnglishNames[targetLang]})`);
   
   // 1. Read the original file
@@ -75,7 +77,9 @@ export async function processDocument(inputPath: string, outputPath: string, sou
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
   await fs.writeFile(outputPath, finalFileContent, 'utf-8');
   
-  console.log(`✅ File successfully saved to: ${outputPath}`);
+  const fileEnd = performance.now();
+  const fileDuration = ((fileEnd - fileStart) / 1000).toFixed(2);
+  console.log(`✅ File successfully saved to: ${outputPath} (Total time: ${fileDuration}s)`);
 }
 
 /**
@@ -84,6 +88,9 @@ export async function processDocument(inputPath: string, outputPath: string, sou
 export async function translateText(text: string, sourceLang: Locale, targetLang: Locale): Promise<string> {
   // Ignore empty strings, whitespace, or single line breaks
   if (!text.trim()) return text;
+
+  // Start the high-resolution stopwatch
+  const startTime = performance.now();
 
   const prompt = `You are an expert technical translator. Translate the following text from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}. 
 Return ONLY the translation, without any markdown formatting, quotes, or introductory text.
@@ -106,12 +113,18 @@ Original text: ${text}`;
       throw new Error('No response from Ollama API');
     }
 
+    // Stop the stopwatch and calculate elapsed seconds
+    const endTime = performance.now();
+    const duration = ((endTime - startTime) / 1000).toFixed(2);
+
     const translatedText = data.response.trim();
-    console.log(`   🔹 Translated: "${text.substring(0, 20)}..." -> "${translatedText.substring(0, 20)}..."`);
+    console.log(`   🔹 [${duration}s] Translated: "${text.substring(0, 20)}..." -> "${translatedText.substring(0, 20)}..."`);
     return translatedText;
   } catch (error) {
+    const endTime = performance.now();
+    const duration = ((endTime - startTime) / 1000).toFixed(2);
     const textSnippet = text.length > 20 ? `${text.substring(0, 20)}...` : text;
-    console.error(`❌ Ollama translation error for: "${textSnippet}"`, error);
+    console.error(`❌ [${duration}s] Ollama translation error for: "${textSnippet}"`, error);
     return text; // Fallback: return original text if the request fails
   }
 }
