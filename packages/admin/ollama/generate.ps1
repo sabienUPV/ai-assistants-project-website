@@ -1,6 +1,6 @@
 param(
     # Note: PowerShell natively supports single hyphen parameters (-model, -prompt)
-    [string]$model = "ministral-3:3b",
+    [string]$model = "llama3.2:1b",
     # This allows users to type -host or --host, but inside the script 
     # we safely use the variable $ollamaHost to avoid clashing with PowerShell's built-in $host
     [Alias('host')]

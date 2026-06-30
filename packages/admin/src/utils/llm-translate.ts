@@ -9,7 +9,7 @@ import { PROJECT_NAME } from '@constants';
 
 // LLM Engine Configuration
 const OLLAMA_URL = 'http://localhost:11434/api/generate';
-const LLM_MODEL = 'ministral-3:3b'; // Can be swapped with 'llama3.2:1b' or any other model available in your local Ollama instance
+const LLM_MODEL = 'llama3.2:1b'; // Can be swapped with 'ministral-3:3b' or any other model available in your local Ollama instance
 
 // Keys in the YAML frontmatter that should be translated
 const keysToTranslate = ['title', 'description'];
