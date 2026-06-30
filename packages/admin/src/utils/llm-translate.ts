@@ -93,8 +93,15 @@ export async function processDocument(inputPath: string, outputPath: string, sou
  * Calls the local Ollama API to translate plain text nodes.
  */
 export async function translateText(text: string, sourceLang: Locale, targetLang: Locale): Promise<string> {
+  // Capture leading and trailing whitespace to preserve formatting after translation
+  const leadingSpace = text.match(/^\s*/)?.[0] || '';
+  const trailingSpace = text.match(/\s*$/)?.[0] || '';
+  
+  // Trim the text for processing, but we'll reattach whitespace later
+  const coreText = text.trim();
+
   // Ignore empty strings, whitespace, or single line breaks
-  if (!text.trim()) return text;
+  if (!coreText) return text;
 
   // Start the high-resolution stopwatch
   const startTime = performance.now();
@@ -103,7 +110,7 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
   const urlRegex = /(https?:\/\/[^\s)\]"']+)/g;
   const urls: string[] = [];
   
-  const protectedText = text.replace(urlRegex, (match) => {
+  const protectedText = coreText.replace(urlRegex, (match) => {
     urls.push(match);
     // Note: We use a purely alphanumeric placeholder to avoid any special characters that might confuse the LLM. The index ensures uniqueness for multiple URLs.
     return `URLPLACEHOLDER${urls.length - 1}X`; // Turns into URLPLACEHOLDER0X, URLPLACEHOLDER1X, etc.
@@ -153,17 +160,21 @@ ${protectedText}`;
     const endTime = performance.now();
     const duration = ((endTime - startTime) / 1000).toFixed(2);
 
-    const textSnippet = MAX_SNIPPET_LENGTH > 0 && text.length > MAX_SNIPPET_LENGTH ? `${text.substring(0, MAX_SNIPPET_LENGTH)}...` : text;
+    const textSnippet = MAX_SNIPPET_LENGTH > 0 && coreText.length > MAX_SNIPPET_LENGTH ? `${coreText.substring(0, MAX_SNIPPET_LENGTH)}...` : coreText;
     const translatedSnippet = MAX_SNIPPET_LENGTH > 0 && translatedText.length > MAX_SNIPPET_LENGTH ? `${translatedText.substring(0, MAX_SNIPPET_LENGTH)}...` : translatedText;
 
     console.log(`   🔹 [${duration}s] Translated: "${textSnippet}" -> "${translatedSnippet}"`);
     
-    return translatedText;
+    if (leadingSpace) console.log(`Added back leading whitespace: "${leadingSpace}" (length: ${leadingSpace.length})`);
+    if (trailingSpace) console.log(`Added back trailing whitespace: "${trailingSpace}" (length: ${trailingSpace.length})`);
+    
+    // Return the translated text with the original leading and trailing whitespace preserved
+    return `${leadingSpace}${translatedText}${trailingSpace}`;
   } catch (error) {
     const endTime = performance.now();
     const duration = ((endTime - startTime) / 1000).toFixed(2);
-    const textSnippet = MAX_SNIPPET_LENGTH > 0 && text.length > MAX_SNIPPET_LENGTH ? `${text.substring(0, MAX_SNIPPET_LENGTH)}...` : text;
+    const textSnippet = MAX_SNIPPET_LENGTH > 0 && coreText.length > MAX_SNIPPET_LENGTH ? `${coreText.substring(0, MAX_SNIPPET_LENGTH)}...` : coreText;
     console.error(`❌ [${duration}s] Ollama translation error for: "${textSnippet}"`, error);
-    return text; // Fallback: return original text if the request fails
+    return text; // Fallback: return original text if the request fails (it already includes original whitespace)
   }
 }
