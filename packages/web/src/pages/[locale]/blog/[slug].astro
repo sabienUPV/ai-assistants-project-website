@@ -39,7 +39,7 @@ export async function getStaticPaths() {
       <div class="post-meta">
         {post.data.pubDate && (
           <time datetime={post.data.pubDate.toISOString()}>
-            {post.data.pubDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+            {post.data.pubDate.toLocaleDateString(locale === 'en' ? 'en-GB' : locale, { day: 'numeric', month: 'long', year: 'numeric' })}
           </time>
         )}
         {post.data.author && <span class="author">By {post.data.author}</span>}
