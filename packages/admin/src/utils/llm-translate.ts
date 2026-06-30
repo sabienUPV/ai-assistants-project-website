@@ -140,6 +140,7 @@ ${protectedText}`;
         model: LLM_MODEL,
         prompt: prompt,
         stream: false,
+        temperature: 0.2, // Lower temperature for more deterministic translations
       }),
     });
 
