@@ -48,17 +48,25 @@ export async function processDocument(inputPath: string, outputPath: string, sou
   // 5. Walk the AST and mutate ONLY the text nodes
   console.log('🤖 Sending text nodes to local LLM...');
   
+  // Regular expression to check if the text contains at least one alphanumeric character
+  // \p{L} matches any letter from any language, \p{N} matches any number
+  const letterOrNumberRegex = /[\p{L}\p{N}]/u;
+
   // ast.walk() is a generator that yields every node in the tree
   for (const node of ast.walk()) {
     // We strictly target text nodes to prevent the LLM from breaking tags or markup
     if (node.type === 'text' && typeof node.attributes.content === 'string') {
       const originalText = node.attributes.content;
       
-      // Avoid API calls for standalone punctuation or spacing
-      if (originalText.trim().length > 1) {
+      // Check if the text actually contains translatable content (letters or numbers)
+      // This completely skips standalone emojis (like 🔹), punctuation, or empty blocks
+      if (letterOrNumberRegex.test(originalText)) {
         const translatedText = await translateText(originalText, sourceLang, targetLang);
         // Mutate the node in place
         node.attributes.content = translatedText;
+      } else {
+        // Keep the symbol exactly as it was
+        console.log(`   ⏩ Skipped structural symbol/emoji: "${originalText}"`);
       }
     }
   }
