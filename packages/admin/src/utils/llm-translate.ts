@@ -41,6 +41,9 @@ export async function processDocument(inputPath: string, outputPath: string, sou
     }
   }
 
+  // 3.5 Mark the document as AI-generated (aiGenerated: true), since this script translates the content through an LLM (AI).
+  translatedFrontmatter['aiGenerated'] = true;
+
   // 4. Parse the body into an Abstract Syntax Tree (AST)
   console.log('🌳 Generating Markdoc AST...');
   const ast = Markdoc.parse(mdocContent);

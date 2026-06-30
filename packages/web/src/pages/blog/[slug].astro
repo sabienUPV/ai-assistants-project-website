@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import AiDisclaimer from '@components/AiDisclaimer.astro';
 
 export const prerender = true;
 
@@ -34,6 +35,10 @@ export async function getStaticPaths() {
       
       {post.data.description && (
         <p class="post-description">{post.data.description}</p>
+      )}
+
+      {post.data.aiGenerated && (
+        <AiDisclaimer />
       )}
     </header>
 

@@ -69,6 +69,11 @@ export default config({
         pubDate: fields.date({ label: 'Date', defaultValue: { kind: 'today' } }),
         description: fields.text({ label: 'Description' }),
         author: fields.text({ label: 'Author' }),
+        aiGenerated: fields.checkbox({
+          label: '🤖 AI Generated Translation',
+          description: 'Check this if the content was translated automatically. Uncheck it after manual review.',
+          defaultValue: false,
+        }),
         content: fields.markdoc({
           label: 'Content',
           options: {

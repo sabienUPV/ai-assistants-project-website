@@ -1,0 +1,70 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { getPlainPathNoLocale } from "@utils/localizedUrl";
+import { defaultLocale } from "@languages";
+
+const { locale: currentLocale, t } = Astro.locals;
+
+// Get the locale-agnostic path (e.g., 'contact' instead of '/en/contact' or '/my-repo/en/contact')
+const plainPathNoLocale = getPlainPathNoLocale(Astro.url.pathname, currentLocale);
+---
+
+<div class="ai-disclaimer" role="alert">
+  <div class="icon">
+    {/* Warning icon for the disclaimer */}
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+      <path d="M12 9v4"/>
+      <path d="M12 17h.01"/>
+    </svg>
+  </div>
+  
+  <div class="content">
+    <p>
+      <strong>{t("ai_disclaimer_note")}</strong>: {t("ai_disclaimer_text")}
+    </p>
+    <p>
+      <a href={getRelativeLocaleUrl(defaultLocale, plainPathNoLocale)}>{t("ai_disclaimer_original_link")}</a>
+    </p>
+  </div>
+</div>
+
+<style>
+  .ai-disclaimer {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background-color: #fffbeb; /* Amarillo suave para no ser muy agresivo */
+    border-left: 4px solid #f59e0b;
+    padding: 1rem;
+    margin: 2rem 0;
+    border-radius: 0.25rem;
+    color: #92400e;
+  }
+
+  .icon {
+    flex-shrink: 0;
+    color: #d97706;
+  }
+
+  .content p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .content p + p {
+    margin-top: 0.5rem;
+  }
+
+  .content a {
+    color: #d97706;
+    text-decoration: underline;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .content a:hover {
+    color: #b45309;
+  }
+</style>
