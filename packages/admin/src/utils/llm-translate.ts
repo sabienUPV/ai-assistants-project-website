@@ -166,8 +166,8 @@ ${protectedText}`;
 
     console.log(`   🔹 [${duration}s] Translated: "${textSnippet}" -> "${translatedSnippet}"`);
     
-    if (leadingSpace) console.log(`Added back leading whitespace: "${leadingSpace}" (length: ${leadingSpace.length})`);
-    if (trailingSpace) console.log(`Added back trailing whitespace: "${trailingSpace}" (length: ${trailingSpace.length})`);
+    if (leadingSpace) console.log(`       🔸 Added back leading whitespace: "${leadingSpace}" (length: ${leadingSpace.length})`);
+    if (trailingSpace) console.log(`       🔸 Added back trailing whitespace: "${trailingSpace}" (length: ${trailingSpace.length})`);
     
     // Return the translated text with the original leading and trailing whitespace preserved
     return `${leadingSpace}${translatedText}${trailingSpace}`;
