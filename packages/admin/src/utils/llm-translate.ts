@@ -106,7 +106,9 @@ Original text: ${text}`;
       throw new Error('No response from Ollama API');
     }
 
-    return data.response.trim();
+    const translatedText = data.response.trim();
+    console.log(`   🔹 Translated: "${text.substring(0, 20)}..." -> "${translatedText.substring(0, 20)}..."`);
+    return translatedText;
   } catch (error) {
     const textSnippet = text.length > 20 ? `${text.substring(0, 20)}...` : text;
     console.error(`❌ Ollama translation error for: "${textSnippet}"`, error);
