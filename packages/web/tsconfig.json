@@ -11,7 +11,7 @@
       "@scripts/*": ["./src/scripts/*"],
       "@styles/*": ["./src/styles/*"],
       "@utils/*": ["./src/utils/*"],
-      "@languages": ["./src/languages.ts"],
+      "@languages": ["../core/src/languages.ts"],
       "@constants": ["./src/constants.ts"],
       "@admin-assets/*": ["../admin/src/assets/*"]
     }
