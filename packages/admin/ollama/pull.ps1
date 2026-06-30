@@ -1,5 +1,5 @@
 param(
-    [string]$model = "llama3.2:1b",
+    [string]$model = "ministral-3:3b",
     # This allows users to type -host or --host, but inside the script 
     # we safely use the variable $ollamaHost to avoid clashing with PowerShell's built-in $host
     [Alias('host')]

@@ -2,7 +2,7 @@
 
 # Default values
 OLLAMA_HOST="localhost:11434"
-MODEL_NAME="llama3.2:1b"
+MODEL_NAME="ministral-3:3b"
 
 # Parse arguments
 while [ "$#" -gt 0 ]; do
