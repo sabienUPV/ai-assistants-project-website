@@ -8,6 +8,7 @@
     "dev:web": "npm run -w @sabien-upv-astro-cms/web dev",
     "dev:admin": "npm run -w @sabien-upv-astro-cms/admin dev",
     "build:web": "npm run -w @sabien-upv-astro-cms/web build",
-    "build:admin": "npm run -w @sabien-upv-astro-cms/admin build"
+    "build:admin": "npm run -w @sabien-upv-astro-cms/admin build",
+    "llm-translate": "npm run -w @sabien-upv-astro-cms/admin llm-translate"
   }
 }
