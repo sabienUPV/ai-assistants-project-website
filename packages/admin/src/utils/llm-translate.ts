@@ -11,6 +11,13 @@ import { PROJECT_NAME } from '@constants';
 const OLLAMA_URL = 'http://localhost:11434/api/generate';
 const LLM_MODEL = 'ministral-3:3b'; // Can be swapped with 'llama3.2:1b' or any other model available in your local Ollama instance
 
+// Keys in the YAML frontmatter that should be translated
+const keysToTranslate = ['title', 'description'];
+
+// Maximum length of snippets to log for translation feedback
+const MAX_SNIPPET_LENGTH = 20;
+//const MAX_SNIPPET_LENGTH = Number.MAX_SAFE_INTEGER;
+
 /**
  * Core function to parse, translate, and rebuild the .mdoc file
  */
@@ -27,7 +34,6 @@ export async function processDocument(inputPath: string, outputPath: string, sou
   // 3. Translate specific Frontmatter values
   console.log('🔄 Translating YAML Frontmatter...');
   const translatedFrontmatter = { ...frontmatter };
-  const keysToTranslate = ['title', 'description'];
   
   for (const key of keysToTranslate) {
     if (translatedFrontmatter[key]) {
@@ -141,13 +147,16 @@ ${protectedText}`;
     const endTime = performance.now();
     const duration = ((endTime - startTime) / 1000).toFixed(2);
 
-    console.log(`   🔹 [${duration}s] Translated: "${text.substring(0, 20)}..." -> "${translatedText.substring(0, 20)}..."`);
+    const textSnippet = text.length > MAX_SNIPPET_LENGTH ? `${text.substring(0, MAX_SNIPPET_LENGTH)}...` : text;
+    const translatedSnippet = translatedText.length > MAX_SNIPPET_LENGTH ? `${translatedText.substring(0, MAX_SNIPPET_LENGTH)}...` : translatedText;
+
+    console.log(`   🔹 [${duration}s] Translated: "${textSnippet}" -> "${translatedSnippet}"`);
     
     return translatedText;
   } catch (error) {
     const endTime = performance.now();
     const duration = ((endTime - startTime) / 1000).toFixed(2);
-    const textSnippet = text.length > 20 ? `${text.substring(0, 20)}...` : text;
+    const textSnippet = text.length > MAX_SNIPPET_LENGTH ? `${text.substring(0, MAX_SNIPPET_LENGTH)}...` : text;
     console.error(`❌ [${duration}s] Ollama translation error for: "${textSnippet}"`, error);
     return text; // Fallback: return original text if the request fails
   }
