@@ -74,15 +74,6 @@ export async function processDocument(inputPath: string, outputPath: string, sou
     }
   }
 
-  // 5.5 Fix Date objects formatting
-  // gray-matter parses standard dates into JS Date objects, which stringify to full ISO strings.
-  // We manually convert any Date objects back to 'YYYY-MM-DD' strings.
-  for (const key in translatedFrontmatter) {
-    if (translatedFrontmatter[key] instanceof Date) {
-      translatedFrontmatter[key] = (translatedFrontmatter[key] as Date).toISOString().split('T')[0];
-    }
-  }
-
   // 6. Rebuild (Unparse) the document
   console.log('🏗️ Rebuilding the document...');
   // Markdoc.format() converts the mutated AST back to a markdown string
