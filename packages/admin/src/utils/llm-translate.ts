@@ -15,8 +15,8 @@ const LLM_MODEL = 'ministral-3:3b'; // Can be swapped with 'llama3.2:1b' or any 
 const keysToTranslate = ['title', 'description'];
 
 // Maximum length of snippets to log for translation feedback
-const MAX_SNIPPET_LENGTH = 20;
-//const MAX_SNIPPET_LENGTH = Number.MAX_SAFE_INTEGER;
+//const MAX_SNIPPET_LENGTH = 20;
+const MAX_SNIPPET_LENGTH = -1; // Set to -1 to disable snippet truncation in logs
 
 /**
  * Core function to parse, translate, and rebuild the .mdoc file
@@ -153,8 +153,8 @@ ${protectedText}`;
     const endTime = performance.now();
     const duration = ((endTime - startTime) / 1000).toFixed(2);
 
-    const textSnippet = text.length > MAX_SNIPPET_LENGTH ? `${text.substring(0, MAX_SNIPPET_LENGTH)}...` : text;
-    const translatedSnippet = translatedText.length > MAX_SNIPPET_LENGTH ? `${translatedText.substring(0, MAX_SNIPPET_LENGTH)}...` : translatedText;
+    const textSnippet = MAX_SNIPPET_LENGTH > 0 && text.length > MAX_SNIPPET_LENGTH ? `${text.substring(0, MAX_SNIPPET_LENGTH)}...` : text;
+    const translatedSnippet = MAX_SNIPPET_LENGTH > 0 && translatedText.length > MAX_SNIPPET_LENGTH ? `${translatedText.substring(0, MAX_SNIPPET_LENGTH)}...` : translatedText;
 
     console.log(`   🔹 [${duration}s] Translated: "${textSnippet}" -> "${translatedSnippet}"`);
     
@@ -162,7 +162,7 @@ ${protectedText}`;
   } catch (error) {
     const endTime = performance.now();
     const duration = ((endTime - startTime) / 1000).toFixed(2);
-    const textSnippet = text.length > MAX_SNIPPET_LENGTH ? `${text.substring(0, MAX_SNIPPET_LENGTH)}...` : text;
+    const textSnippet = MAX_SNIPPET_LENGTH > 0 && text.length > MAX_SNIPPET_LENGTH ? `${text.substring(0, MAX_SNIPPET_LENGTH)}...` : text;
     console.error(`❌ [${duration}s] Ollama translation error for: "${textSnippet}"`, error);
     return text; // Fallback: return original text if the request fails
   }
