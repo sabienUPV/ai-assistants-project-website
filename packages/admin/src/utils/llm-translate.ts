@@ -94,12 +94,13 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
   const startTime = performance.now();
 
   // Use a URL regex to find and temporarily replace URLs in the text to prevent them from being altered during translation
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const urlRegex = /(https?:\/\/[^\s)\]"']+)/g;
   const urls: string[] = [];
   
   const protectedText = text.replace(urlRegex, (match) => {
     urls.push(match);
-    return `__URL_${urls.length - 1}__`; // Turns into __URL_0__, __URL_1__, etc.
+    // Note: We use a purely alphanumeric placeholder to avoid any special characters that might confuse the LLM. The index ensures uniqueness for multiple URLs.
+    return `URLPLACEHOLDER${urls.length - 1}X`; // Turns into URLPLACEHOLDER0X, URLPLACEHOLDER1X, etc.
   });
 
   const prompt = `You are an expert technical translator. Translate the text from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}.
@@ -107,7 +108,7 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
 CRITICAL RULES:
 1. DO NOT translate proper nouns, acronyms, or project names (e.g., "${PROJECT_NAME}"). Keep them exactly as they appear.
 2. Return ONLY plain text. Do not add asterisks (*), bolding, quotes, or any markdown syntax.
-3. Keep placeholders like __URL_0__ exactly as they are.
+3. Keep placeholders like URLPLACEHOLDER0X exactly as they are.
 
 Original text:
 ${protectedText}`;
@@ -133,7 +134,7 @@ ${protectedText}`;
 
     // Restore the original URLs back into the translated text
     urls.forEach((url, index) => {
-      translatedText = translatedText.replace(`__URL_${index}__`, url);
+      translatedText = translatedText.replace(`URLPLACEHOLDER${index}X`, url);
     });
 
     // Stop the stopwatch and calculate elapsed seconds
