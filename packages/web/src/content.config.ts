@@ -6,8 +6,8 @@ import { postSchema } from '@sabien-upv-astro-cms/core';
 
 // 1. Import the supported languages and their types
 // from a single source of truth
-import { locales } from './languages';
-import type { Locale } from './languages';
+import { locales } from '@languages';
+import type { Locale } from '@languages';
 
 // 2. Dynamically create the shape for the translations
 // We want: { en: z.string(), es: z.string(), ... }

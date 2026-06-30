@@ -1,6 +1,6 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
-import { defaultLocale, locales } from './src/languages';
+import { defaultLocale, locales } from '../core/src/languages';
 
 import icon from 'astro-icon';
 
