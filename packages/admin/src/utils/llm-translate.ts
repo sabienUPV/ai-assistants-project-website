@@ -19,13 +19,22 @@ const keysToTranslate = ['title', 'description'];
 //const MAX_SNIPPET_LENGTH = 20;
 const MAX_SNIPPET_LENGTH = -1; // Set to -1 to disable snippet truncation in logs
 
+function escapeRegExp(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+const escapedProjectNameRegex = escapeRegExp(PROJECT_NAME).replace(/\s+/g, '\\s+');
+
+const PROJECT_NAME_WORDS = PROJECT_NAME.split(/\s+/);
+
 // Protected patterns include URLs, hashtags, and mentions. These will be ignored by the LLM translation process.
 // Note: We use \p{L} and \p{N}, combined with the 'u' flag, to ensure that we capture letters and numbers from any language, including accented characters and special letters like 'ñ'.
 const PROTECTED_PATTERNS = [
   /(https?:\/\/[^\s)\]"']+)/g, // URLs
   /(#[\p{L}\p{N}_]+)/gu,        // Hashtags (e.g. #AIforGood, #Inclusion)
   /(@[\p{L}\p{N}_]+)/gu,         // Mentions (e.g. @HURT)
-  /([\p{L}\p{N}._-]+@[\p{L}\p{N}._-]+\.[\p{L}\p{N}_-]+)/gu // Email addresses
+  /([\p{L}\p{N}._-]+@[\p{L}\p{N}._-]+\.[\p{L}\p{N}_-]+)/gu, // Email addresses
+  new RegExp(`(${escapedProjectNameRegex})`, 'gi'), // Project name (e.g., "AI-ASSISTANTS 4PID") in any case (lowercase, uppercase, etc.), with flexible whitespace (note: order is important! This regex should come before the individual words of the project name, to avoid partial matches)
+  ...(PROJECT_NAME_WORDS.length > 1 ? [new RegExp(`(${PROJECT_NAME_WORDS.map(word => escapeRegExp(word)).join('|')})`, 'gi')] : []), // Individual words of the project name (e.g., "AI-ASSISTANTS" and "4PID") in any case, with flexible whitespace
 ];
 
 /**
