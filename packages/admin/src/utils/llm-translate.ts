@@ -155,9 +155,9 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
   }
 
   let promptRules = `CRITICAL RULES:
-1. PRESERVE PROPER NOUNS: DO NOT translate project names (like "${PROJECT_NAME}"), countries, or organization names.
-2. NO FORMATTING: Output raw text only. No markdown, no asterisks, no bolding.
-3. NO CHATTER: DO NOT include introductory phrases, notes, or explanations (e.g., never output "Translated text:" or "Note:") IN ANY LANGUAGE. Just the exact translation.`;
+1. OUTPUT: You ONLY output the translated text. NEVER output notes, explanations, or labels like "Translated text:".
+2. NO FORMATTING: Return raw text only. No markdown, no bolding, no asterisks.
+3. PRESERVE ENTITIES: Keep project names ("${PROJECT_NAME}"), countries, and organizations exactly as in the source.`;
 
   let ruleCounter = 4;
 
@@ -169,16 +169,18 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
 
   let contextBlock = '';
   if (prevContext || nextContext) {
-    promptRules += `\n${ruleCounter}. CONTEXT ONLY: Use the <PREVIOUS_NODE> and <NEXT_NODE> strictly to understand grammar and flow (e.g., if a verb should be plural/singular based on the previous word). DO NOT translate and DO NOT output the context nodes.`;
+    promptRules += `\n${ruleCounter}. CONTEXT ONLY: Use the information below in <PREVIOUS_NODE> and <NEXT_NODE> strictly to understand grammar and flow. DO NOT translate nor include the context nodes in the output.`;
     
     if (prevContext) contextBlock += `<PREVIOUS_NODE>\n${prevContext.trim()}\n</PREVIOUS_NODE>\n\n`;
     if (nextContext) contextBlock += `<NEXT_NODE>\n${nextContext.trim()}\n</NEXT_NODE>\n\n`;
   }
 
-  const systemPrompt = `You are a professional technical translator. Your task is to translate text from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}.
+  const systemPrompt = `You are a professional data translation engine, as part of an automated pipeline. Your task is to translate text from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}.
 
 ${promptRules}
 ${contextBlock}
+
+If you output anything other than the exact translation, the system will crash.
 `;
 
   // To simplify the prompt for the LLM (especially the smaller ones), we keep all the rules and context in the system prompt, and only send it the text to translate in the user prompt. This reduces the chance of the LLM misinterpreting the instructions.
