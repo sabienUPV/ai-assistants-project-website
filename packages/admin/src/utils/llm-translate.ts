@@ -37,7 +37,7 @@ export async function processDocument(inputPath: string, outputPath: string, sou
   console.log(`🌐 Using Ollama URL: ${ollama_url}`);
   console.log(`🤖 Using LLM model: ${llm_model}`);
   // Log whether sliding window context is enabled or disabled
-  console.log(`🪟 Sliding window context: ${useSlidingContext ? 'Enabled' : 'Disabled'}`);
+  console.log(`🪟  Sliding window context: ${useSlidingContext ? 'Enabled' : 'Disabled'}`);
   
   const fileStart = performance.now();
   console.log(`\n📄 Processing: ${path.basename(inputPath)} -> Target: ${targetLang.toUpperCase()} (${localeEnglishNames[targetLang]})`);
