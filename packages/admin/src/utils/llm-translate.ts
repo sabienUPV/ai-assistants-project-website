@@ -77,7 +77,7 @@ export async function processDocument(inputPath: string, outputPath: string, sou
     }
   }
 
-  console.log('🤖 Sending text nodes to local LLM with sliding window context...');
+  console.log(`🤖 Sending text nodes to local LLM${useSlidingContext ? ' with sliding window context' : ''}...`);
   // Regular expression to check if the text contains at least one alphanumeric character
   // \p{L} matches any letter from any language, \p{N} matches any number
   const letterOrNumberRegex = /[\p{L}\p{N}]/u;
