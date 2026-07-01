@@ -163,6 +163,7 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
     });
   }
 
+  // Note: To simplify the prompt for the LLM (especially the smaller ones), we keep all the rules and context in the system prompt, and only send it the text to translate in the user prompt. This reduces the chance of the LLM misinterpreting the instructions.
   let promptRules = `CRITICAL RULES:
 1. OUTPUT: You ONLY output the translated text. NEVER output notes, explanations, or labels like "Translated text:".
 2. NO FORMATTING: Return raw text only. No markdown, no bolding, no asterisks.
@@ -178,10 +179,7 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
 
   let contextBlock = '';
   if (prevContext || nextContext) {
-    promptRules += `\n${ruleCounter}. CONTEXT ONLY: Use the information below in <PREVIOUS_NODE> and <NEXT_NODE> strictly to understand grammar and flow. DO NOT translate nor include the context nodes in the output.`;
-    
-    if (prevContext) contextBlock += `<PREVIOUS_NODE>\n${prevContext.trim()}\n</PREVIOUS_NODE>\n\n`;
-    if (nextContext) contextBlock += `<NEXT_NODE>\n${nextContext.trim()}\n</NEXT_NODE>\n\n`;
+    promptRules += `\n${ruleCounter}. TARGET ONLY: ONLY translate and output the text between [TARGET_START] and [TARGET_END]. Use any text outside of those markers as context, but DO NOT translate it, and DO NOT include it in your output.`;
   }
 
   const systemPrompt = `You are a professional data translation engine, as part of an automated pipeline. Your task is to translate text from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}.
@@ -192,8 +190,17 @@ ${contextBlock}
 If you output anything other than the exact translation, the system will crash.
 `;
 
-  // To simplify the prompt for the LLM (especially the smaller ones), we keep all the rules and context in the system prompt, and only send it the text to translate in the user prompt. This reduces the chance of the LLM misinterpreting the instructions.
-  const prompt = protectedText;
+  // If there is context, we wrap the protected text in [TARGET_START] and [TARGET_END] markers to clearly indicate to the LLM what should be translated. The context is provided outside of these markers, so the LLM can use it for better translation without including it in the output.
+  let prompt = '';
+  if (prevContext || nextContext) {;
+    prompt = `[TARGET_START]${protectedText}[TARGET_END]`;
+    
+    if (prevContext) prompt = prevContext.trim() + ' ' + prompt;
+    if (nextContext) prompt += ' ' + nextContext.trim();
+  }
+  else {
+    prompt = protectedText;
+  }
 
 console.debug('SYSTEM PROMPT SENT TO LLM:\n', systemPrompt);
 console.debug('PROMPT SENT TO LLM:\n', prompt);
