@@ -57,29 +57,39 @@ export async function processDocument(inputPath: string, outputPath: string, sou
   console.log('🌳 Generating Markdoc AST...');
   const ast = Markdoc.parse(mdocContent);
 
-  // 5. Walk the AST and mutate ONLY the text nodes
-  console.log('🤖 Sending text nodes to local LLM...');
-  
-  // Regular expression to check if the text contains at least one alphanumeric character
-  // \p{L} matches any letter from any language, \p{N} matches any number
-  const letterOrNumberRegex = /[\p{L}\p{N}]/u;
-
+  // 5. Walk the AST and collect text nodes for Sliding Window Context
+  console.log('🌳 Collecting text nodes for context window...');
+  const nodesData = [];
   // ast.walk() is a generator that yields every node in the tree
   for (const node of ast.walk()) {
     // We strictly target text nodes to prevent the LLM from breaking tags or markup
     if (node.type === 'text' && typeof node.attributes.content === 'string') {
-      const originalText = node.attributes.content;
-      
-      // Check if the text actually contains translatable content (letters or numbers)
-      // This completely skips standalone emojis (like 🔹), punctuation, or empty blocks
-      if (letterOrNumberRegex.test(originalText)) {
-        const translatedText = await translateText(originalText, sourceLang, targetLang);
-        // Mutate the node in place
-        node.attributes.content = translatedText;
-      } else {
-        // Keep the symbol exactly as it was
-        console.log(`   ⏩ Skipped structural symbol/emoji: "${originalText}"`);
-      }
+      // Store both the reference to the node itself (so we can mutate it later), and a copy of the original text to send to the LLM as context
+      nodesData.push({ node, originalText: node.attributes.content });
+    }
+  }
+
+  console.log('🤖 Sending text nodes to local LLM with sliding window context...');
+  // Regular expression to check if the text contains at least one alphanumeric character
+  // \p{L} matches any letter from any language, \p{N} matches any number
+  const letterOrNumberRegex = /[\p{L}\p{N}]/u;
+
+  for (let i = 0; i < nodesData.length; i++) {
+    const { node, originalText } = nodesData[i];
+
+    // Check if the text actually contains translatable content (letters or numbers)
+    // This completely skips standalone emojis (like 🔹), punctuation, or empty blocks
+    if (letterOrNumberRegex.test(originalText)) {
+      // Extract the context of adjacent text nodes (if any) by using the original texts (not the translated ones!) to provide the LLM with a better understanding of the surrounding content
+      const prevContext = i > 0 ? nodesData[i - 1].originalText : '';
+      const nextContext = i < nodesData.length - 1 ? nodesData[i + 1].originalText : '';
+
+      const translatedText = await translateText(originalText, sourceLang, targetLang, prevContext, nextContext);
+      // Mutate the node in place
+      node.attributes.content = translatedText;
+    } else {
+      // Keep the symbol exactly as it was
+      console.log(`   ⏩ Skipped structural symbol/emoji: "${originalText}"`);
     }
   }
 
@@ -103,7 +113,7 @@ export async function processDocument(inputPath: string, outputPath: string, sou
 /**
  * Calls the local Ollama API to translate plain text nodes.
  */
-export async function translateText(text: string, sourceLang: Locale, targetLang: Locale): Promise<string> {
+export async function translateText(text: string, sourceLang: Locale, targetLang: Locale, prevContext: string = '', nextContext: string = ''): Promise<string> {
   // Capture leading and trailing whitespace to preserve formatting after translation
   const leadingSpace = text.match(/^\s*/)?.[0] || '';
   const trailingSpace = text.match(/\s*$/)?.[0] || '';
@@ -139,18 +149,31 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
 2. NO FORMATTING: Output raw text only. No markdown, no asterisks, no bolding.
 3. NO CHATTER: Do not include introductory phrases, notes, or explanations (e.g., never output "Translated text:" or "Note:"). Just the exact translation.`;
 
+  let ruleCounter = 4;
+
   // Add the placeholder rule ONLY if there are protected tokens in this fragment
   if (protectedTokens.length > 0) {
-    promptRules += `\n4. PLACEHOLDERS: Copy placeholders like TOKENPLACEHOLDER0X exactly as they appear.`;
+    promptRules += `\n${ruleCounter}. PLACEHOLDERS: Copy placeholders like TOKENPLACEHOLDER0X exactly as they appear.`;
+    ruleCounter++;
   }
 
-  const prompt = `You are a professional technical translator. Your task is to translate the text enclosed in <SOURCE_TEXT> from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}.
+  let contextBlock = '';
+  if (prevContext || nextContext) {
+    promptRules += `\n${ruleCounter}. CONTEXT ONLY: Use the <PREVIOUS_NODE> and <NEXT_NODE> strictly to understand grammar and flow (e.g., if a verb should be plural/singular based on the previous word). DO NOT translate and DO NOT output the context nodes.`;
+    
+    if (prevContext) contextBlock += `<PREVIOUS_NODE>\n${prevContext.trim()}\n</PREVIOUS_NODE>\n\n`;
+    if (nextContext) contextBlock += `<NEXT_NODE>\n${nextContext.trim()}\n</NEXT_NODE>\n\n`;
+  }
+
+  const prompt = `You are a professional technical translator. Your task is to translate ONLY the text enclosed in <TARGET_TO_TRANSLATE> from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}. Translate NOTHING ELSE.
 
 ${promptRules}
 
-<SOURCE_TEXT>
+${contextBlock}<TARGET_TO_TRANSLATE>
 ${protectedText}
-</SOURCE_TEXT>`;
+</TARGET_TO_TRANSLATE>`;
+
+console.debug('FULL PROMPT SENT TO LLM:\n', prompt);
 
   try {
     const response = await fetch(OLLAMA_URL, {
