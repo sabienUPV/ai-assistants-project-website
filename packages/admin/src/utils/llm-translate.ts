@@ -175,15 +175,17 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
     if (nextContext) contextBlock += `<NEXT_NODE>\n${nextContext.trim()}\n</NEXT_NODE>\n\n`;
   }
 
-  const prompt = `You are a professional technical translator. Your task is to translate ONLY the text enclosed in <TARGET_TO_TRANSLATE> from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}. Translate NOTHING ELSE.
+  const systemPrompt = `You are a professional technical translator. Your task is to translate text from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}.
 
 ${promptRules}
+${contextBlock}
+`;
 
-${contextBlock}<TARGET_TO_TRANSLATE>
-${protectedText}
-</TARGET_TO_TRANSLATE>`;
+  // To simplify the prompt for the LLM (especially the smaller ones), we keep all the rules and context in the system prompt, and only send it the text to translate in the user prompt. This reduces the chance of the LLM misinterpreting the instructions.
+  const prompt = protectedText;
 
-console.debug('FULL PROMPT SENT TO LLM:\n', prompt);
+console.debug('SYSTEM PROMPT SENT TO LLM:\n', systemPrompt);
+console.debug('PROMPT SENT TO LLM:\n', prompt);
 
   try {
     // Send the prompt to the Ollama API
@@ -193,6 +195,7 @@ console.debug('FULL PROMPT SENT TO LLM:\n', prompt);
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: llm_model,
+        system: systemPrompt,
         prompt: prompt,
         stream: false,
         options: {
