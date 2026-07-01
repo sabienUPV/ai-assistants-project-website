@@ -20,7 +20,7 @@ program
   .option('-d, --debug', 'enable debug logs', false)
   .option('--url <url>', 'ollama api url', DEFAULT_OLLAMA_URL)
   .option('-m, --model <model>', 'llm model name', DEFAULT_LLM_MODEL)
-  .option('--no-context', 'disable sliding window context', true) // Default is true, because Commander understands that it's the default value of the inverted "context" property, so --no-context will be false
+  .option('--no-context', 'disable sliding window context', true) // Default is true, because Commander understands that it's the default value of the inverted "context" property, so --no-context will be false. This means that by default, the sliding window context is ENABLED.
 
 program.parse(process.argv);
 
