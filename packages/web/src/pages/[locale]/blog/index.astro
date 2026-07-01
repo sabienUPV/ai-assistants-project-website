@@ -7,7 +7,7 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import type { Post } from '@sabien-upv-astro-cms/core';
 import type { Locale } from '@languages';
-import { getSlugFromEntryId } from '@utils/dynamicContent';
+import { getExcerptFromBody, getSlugFromEntryId } from '@utils/dynamicContent';
 
 export const prerender = true;
 
@@ -22,15 +22,6 @@ const sortedPosts = allPosts.sort((a, b) => {
   const dateB = b.data.pubDate ? new Date(b.data.pubDate).getTime() : 0;
   return dateB - dateA;
 });
-
-function getExcerptFromBody(body: string | undefined, maxLength: number = 150): string {
-  if (!body) return '';
-  body = body
-    .replace(/\{%.*?%\}/g, '') // Remove markdoc tags and their content (e.g., {%...%})
-    .trim(); // Remove leading/trailing whitespace
-  const excerpt = body.substring(0, maxLength);
-  return body.length > maxLength ? `${excerpt}...` : excerpt;
-}
 ---
 
 <Layout title="Project News & Blog">
