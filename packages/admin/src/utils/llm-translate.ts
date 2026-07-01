@@ -155,9 +155,9 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
   }
 
   let promptRules = `CRITICAL RULES:
-1. PRESERVE PROPER NOUNS: Do not translate project names (like "${PROJECT_NAME}"), countries, or organization names.
+1. PRESERVE PROPER NOUNS: DO NOT translate project names (like "${PROJECT_NAME}"), countries, or organization names.
 2. NO FORMATTING: Output raw text only. No markdown, no asterisks, no bolding.
-3. NO CHATTER: Do not include introductory phrases, notes, or explanations (e.g., never output "Translated text:" or "Note:"). Just the exact translation.`;
+3. NO CHATTER: DO NOT include introductory phrases, notes, or explanations (e.g., never output "Translated text:" or "Note:") IN ANY LANGUAGE. Just the exact translation.`;
 
   let ruleCounter = 4;
 
