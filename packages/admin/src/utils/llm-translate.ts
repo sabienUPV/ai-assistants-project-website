@@ -105,6 +105,12 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
   // Ignore empty strings, whitespace, or single line breaks
   if (!coreText) return text;
 
+  // Check if the text is a standalone URL (e.g., "https://example.com"), without additional text, and skip translation for such cases
+  const strictUrlRegex = /^https?:\/\/[^\s)\]"']+$/;
+  if (strictUrlRegex.test(coreText)) {
+    return text; // Return the original text if it's a standalone URL, preserving whitespace
+  }
+
   // Start the high-resolution stopwatch
   const startTime = performance.now();
 
