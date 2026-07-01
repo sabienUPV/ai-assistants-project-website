@@ -18,6 +18,14 @@ const keysToTranslate = ['title', 'description'];
 //const MAX_SNIPPET_LENGTH = 20;
 const MAX_SNIPPET_LENGTH = -1; // Set to -1 to disable snippet truncation in logs
 
+// Protected patterns include URLs, hashtags, and mentions. These will be ignored by the LLM translation process.
+// Note: We use \p{L} and \p{N}, combined with the 'u' flag, to ensure that we capture letters and numbers from any language, including accented characters and special letters like 'ñ'.
+const PROTECTED_PATTERNS = [
+  /(https?:\/\/[^\s)\]"']+)/g, // URLs
+  /(#[\p{L}\p{N}_]+)/gu,        // Hashtags (e.g. #AIforGood, #Inclusión)
+  /(@[\p{L}\p{N}_]+)/gu         // Mentions (e.g. @HURT)
+];
+
 /**
  * Core function to parse, translate, and rebuild the .mdoc file
  */
@@ -105,33 +113,34 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
   // Ignore empty strings, whitespace, or single line breaks
   if (!coreText) return text;
 
-  // Check if the text is a standalone URL (e.g., "https://example.com"), without additional text, and skip translation for such cases
-  const strictUrlRegex = /^https?:\/\/[^\s)\]"']+$/;
-  if (strictUrlRegex.test(coreText)) {
-    return text; // Return the original text if it's a standalone URL, preserving whitespace
+  // Check if the text is only composed of protected content (e.g., URLs, hashtags, mentions), without additional text, and skip translation for such cases
+  if (isOnlyProtectedContent(coreText)) {
+    return text; // Return the original text as-is, including any leading/trailing whitespace
   }
 
   // Start the high-resolution stopwatch
   const startTime = performance.now();
 
-  // Use a URL regex to find and temporarily replace URLs in the text to prevent them from being altered during translation
-  const urlRegex = /(https?:\/\/[^\s)\]"']+)/g;
-  const urls: string[] = [];
-  
-  const protectedText = coreText.replace(urlRegex, (match) => {
-    urls.push(match);
-    // Note: We use a purely alphanumeric placeholder to avoid any special characters that might confuse the LLM. The index ensures uniqueness for multiple URLs.
-    return `URLPLACEHOLDER${urls.length - 1}X`; // Turns into URLPLACEHOLDER0X, URLPLACEHOLDER1X, etc.
-  });
+  // Extract and replace protected content (like URLs) with placeholders to prevent the LLM from altering them
+  let protectedText = coreText;
+  const protectedTokens: string[] = [];
+
+  for (const pattern of PROTECTED_PATTERNS) {
+    protectedText = protectedText.replace(pattern, (match) => {
+      protectedTokens.push(match);
+      // Note: We use a purely alphanumeric placeholder to avoid any special characters that might confuse the LLM. The index ensures uniqueness for multiple URLs.
+      return `TOKENPLACEHOLDER${protectedTokens.length - 1}X`;
+    });
+  }
 
   let promptRules = `CRITICAL RULES:
 1. PRESERVE PROPER NOUNS: Do not translate project names (like "${PROJECT_NAME}"), countries, or organization names.
 2. NO FORMATTING: Output raw text only. No markdown, no asterisks, no bolding.
 3. NO CHATTER: Do not include introductory phrases, notes, or explanations (e.g., never output "Translated text:" or "Note:"). Just the exact translation.`;
 
-  // Add the placeholder rule ONLY if there are URLs in this fragment
-  if (urls.length > 0) {
-    promptRules += `\n4. PLACEHOLDERS: Copy placeholders like URLPLACEHOLDER0X exactly as they appear.`;
+  // Add the placeholder rule ONLY if there are protected tokens in this fragment
+  if (protectedTokens.length > 0) {
+    promptRules += `\n4. PLACEHOLDERS: Copy placeholders like TOKENPLACEHOLDER0X exactly as they appear.`;
   }
 
   const prompt = `You are a professional technical translator. Your task is to translate the text enclosed in <SOURCE_TEXT> from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}.
@@ -166,9 +175,9 @@ ${protectedText}
 
     let translatedText = data.response.trim();
 
-    // Restore the original URLs back into the translated text
-    urls.forEach((url, index) => {
-      translatedText = translatedText.replace(`URLPLACEHOLDER${index}X`, url);
+    // Restore the original protected tokens back into the translated text
+    protectedTokens.forEach((token, index) => {
+      translatedText = translatedText.replace(`TOKENPLACEHOLDER${index}X`, token);
     });
 
     // Stop the stopwatch and calculate elapsed seconds
@@ -192,4 +201,21 @@ ${protectedText}
     console.error(`❌ [${duration}s] Ollama translation error for: "${textSnippet}"`, error);
     return text; // Fallback: return original text if the request fails (it already includes original whitespace)
   }
+}
+
+// Generic function to determine if the text should be ignored by the LLM because it contains only protected content (like URLs, hashtags, or mentions) and no translatable text.
+function isOnlyProtectedContent(text: string): boolean {
+  let tempText = text;
+
+  // We remove all protected patterns from the text
+  for (const pattern of PROTECTED_PATTERNS) {
+    tempText = tempText.replace(pattern, '');
+  }
+
+  // We trim the text to remove any leading or trailing whitespace
+  tempText = tempText.trim();
+  
+  // If after removing URLs, hashtags and mentions, the text is empty 
+  // or only contains whitespace and isolated punctuation, we return true
+  return tempText.length === 0 || /^[\s\p{P}]+$/u.test(tempText);
 }
