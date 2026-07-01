@@ -7,17 +7,24 @@ import { Command } from 'commander';
 
 const program = new Command();
 
+interface CliOptions {
+  debug: boolean;
+  url: string;
+  model: string;
+  context: boolean; // Commander is smart enough to invert the boolean value of --no-context automatically and store it in this property as 'context'
+}
+
 program
   .name('llm-translate')
   .description('Translate all .mdoc files in the posts directory to all supported locales using LLM.')
   .option('-d, --debug', 'enable debug logs', false)
   .option('--url <url>', 'ollama api url', DEFAULT_OLLAMA_URL)
   .option('-m, --model <model>', 'llm model name', DEFAULT_LLM_MODEL)
-  .option('--no-context', 'disable sliding window context', false);
+  .option('--no-context', 'disable sliding window context', true) // Default is true, because Commander understands that it's the default value of the inverted "context" property, so --no-context will be false
 
 program.parse(process.argv);
 
-const options = program.opts();
+const options = program.opts<CliOptions>();
 
 if (options.debug) {
   console.log('🔍 Debug mode enabled');
@@ -26,6 +33,7 @@ else {
   console.debug = () => {}; // Disable debug logs if not in debug mode
 }
 
+console.debug('CLI Options:', options);
 
 // Get the directory name of the current script file
 const __filename = fileURLToPath(import.meta.url);
@@ -59,7 +67,7 @@ const run = async () => {
         `${path.sep}${lang}${path.sep}`
       );
       
-      await processDocument(inputFile, outputFile, defaultLocale, lang, options.url, options.model, !options.noContext);
+      await processDocument(inputFile, outputFile, defaultLocale, lang, options.url, options.model, options.context);
     }
   }
 };
