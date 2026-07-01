@@ -12,7 +12,8 @@ program
   .description('Translate all .mdoc files in the posts directory to all supported locales using LLM.')
   .option('-d, --debug', 'enable debug logs', false)
   .option('--url <url>', 'ollama api url', DEFAULT_OLLAMA_URL)
-  .option('-m, --model <model>', 'llm model name', DEFAULT_LLM_MODEL);
+  .option('-m, --model <model>', 'llm model name', DEFAULT_LLM_MODEL)
+  .option('--no-context', 'disable sliding window context', false);
 
 program.parse(process.argv);
 
@@ -58,7 +59,7 @@ const run = async () => {
         `${path.sep}${lang}${path.sep}`
       );
       
-      await processDocument(inputFile, outputFile, defaultLocale, lang, options.url, options.model);
+      await processDocument(inputFile, outputFile, defaultLocale, lang, options.url, options.model, !options.noContext);
     }
   }
 };

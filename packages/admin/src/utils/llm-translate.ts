@@ -32,7 +32,7 @@ const PROTECTED_PATTERNS = [
  * Core function to parse, translate, and rebuild the .mdoc file
  */
 export async function processDocument(inputPath: string, outputPath: string, sourceLang: Locale, targetLang: Locale,
-  ollama_url: string = DEFAULT_OLLAMA_URL, llm_model: string = DEFAULT_LLM_MODEL) : Promise<void> {
+  ollama_url: string = DEFAULT_OLLAMA_URL, llm_model: string = DEFAULT_LLM_MODEL, useSlidingContext: boolean = true) : Promise<void> {
   // Log URL and model being used for translation
   console.log(`🌐 Using Ollama URL: ${ollama_url}`);
   console.log(`🤖 Using LLM model: ${llm_model}`);
@@ -87,8 +87,8 @@ export async function processDocument(inputPath: string, outputPath: string, sou
     // This completely skips standalone emojis (like 🔹), punctuation, or empty blocks
     if (letterOrNumberRegex.test(originalText)) {
       // Extract the context of adjacent text nodes (if any) by using the original texts (not the translated ones!) to provide the LLM with a better understanding of the surrounding content
-      const prevContext = i > 0 ? nodesData[i - 1].originalText : '';
-      const nextContext = i < nodesData.length - 1 ? nodesData[i + 1].originalText : '';
+      const prevContext = (useSlidingContext && i > 0) ? nodesData[i - 1].originalText : '';
+      const nextContext = (useSlidingContext && i < nodesData.length - 1) ? nodesData[i + 1].originalText : '';
 
       const translatedText = await translateText(originalText, sourceLang, targetLang, ollama_url, llm_model, prevContext, nextContext);
       // Mutate the node in place
