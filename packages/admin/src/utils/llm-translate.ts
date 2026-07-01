@@ -8,8 +8,9 @@ import { localeEnglishNames, type Locale } from '@languages';
 import { PROJECT_NAME } from '@constants';
 
 // LLM Engine Configuration
-const OLLAMA_URL = 'http://localhost:11434/api/generate';
-const LLM_MODEL = 'ministral-3:3b'; // Can be swapped with 'llama3.2:1b' or any other model available in your local Ollama instance
+export const DEFAULT_OLLAMA_URL = 'http://localhost:11434';
+const OLLAMA_GENERATE_ENDPOINT = '/api/generate';
+export const DEFAULT_LLM_MODEL = 'ministral-3:3b'; // Can be swapped with 'llama3.2:1b' or any other model available in your local Ollama instance
 
 // Keys in the YAML frontmatter that should be translated
 const keysToTranslate = ['title', 'description'];
@@ -30,7 +31,12 @@ const PROTECTED_PATTERNS = [
 /**
  * Core function to parse, translate, and rebuild the .mdoc file
  */
-export async function processDocument(inputPath: string, outputPath: string, sourceLang: Locale, targetLang: Locale) {
+export async function processDocument(inputPath: string, outputPath: string, sourceLang: Locale, targetLang: Locale,
+  ollama_url: string = DEFAULT_OLLAMA_URL, llm_model: string = DEFAULT_LLM_MODEL) : Promise<void> {
+  // Log URL and model being used for translation
+  console.log(`🌐 Using Ollama URL: ${ollama_url}`);
+  console.log(`🤖 Using LLM model: ${llm_model}`);
+  
   const fileStart = performance.now();
   console.log(`\n📄 Processing: ${path.basename(inputPath)} -> Target: ${targetLang.toUpperCase()} (${localeEnglishNames[targetLang]})`);
   
@@ -46,7 +52,7 @@ export async function processDocument(inputPath: string, outputPath: string, sou
   
   for (const key of keysToTranslate) {
     if (translatedFrontmatter[key]) {
-      translatedFrontmatter[key] = await translateText(translatedFrontmatter[key], sourceLang, targetLang);
+      translatedFrontmatter[key] = await translateText(translatedFrontmatter[key], sourceLang, targetLang, ollama_url, llm_model);
     }
   }
 
@@ -84,7 +90,7 @@ export async function processDocument(inputPath: string, outputPath: string, sou
       const prevContext = i > 0 ? nodesData[i - 1].originalText : '';
       const nextContext = i < nodesData.length - 1 ? nodesData[i + 1].originalText : '';
 
-      const translatedText = await translateText(originalText, sourceLang, targetLang, prevContext, nextContext);
+      const translatedText = await translateText(originalText, sourceLang, targetLang, ollama_url, llm_model, prevContext, nextContext);
       // Mutate the node in place
       node.attributes.content = translatedText;
     } else {
@@ -113,7 +119,9 @@ export async function processDocument(inputPath: string, outputPath: string, sou
 /**
  * Calls the local Ollama API to translate plain text nodes.
  */
-export async function translateText(text: string, sourceLang: Locale, targetLang: Locale, prevContext: string = '', nextContext: string = ''): Promise<string> {
+export async function translateText(text: string, sourceLang: Locale, targetLang: Locale,
+  ollama_url: string = DEFAULT_OLLAMA_URL, llm_model: string = DEFAULT_LLM_MODEL,
+  prevContext: string = '', nextContext: string = ''): Promise<string> {
   // Capture leading and trailing whitespace to preserve formatting after translation
   const leadingSpace = text.match(/^\s*/)?.[0] || '';
   const trailingSpace = text.match(/\s*$/)?.[0] || '';
@@ -176,11 +184,13 @@ ${protectedText}
 console.debug('FULL PROMPT SENT TO LLM:\n', prompt);
 
   try {
-    const response = await fetch(OLLAMA_URL, {
+    // Send the prompt to the Ollama API
+    // (The full URL is the base URL without the trailing slash (/) + and the endpoint (/api/generate))
+    const response = await fetch(ollama_url.replace(/\/$/, '') + OLLAMA_GENERATE_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: LLM_MODEL,
+        model: llm_model,
         prompt: prompt,
         stream: false,
         options: {

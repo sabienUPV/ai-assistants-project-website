@@ -1,8 +1,30 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url'; // Required to convert URL to path
-import { processDocument } from '@utils/llm-translate.js';
+import { DEFAULT_LLM_MODEL, DEFAULT_OLLAMA_URL, processDocument } from '@utils/llm-translate.js';
 import { locales, defaultLocale } from '@languages';
+import { Command } from 'commander';
+
+const program = new Command();
+
+program
+  .name('llm-translate')
+  .description('Translate all .mdoc files in the posts directory to all supported locales using LLM.')
+  .option('-d, --debug', 'enable debug logs', false)
+  .option('--url <url>', 'ollama api url', DEFAULT_OLLAMA_URL)
+  .option('-m, --model <model>', 'llm model name', DEFAULT_LLM_MODEL);
+
+program.parse(process.argv);
+
+const options = program.opts();
+
+if (options.debug) {
+  console.log('🔍 Debug mode enabled');
+}
+else {
+  console.debug = () => {}; // Disable debug logs if not in debug mode
+}
+
 
 // Get the directory name of the current script file
 const __filename = fileURLToPath(import.meta.url);
@@ -36,7 +58,7 @@ const run = async () => {
         `${path.sep}${lang}${path.sep}`
       );
       
-      await processDocument(inputFile, outputFile, defaultLocale, lang);
+      await processDocument(inputFile, outputFile, defaultLocale, lang, options.url, options.model);
     }
   }
 };
