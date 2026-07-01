@@ -214,10 +214,17 @@ console.debug('PROMPT SENT TO LLM:\n', prompt);
 
     let translatedText = data.response.trim();
 
+    console.debug('RAW TRANSLATED TEXT RECEIVED FROM LLM:\n', translatedText);
+
     // Restore the original protected tokens back into the translated text
     protectedTokens.forEach((token, index) => {
       translatedText = translatedText.replace(`TOKENPLACEHOLDER${index}X`, token);
     });
+
+    // Remove bold (**) and italics (_) that the ministral-3:3b model insists on adding, even though we explicitly told it not to in the system prompt. This is a safeguard to ensure that the output is clean.
+    translatedText = translatedText.replace(/\*\*/g, '').replace(/__/g, '').replace(/\*/g, '').replace(/_/g, '');
+    
+    console.debug('TRANSLATED TEXT AFTER CLEANING:\n', translatedText);
 
     // Stop the stopwatch and calculate elapsed seconds
     const endTime = performance.now();
