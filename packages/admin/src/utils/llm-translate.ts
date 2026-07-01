@@ -125,20 +125,22 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
   });
 
   let promptRules = `CRITICAL RULES:
-1. DO NOT translate proper nouns, acronyms, or project names (e.g., "${PROJECT_NAME}"). Keep them exactly as they appear.
-2. Return ONLY plain text. Do not add asterisks (*), bolding, quotes, or any markdown syntax.`;
+1. PRESERVE PROPER NOUNS: Do not translate project names (like "${PROJECT_NAME}"), countries, or organization names.
+2. NO FORMATTING: Output raw text only. No markdown, no asterisks, no bolding.
+3. NO CHATTER: Do not include introductory phrases, notes, or explanations (e.g., never output "Translated text:" or "Note:"). Just the exact translation.`;
 
   // Add the placeholder rule ONLY if there are URLs in this fragment
   if (urls.length > 0) {
-    promptRules += `\n3. Keep placeholders like URLPLACEHOLDER0X exactly as they are.`;
+    promptRules += `\n4. PLACEHOLDERS: Copy placeholders like URLPLACEHOLDER0X exactly as they appear.`;
   }
 
-  const prompt = `You are an expert technical translator. Translate the text from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}.
+  const prompt = `You are a professional technical translator. Your task is to translate the text enclosed in <SOURCE_TEXT> from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}.
 
 ${promptRules}
 
-Original text:
-${protectedText}`;
+<SOURCE_TEXT>
+${protectedText}
+</SOURCE_TEXT>`;
 
   try {
     const response = await fetch(OLLAMA_URL, {
@@ -148,7 +150,11 @@ ${protectedText}`;
         model: LLM_MODEL,
         prompt: prompt,
         stream: false,
-        temperature: 0.2, // Lower temperature for more deterministic translations
+        options: {
+          temperature: 0.1, // Lower temperature for more deterministic translations
+          top_k: 10, // Take only the top 10 most likely next words at each step, which helps reduce randomness
+          top_p: 0.5 // Consider only the top 50% of the probability mass for the next word (this means, if option 1 has a probability of 0.3 and option 2 has a probability of 0.2, since their sum is 0.5, only those first two options are considered, and the rest are ignored), which also helps reduce randomness
+        }
       }),
     });
 
