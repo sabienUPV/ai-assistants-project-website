@@ -22,8 +22,9 @@ const MAX_SNIPPET_LENGTH = -1; // Set to -1 to disable snippet truncation in log
 // Note: We use \p{L} and \p{N}, combined with the 'u' flag, to ensure that we capture letters and numbers from any language, including accented characters and special letters like 'ñ'.
 const PROTECTED_PATTERNS = [
   /(https?:\/\/[^\s)\]"']+)/g, // URLs
-  /(#[\p{L}\p{N}_]+)/gu,        // Hashtags (e.g. #AIforGood, #Inclusión)
-  /(@[\p{L}\p{N}_]+)/gu         // Mentions (e.g. @HURT)
+  /(#[\p{L}\p{N}_]+)/gu,        // Hashtags (e.g. #AIforGood, #Inclusion)
+  /(@[\p{L}\p{N}_]+)/gu,         // Mentions (e.g. @HURT)
+  /([\p{L}\p{N}._-]+@[\p{L}\p{N}._-]+\.[\p{L}\p{N}_-]+)/gu // Email addresses
 ];
 
 /**
