@@ -11,7 +11,7 @@ import { getSlugFromEntryId } from '@utils/dynamicContent';
 
 export const prerender = true;
 
-const { locale } = Astro.locals;
+const { locale, t } = Astro.locals;
 
 // 1. Fetch all entries from the posts collection
 const allPosts = await getCollection(`posts_${locale}`) as (CollectionEntry<`posts_${Locale}`> & { data: Post })[];
@@ -22,17 +22,26 @@ const sortedPosts = allPosts.sort((a, b) => {
   const dateB = b.data.pubDate ? new Date(b.data.pubDate).getTime() : 0;
   return dateB - dateA;
 });
+
+function getExcerptFromBody(body: string | undefined, maxLength: number = 150): string {
+  if (!body) return '';
+  body = body
+    .replace(/\{%.*?%\}/g, '') // Remove markdoc tags and their content (e.g., {%...%})
+    .trim(); // Remove leading/trailing whitespace
+  const excerpt = body.substring(0, maxLength);
+  return body.length > maxLength ? `${excerpt}...` : excerpt;
+}
 ---
 
 <Layout title="Project News & Blog">
   <main class="blog-directory">
-    <h1 class="directory-title">Latest Updates</h1>
+    <h1 class="directory-title">{t('blog_list_title')}</h1>
 
     <div class="posts-grid">
       {sortedPosts.map(post => (
         <article class="post-card">
           <div class="card-body">
-            <!-- Modified header semantic spacing to match global line-height specs -->
+            {/* Modified header semantic spacing to match global line-height specs */}
             <h2 class="card-title">
               <a href={getSlugFromEntryId(post.id)}>{post.data.title}</a>
             </h2>
@@ -40,11 +49,14 @@ const sortedPosts = allPosts.sort((a, b) => {
               {post.data.pubDate?.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
             </div>
             <p class="card-excerpt">
-              {post.data.description || "Click to read the full article."}
+              {post.data.description
+                || (post.body
+                    ? getExcerptFromBody(post.body, 150)
+                    : t('blog_card_click_to_read'))}
             </p>
           </div>
           <a href={getSlugFromEntryId(post.id)} class="read-more-btn">
-            Read article &rarr;
+            {t('blog_card_read_more')} &rarr;
           </a>
         </article>
       ))}
