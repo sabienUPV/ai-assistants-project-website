@@ -2,7 +2,7 @@
 
 # Default values
 OLLAMA_HOST="localhost:11434"
-MODEL_NAME="ministral-3:3b"
+MODEL_NAME="translategemma:4b"
 PROMPT_TEXT=""
 SYSTEM_TEXT=""
 
@@ -51,10 +51,9 @@ else
     JSON_PAYLOAD="{\"model\": \"$MODEL_NAME\", \"prompt\": \"$PROMPT_TEXT\", \"stream\": false}"
 fi
 
-# Execution using curl with streaming flags
-#  -s: hides curl's progress bar
+# Execution using curl with streaming flags:
 #  -N: disables buffering so lines print immediately
-curl -s -N -X POST "http://$OLLAMA_HOST/api/generate" \
+curl -N -X POST "http://$OLLAMA_HOST/api/generate" \
   -H "Content-Type: application/json" \
   -d "$JSON_PAYLOAD"
 

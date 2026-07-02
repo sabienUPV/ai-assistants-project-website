@@ -2,7 +2,7 @@
 
 # Default values
 OLLAMA_HOST="localhost:11434"
-MODEL_NAME="ministral-3:3b"
+MODEL_NAME="translategemma:4b"
 
 # Parse arguments
 while [ "$#" -gt 0 ]; do
@@ -26,9 +26,8 @@ done
 echo "Pulling model '$MODEL_NAME' from Ollama at '$OLLAMA_HOST'..."
 
 # Execution using curl with streaming flags:
-#  -s: hides curl's progress bar to let Ollama's output shine
 #  -N: disables buffering so lines print immediately
-curl -s -N -X POST "http://$OLLAMA_HOST/api/pull" \
+curl -N -X POST "http://$OLLAMA_HOST/api/pull" \
   -H "Content-Type: application/json" \
   -d "{\"name\": \"$MODEL_NAME\"}"
 

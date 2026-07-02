@@ -1,6 +1,6 @@
 param(
     # Note: PowerShell natively supports single hyphen parameters (-model, -prompt)
-    [string]$model = "ministral-3:3b",
+    [string]$model = "translategemma:4b",
     # This allows users to type -host or --host, but inside the script 
     # we safely use the variable $ollamaHost to avoid clashing with PowerShell's built-in $host
     [Alias('host')]
@@ -53,7 +53,7 @@ Write-Host "Generating text with model '$model' from Ollama at '$ollamaHost'..."
 
 try {
     # Using native curl.exe for clean, real-time streaming
-    curl.exe -s -N -X POST $url -H "Content-Type: application/json" -d $body
+    curl.exe -N -X POST $url -H "Content-Type: application/json" -d $body
 
     if ($LASTEXITCODE -ne 0) {
         throw "curl.exe exited with error code $LASTEXITCODE"
