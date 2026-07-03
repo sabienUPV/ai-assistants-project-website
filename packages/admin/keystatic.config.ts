@@ -1,5 +1,5 @@
 import { config, fields, collection, type Config } from '@keystatic/core';
-import { inline } from '@keystatic/core/content-components';
+import { inline, wrapper } from '@keystatic/core/content-components';
 import type { Post } from '@sabien-upv-astro-cms/core';
 import { markdocTagAttributes } from '@sabien-upv-astro-cms/core';
 import React from 'react';
@@ -15,9 +15,10 @@ type KeystaticPostSchema = {
   content: any; // Añadimos 'content' porque Keystatic lo necesita para el Markdoc
 };
 
-// Define the custom inline component for Keystatic using shared core attributes
+// Define custom inline components for Keystatic using shared core attributes
 const flagComponent = inline({
   label: 'Flag',
+  description: markdocTagAttributes.flag.description,
   schema: {
     // Safely accessing the description metadata from the shared core configuration for consistency
     country: fields.text({ 
@@ -35,6 +36,14 @@ const flagComponent = inline({
       { style: { color: '#0284c7', fontWeight: 'bold' } },
       `🚩 flag: '${countryCode}'`
     );
+  }
+});
+const noTranslateComponent = wrapper({
+  label: 'No Translate',
+  description: markdocTagAttributes.notranslate.description,
+  schema: {}, // Vacío, porque el contenido son sus propios hijos nativos
+  ContentView: (props) => {
+    return React.createElement('div', { style: { border: '2px dashed #dc2626' } }, props.children);
   }
 });
 
@@ -93,8 +102,10 @@ const createPostCollection = (locale: Locale) => {
             }
           },
         },
+        // Register custom components in Markdoc options
         components: {
-          flag: flagComponent, // Register the custom component in Markdoc options
+          flag: flagComponent, 
+          notranslate: noTranslateComponent,
         }
       }),
     } satisfies KeystaticPostSchema, // 2. LE DECIMOS A TS QUE ESTE OBJETO DEBE CUMPLIR EL TIPO MAPEADO. SI VES "satisfies" EN ROJO, ES QUE FALTA ALGÚN CAMPO DE TU POST, REVISA EN EL PROYECTO core/src/schemas/posts.ts Y ASEGÚRATE DE QUE TODOS LOS CAMPOS ESTÉN AQUÍ

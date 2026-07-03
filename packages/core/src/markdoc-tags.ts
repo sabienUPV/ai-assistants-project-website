@@ -9,13 +9,17 @@ type Project = 'web' | 'admin';
  */
 export const markdocTagAttributes = {
   flag: {
+    description: "Render a country flag icon (e.g. 'eu' for European Union, 'es' for Spain, etc.)",
     attributes: {
       country: { 
-        type: String, 
+        type: String,
         required: true,
         description: "The country code: 'eu', 'es', etc. You can find a list of supported country codes here: https://icon-sets.iconify.design/circle-flags/",
       }
     },
+  },
+  notranslate: {
+    description: "Mark content to be ignored by the LLM translation process, and preserved as-is in any translated versions.",
   }
 } satisfies AstroMarkdocConfig['tags'];
 
