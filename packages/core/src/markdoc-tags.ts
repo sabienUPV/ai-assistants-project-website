@@ -24,14 +24,12 @@ export const markdocTagAttributes = {
  * according to the consuming project location in the monorepo.
  */
 export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig['tags'] {
-  // NOTE: You should use markdocTagAttributes directly for the base tag definitions,
-  // and only use this function when you need to resolve the paths for rendering components across different projects in the monorepo
-  // (e.g. in the render attribute), because we need that to be resolved at runtime based on the project that is consuming the Markdoc configuration.
-  return Object.assign({}, markdocTagAttributes, {
+  return {
     flag: {
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/MarkdocFlag.astro'),
+      attributes: markdocTagAttributes.flag.attributes,
     }
-  });
+  };
 }
 
 /**
