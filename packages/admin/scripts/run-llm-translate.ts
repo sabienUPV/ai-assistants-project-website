@@ -65,7 +65,7 @@ const run = async () => {
 
   // Filter the results to keep only the .mdoc files, and apply the glob pattern if provided
   const mdocFiles = files.filter(file => 
-    file.endsWith('.mdoc') && (!options.glob || globToRegex!.test(file)));
+    file.endsWith('.mdoc') && (!globToRegex || globToRegex.test(file)));
 
   for (const filename of mdocFiles) {
     const inputFile = path.join(postsDir, filename);
