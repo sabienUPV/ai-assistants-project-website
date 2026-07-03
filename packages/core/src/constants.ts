@@ -43,3 +43,17 @@ export const WH_LEGAL_REP = "Prof. Dr. Bernd Kriegesmann, President";
 export const TECH_PROVIDER_NAME = "ITACA-SABIEN, UPV";
 export const getTechProviderUrlForLocale = (locale: string) =>
   "https://www.sabien.upv.es/" + (locale.toLowerCase() === 'es' ? "" : "en/");
+
+
+// List of partner names (and all their variations) to be preserved during translation, to avoid altering them in the translated text. This is important for proper nouns, organization names, and other specific terms that should remain unchanged across languages.
+// Note: This is used for the LLM translation process to ensure that these names are not modified or mistranslated, which could lead to confusion or misrepresentation of the project and its partners.
+export const PARTNER_NAMES = [
+  'Universitat Politècnica de València', 'UPV',
+  'Institute Work and Technology', 'Westphalian University of Applied Sciences', 'Institut für Arbeit und Technik', 'IAT',
+  'CECD Mira Sintra', 'CECD',
+  'AIAS Bologna ETS', 'AIAS Bologna', 'AIAS',
+  'INESC-ID Lisboa', 'INESC-ID',
+  'Fundación Amica', 'Amica',
+  'ARFIE Network', 'ARFIE',
+  'HURT'
+];

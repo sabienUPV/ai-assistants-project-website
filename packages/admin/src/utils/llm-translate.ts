@@ -5,7 +5,7 @@ import Markdoc, { type Node as MarkdocNode } from '@markdoc/markdoc';
 import { performance } from 'node:perf_hooks'; // Native Node module for precise timing
 
 import { localeEnglishNames, type Locale } from '@languages';
-import { PROJECT_NAME } from '@constants';
+import { PROJECT_NAME, PARTNER_NAMES } from '@constants';
 
 // LLM Engine Configuration
 export const DEFAULT_OLLAMA_URL = 'http://localhost:11434';
@@ -36,6 +36,7 @@ const PROTECTED_PATTERNS = [
   /(&[a-zA-Z0-9#]+;)/g,          // HTML entities (e.g., &nbsp;, &amp;, &#160;)
   new RegExp(`(${escapedProjectNameRegex})`, 'gi'), // Project name (e.g., "AI-ASSISTANTS 4PID") in any case (lowercase, uppercase, etc.), with flexible whitespace (note: order is important! This regex should come before the individual words of the project name, to avoid partial matches)
   ...(PROJECT_NAME_WORDS.length > 1 ? [new RegExp(`(${PROJECT_NAME_WORDS.map(word => escapeRegExp(word)).join('|')})`, 'gi')] : []), // Individual words of the project name (e.g., "AI-ASSISTANTS" and "4PID") in any case, with flexible whitespace
+  ...(PARTNER_NAMES.sort((a, b) => b.length - a.length).map(partner => new RegExp(`(${escapeRegExp(partner)})`, 'g'))), // Partner names, sorted from longest to shortest to avoid partial matches (e.g., "Westphalian University of Applied Sciences" should be matched before "Westphalian University"). Note: We use the 'g' flag for global matching, but not 'i' for case-insensitive, since partner names are usually proper nouns and should be matched in their original case. For example, "HURT" is a partner name, but "hurt" is a common English word, so we want to avoid false positives.
 ];
 
 /**
