@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url'; // Required to convert URL to path
 import { DEFAULT_LLM_MODEL, DEFAULT_OLLAMA_URL, processDocument } from '@utils/llm-translate.js';
-import { locales, defaultLocale } from '@languages';
+import { locales, defaultLocale, type Locale } from '@languages';
 import { Command } from 'commander';
 
 const program = new Command();
@@ -12,6 +12,7 @@ interface CliOptions {
   url: string;
   model: string;
   glob?: string;
+  locales: Locale[];
 }
 
 program
@@ -20,7 +21,8 @@ program
   .option('-d, --debug', 'enable debug logs', false)
   .option('--url <url>', 'ollama api url', DEFAULT_OLLAMA_URL)
   .option('-m, --model <model>', 'llm model name', DEFAULT_LLM_MODEL)
-  .option('-g, --glob <glob-pattern>', 'glob pattern to match files (optional)');
+  .option('-g, --glob <glob-pattern>', 'glob pattern to match files (optional)')
+  .option('-l, --locales <locales...>', 'list of locales to translate to, separated by commas (,). Unsupported locales will be ignored (optional, defaults to all supported locales)', (value: string, _: unknown) => value.split(',').map(locale => locale.trim()).filter(locale => locales.includes(locale as Locale)), locales.join(','));
 
 program.parse(process.argv);
 
@@ -70,7 +72,7 @@ const run = async () => {
   for (const filename of mdocFiles) {
     const inputFile = path.join(postsDir, filename);
 
-    for (const lang of locales) {
+    for (const lang of options.locales) {
       // Prevent translating the base language into itself and overwriting the original file
       if (lang === defaultLocale) continue; 
 
