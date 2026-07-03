@@ -43,7 +43,7 @@ const noTranslateComponent = wrapper({
   description: markdocTagAttributes.notranslate.description,
   schema: {}, // Vacío, porque el contenido son sus propios hijos nativos
   ContentView: (props) => {
-    return React.createElement('div', { style: { border: '2px dashed #dc2626' } }, props.children);
+    return React.createElement('div', {}, props.children);
   }
 });
 
