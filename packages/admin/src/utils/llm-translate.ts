@@ -108,12 +108,6 @@ function getSlotsAndChildren(node: MarkdocNode): MarkdocNode[] {
 }
 
 async function processNode(node: MarkdocNode, sourceLang: Locale, targetLang: Locale, ollama_url: string, llm_model: string): Promise<void> {
-  // Special case: If the node is a "tag" type with the custom name "notranslate", we skip translating this node and all its children, since it's explicitly marked to be ignored by the LLM translation process.
-  if (node.type === 'tag' && node.tag === 'notranslate') {
-    console.debug(`   ⛔ Skipping translation for {% notranslate %} tag and its children` + (node.location ? ` at line ${node.location.start.line}` : ''));
-    return;
-  }
-  
   // First, check if the node is a safe block node (like a paragraph or heading) that can be translated as a whole
   if (isSafeMarkdownBlockNode(node)) {
     await processSafeMarkdownBlockNode(node, sourceLang, targetLang, ollama_url, llm_model);
