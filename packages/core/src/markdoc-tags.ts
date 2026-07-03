@@ -25,9 +25,16 @@ export const markdocTagAttributes = {
  */
 export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig['tags'] {
   return {
+    // Use the spread operator to include all tag definitions from the base configuration
+    ...markdocTagAttributes,
     flag: {
+      // Use the spread operator to include all attribute definitions for the 'flag' tag
+      // we need to do this again because the flag object is being completely replaced here,
+      // since the spread operator only does a shallow copy,
+      // so redefining the flag property does NOT merge the original flag object with the new one, it replaces it entirely,
+      // // which is why we need to re-include its attributes)
+      ...markdocTagAttributes.flag,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/MarkdocFlag.astro'),
-      attributes: markdocTagAttributes.flag.attributes,
     }
   };
 }
