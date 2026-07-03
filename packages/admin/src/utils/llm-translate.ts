@@ -98,6 +98,14 @@ export async function processDocument(inputPath: string, outputPath: string, sou
 // \p{L} matches any letter from any language, \p{N} matches any number
 const containsAnyletterOrNumberRegex = /[\p{L}\p{N}]/u;
 
+// Helper function to get both slots and children of a Markdoc node, since some nodes may have content in either or both.
+// Note: logic for processing both slots and children in for loop comes directly from the Markdoc Node class's walk() method, which yields all child nodes in both slots and children arrays, with added null checks just in case
+function getSlotsAndChildren(node: MarkdocNode): MarkdocNode[] {
+  const slots = node.slots ? Object.values(node.slots) : [];
+  const children = node.children || [];
+  return [...slots, ...children];
+}
+
 async function processNode(node: MarkdocNode, sourceLang: Locale, targetLang: Locale, ollama_url: string, llm_model: string): Promise<void> {
   // First, check if the node is a safe block node (like a paragraph or heading) that can be translated as a whole
   if (isSafeMarkdownBlockNode(node)) {
@@ -112,10 +120,8 @@ async function processNode(node: MarkdocNode, sourceLang: Locale, targetLang: Lo
   }
 
   // If the node is neither a safe block nor a text node, we recursively process its slots and children (if any)
-  // (Note: logic for processing both slots and children in for loop comes directly from the Markdoc Node class's walk() method, which yields all child nodes in both slots and children arrays, with added null checks just in case)
-  const slots = node.slots ? Object.values(node.slots) : [];
-  const children = node.children || [];
-  for (const child of [...slots, ...children]) {
+  const childNodes = getSlotsAndChildren(node);
+  for (const child of childNodes) {
     await processNode(child, sourceLang, targetLang, ollama_url, llm_model);
   }
 }
@@ -124,8 +130,15 @@ async function processNode(node: MarkdocNode, sourceLang: Locale, targetLang: Lo
 const safeMarkdownBlockTypes = ['paragraph', 'heading'];
 function isSafeMarkdownBlockNode(node: MarkdocNode): boolean {
   return safeMarkdownBlockTypes.includes(node.type) // Ensure the node is a recognized safe block type
-    && !(node.children?.some(child => child.type === 'tag')); // Ensure there are no custom Markdoc tags in the children
+    && !containsCustomTag(node) // Ensure the node does not contain any custom tags (like {% flag country="eu" /%});
 }
+
+// Recursive search to find any custom tags hidden in the hierarchy (e.g. {% flag country="eu" /%})
+function containsCustomTag(node: MarkdocNode): boolean {
+  if (node.type === 'tag') return true;
+  return getSlotsAndChildren(node).some(child => containsCustomTag(child));
+}
+
 async function processSafeMarkdownBlockNode(node: MarkdocNode, sourceLang: Locale, targetLang: Locale, ollama_url: string, llm_model: string): Promise<void> {
   // Convert the sub-tree to Markdown (preserving **bold**, _italics_, etc.)
   const rawMarkdown = Markdoc.format(node).trim();
