@@ -33,6 +33,7 @@ const PROTECTED_PATTERNS = [
   /(#[\p{L}\p{N}_]+)/gu,        // Hashtags (e.g. #AIforGood, #Inclusion)
   /(@[\p{L}\p{N}_]+)/gu,         // Mentions (e.g. @HURT)
   /([\p{L}\p{N}._-]+@[\p{L}\p{N}._-]+\.[\p{L}\p{N}_-]+)/gu, // Email addresses
+  /(&[a-zA-Z0-9#]+;)/g,          // HTML entities (e.g., &nbsp;, &amp;, &#160;)
   new RegExp(`(${escapedProjectNameRegex})`, 'gi'), // Project name (e.g., "AI-ASSISTANTS 4PID") in any case (lowercase, uppercase, etc.), with flexible whitespace (note: order is important! This regex should come before the individual words of the project name, to avoid partial matches)
   ...(PROJECT_NAME_WORDS.length > 1 ? [new RegExp(`(${PROJECT_NAME_WORDS.map(word => escapeRegExp(word)).join('|')})`, 'gi')] : []), // Individual words of the project name (e.g., "AI-ASSISTANTS" and "4PID") in any case, with flexible whitespace
 ];
