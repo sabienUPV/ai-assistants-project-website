@@ -56,15 +56,16 @@ const run = async () => {
   // - Escape special regex characters (like ., ?, +, etc.)
   // - Convert '*' to '.*' (which means "anything" in regex)
   // - Anchor to the start '^' and end '$'
+  let globToRegex: RegExp | undefined;
   if (options.glob) {
     console.log(`🎯 Using glob pattern: ${options.glob}`);
     const escapedPattern = options.glob.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
-    const globToRegex = new RegExp(`^${escapedPattern}$`);
+    globToRegex = new RegExp(`^${escapedPattern}$`);
   }
 
   // Filter the results to keep only the .mdoc files, and apply the glob pattern if provided
   const mdocFiles = files.filter(file => 
-    file.endsWith('.mdoc') && (!options.glob || globToRegex.test(file)));
+    file.endsWith('.mdoc') && (!options.glob || globToRegex!.test(file)));
 
   for (const filename of mdocFiles) {
     const inputFile = path.join(postsDir, filename);
