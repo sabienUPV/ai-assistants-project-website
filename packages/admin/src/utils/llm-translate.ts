@@ -130,13 +130,14 @@ async function processNode(node: MarkdocNode, sourceLang: Locale, targetLang: Lo
 const safeMarkdownBlockTypes = ['paragraph', 'heading'];
 function isSafeMarkdownBlockNode(node: MarkdocNode): boolean {
   return safeMarkdownBlockTypes.includes(node.type) // Ensure the node is a recognized safe block type
-    && !containsCustomTag(node) // Ensure the node does not contain any custom tags (like {% flag country="eu" /%});
+    && !containsUnsafeNode(node) // Ensure the node does not contain any custom tags (like {% flag country="eu" /%});
 }
 
-// Recursive search to find any custom tags hidden in the hierarchy (e.g. {% flag country="eu" /%})
-function containsCustomTag(node: MarkdocNode): boolean {
-  if (node.type === 'tag') return true;
-  return getSlotsAndChildren(node).some(child => containsCustomTag(child));
+// Recursive search to find any custom tags or links (URLs) hidden in the hierarchy (e.g. {% flag country="eu" /%}, [link](https://ai4pid.eu)).
+// We consider these nodes "unsafe" because the LLM may not understand them and could potentially remove or alter them during translation, which would break the document's structure or meaning.
+function containsUnsafeNode(node: MarkdocNode): boolean {
+  if (node.type === 'tag' || node.type === 'link') return true;
+  return getSlotsAndChildren(node).some(child => containsUnsafeNode(child));
 }
 
 async function processSafeMarkdownBlockNode(node: MarkdocNode, sourceLang: Locale, targetLang: Locale, ollama_url: string, llm_model: string): Promise<void> {
