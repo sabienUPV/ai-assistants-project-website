@@ -59,7 +59,7 @@ const run = async () => {
   if (options.glob) {
     console.log(`🎯 Using glob pattern: ${options.glob}`);
     const escapedPattern = options.glob.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
-    var globToRegex = new RegExp(`^${escapedPattern}$`);
+    const globToRegex = new RegExp(`^${escapedPattern}$`);
   }
 
   // Filter the results to keep only the .mdoc files, and apply the glob pattern if provided
