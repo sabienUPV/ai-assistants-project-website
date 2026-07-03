@@ -11,7 +11,6 @@ interface CliOptions {
   debug: boolean;
   url: string;
   model: string;
-  context: boolean; // Commander is smart enough to invert the boolean value of --no-context automatically and store it in this property as 'context'
 }
 
 program
@@ -19,8 +18,7 @@ program
   .description('Translate all .mdoc files in the posts directory to all supported locales using LLM.')
   .option('-d, --debug', 'enable debug logs', false)
   .option('--url <url>', 'ollama api url', DEFAULT_OLLAMA_URL)
-  .option('-m, --model <model>', 'llm model name', DEFAULT_LLM_MODEL)
-  .option('--no-context', 'disable sliding window context', true) // Default is true, because Commander understands that it's the default value of the inverted "context" property, so --no-context will be false. This means that by default, the sliding window context is ENABLED.
+  .option('-m, --model <model>', 'llm model name', DEFAULT_LLM_MODEL);
 
 program.parse(process.argv);
 
@@ -67,7 +65,7 @@ const run = async () => {
         `${path.sep}${lang}${path.sep}`
       );
       
-      await processDocument(inputFile, outputFile, defaultLocale, lang, options.url, options.model, options.context);
+      await processDocument(inputFile, outputFile, defaultLocale, lang, options.url, options.model);
     }
   }
 };

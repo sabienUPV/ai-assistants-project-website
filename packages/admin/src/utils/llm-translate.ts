@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import matter from 'gray-matter';
-import Markdoc from '@markdoc/markdoc';
+import Markdoc, { type Node as MarkdocNode } from '@markdoc/markdoc';
 import { performance } from 'node:perf_hooks'; // Native Node module for precise timing
 
 import { localeEnglishNames, type Locale } from '@languages';
@@ -10,7 +10,7 @@ import { PROJECT_NAME } from '@constants';
 // LLM Engine Configuration
 export const DEFAULT_OLLAMA_URL = 'http://localhost:11434';
 const OLLAMA_GENERATE_ENDPOINT = '/api/generate';
-export const DEFAULT_LLM_MODEL = 'ministral-3:3b'; // Can be swapped with 'llama3.2:1b' or any other model available in your local Ollama instance
+export const DEFAULT_LLM_MODEL = 'translategemma:4b'; // A model optimized for translation tasks
 
 // Keys in the YAML frontmatter that should be translated
 const keysToTranslate = ['title', 'description'];
@@ -41,12 +41,10 @@ const PROTECTED_PATTERNS = [
  * Core function to parse, translate, and rebuild the .mdoc file
  */
 export async function processDocument(inputPath: string, outputPath: string, sourceLang: Locale, targetLang: Locale,
-  ollama_url: string = DEFAULT_OLLAMA_URL, llm_model: string = DEFAULT_LLM_MODEL, useSlidingContext: boolean = true) : Promise<void> {
+  ollama_url: string = DEFAULT_OLLAMA_URL, llm_model: string = DEFAULT_LLM_MODEL) : Promise<void> {
   // Log URL and model being used for translation
   console.log(`🌐 Using Ollama URL: ${ollama_url}`);
   console.log(`🤖 Using LLM model: ${llm_model}`);
-  // Log whether sliding window context is enabled or disabled
-  console.log(`🪟  Sliding window context: ${useSlidingContext ? 'Enabled' : 'Disabled'}`);
   
   const fileStart = performance.now();
   console.log(`\n📄 Processing: ${path.basename(inputPath)} -> Target: ${targetLang.toUpperCase()} (${localeEnglishNames[targetLang]})`);
@@ -74,43 +72,11 @@ export async function processDocument(inputPath: string, outputPath: string, sou
   console.log('🌳 Generating Markdoc AST...');
   const ast = Markdoc.parse(mdocContent);
 
-  // 5. Walk the AST and collect text nodes for Sliding Window Context
-  console.log('🌳 Collecting text nodes for context window...');
-  const nodesData = [];
-  // ast.walk() is a generator that yields every node in the tree
-  for (const node of ast.walk()) {
-    // We strictly target text nodes to prevent the LLM from breaking tags or markup
-    if (node.type === 'text' && typeof node.attributes.content === 'string') {
-      // Store both the reference to the node itself (so we can mutate it later), and a copy of the original text to send to the LLM as context
-      nodesData.push({ node, originalText: node.attributes.content });
-    }
-  }
+  console.log('🤖 Sending block nodes to local LLM...');
 
-  console.log(`🤖 Sending text nodes to local LLM${useSlidingContext ? ' with sliding window context' : ''}...`);
-  // Regular expression to check if the text contains at least one alphanumeric character
-  // \p{L} matches any letter from any language, \p{N} matches any number
-  const letterOrNumberRegex = /[\p{L}\p{N}]/u;
+  // 5. Recursively process the AST nodes, translating text and safe blocks
+  await processNode(ast, sourceLang, targetLang, ollama_url, llm_model);
 
-  for (let i = 0; i < nodesData.length; i++) {
-    const { node, originalText } = nodesData[i];
-
-    // Check if the text actually contains translatable content (letters or numbers)
-    // This completely skips standalone emojis (like 🔹), punctuation, or empty blocks
-    if (letterOrNumberRegex.test(originalText)) {
-      // Extract the context of adjacent text nodes (if any) by using the original texts (not the translated ones!) to provide the LLM with a better understanding of the surrounding content
-      const prevContext = (useSlidingContext && i > 0) ? nodesData[i - 1].originalText : '';
-      const nextContext = (useSlidingContext && i < nodesData.length - 1) ? nodesData[i + 1].originalText : '';
-
-      const translatedText = await translateText(originalText, sourceLang, targetLang, ollama_url, llm_model, prevContext, nextContext);
-      // Mutate the node in place
-      node.attributes.content = translatedText;
-    } else {
-      // Keep the symbol exactly as it was
-      console.log(`   ⏩ Skipped structural symbol/emoji: "${originalText}"`);
-    }
-  }
-
-  // 6. Rebuild (Unparse) the document
   console.log('🏗️ Rebuilding the document...');
   // Markdoc.format() converts the mutated AST back to a markdown string
   const translatedMdocContent = Markdoc.format(ast);
@@ -127,12 +93,79 @@ export async function processDocument(inputPath: string, outputPath: string, sou
   console.log(`✅ File successfully saved to: ${outputPath} (Total time: ${fileDuration}s)`);
 }
 
+// Regular expression to check if the text contains at least one alphanumeric character
+// \p{L} matches any letter from any language, \p{N} matches any number
+const containsAnyletterOrNumberRegex = /[\p{L}\p{N}]/u;
+
+async function processNode(node: MarkdocNode, sourceLang: Locale, targetLang: Locale, ollama_url: string, llm_model: string): Promise<void> {
+  // First, check if the node is a safe block node (like a paragraph or heading) that can be translated as a whole
+  if (isSafeMarkdownBlockNode(node)) {
+    await processSafeMarkdownBlockNode(node, sourceLang, targetLang, ollama_url, llm_model);
+    return;
+  }
+
+  // If the node is not a safe block, we check if it's a text node that can be translated individually
+  if (isTextNode(node)) {
+    await processTextNode(node, sourceLang, targetLang, ollama_url, llm_model);
+    return;
+  }
+
+  // If the node is neither a safe block nor a text node, we recursively process its slots and children (if any)
+  // (Note: logic for processing both slots and children in for loop comes directly from the Markdoc Node class's walk() method, which yields all child nodes in both slots and children arrays, with added null checks just in case)
+  const slots = node.slots ? Object.values(node.slots) : [];
+  const children = node.children || [];
+  for (const child of [...slots, ...children]) {
+    await processNode(child, sourceLang, targetLang, ollama_url, llm_model);
+  }
+}
+
+// Safe nodes for flattening and translating entire blocks (like paragraphs and headings) without risking the loss of inline formatting or Markdoc components.
+const safeMarkdownBlockTypes = ['paragraph', 'heading'];
+function isSafeMarkdownBlockNode(node: MarkdocNode): boolean {
+  return safeMarkdownBlockTypes.includes(node.type) // Ensure the node is a recognized safe block type
+    && !(node.children?.some(child => child.type === 'tag')); // Ensure there are no custom Markdoc tags in the children
+}
+async function processSafeMarkdownBlockNode(node: MarkdocNode, sourceLang: Locale, targetLang: Locale, ollama_url: string, llm_model: string): Promise<void> {
+  // Convert the sub-tree to Markdown (preserving **bold**, _italics_, etc.)
+  const rawMarkdown = Markdoc.format(node).trim();
+
+  if (!containsAnyletterOrNumberRegex.test(rawMarkdown)) {
+    return; // Skip translation if the text doesn't contain any letters or numbers
+  }
+
+  const translatedMarkdown = await translateText(rawMarkdown, sourceLang, targetLang, ollama_url, llm_model);
+    
+  // Parse the translated markdown back into a sub-tree AST
+  const translatedAst = Markdoc.parse(translatedMarkdown);
+
+  // Markdoc.parse() returns Document -> Paragraph/Heading -> [inline children]
+  // We replace the children of the original node with the new translated children
+  if (translatedAst.children.length > 0) {
+    node.children = translatedAst.children[0].children;
+  }
+}
+
+function isTextNode(node: MarkdocNode): boolean {
+  return node.type === 'text' && typeof node.attributes.content === 'string';
+}
+async function processTextNode(node: MarkdocNode, sourceLang: Locale, targetLang: Locale, ollama_url: string, llm_model: string): Promise<void> {
+  const originalText = node.attributes.content;
+  
+  if (!containsAnyletterOrNumberRegex.test(originalText)) {
+    return; // Skip translation if the text doesn't contain any letters or numbers
+  }
+
+  const translatedText = await translateText(originalText, sourceLang, targetLang, ollama_url, llm_model);
+
+  // Update the node's content with the translated text
+  node.attributes.content = translatedText;
+}
+
 /**
  * Calls the local Ollama API to translate plain text nodes.
  */
 export async function translateText(text: string, sourceLang: Locale, targetLang: Locale,
-  ollama_url: string = DEFAULT_OLLAMA_URL, llm_model: string = DEFAULT_LLM_MODEL,
-  prevContext: string = '', nextContext: string = ''): Promise<string> {
+  ollama_url: string = DEFAULT_OLLAMA_URL, llm_model: string = DEFAULT_LLM_MODEL): Promise<string> {
   // Capture leading and trailing whitespace to preserve formatting after translation
   const leadingSpace = text.match(/^\s*/)?.[0] || '';
   const trailingSpace = text.match(/\s*$/)?.[0] || '';
@@ -163,50 +196,23 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
     });
   }
 
-  let promptRules = `CRITICAL RULES:
-1. OUTPUT: You ONLY output the translated text. NEVER output notes, explanations, or labels like "Translated text:".
-2. NO FORMATTING: Return raw text only. No markdown, no bolding, no asterisks.
-3. PRESERVE ENTITIES: Keep project names ("${PROJECT_NAME}"), countries, and organizations exactly as in the source.`;
+  const sourceLangName = localeEnglishNames[sourceLang];
+  const targetLangName = localeEnglishNames[targetLang];
 
-  let ruleCounter = 4;
+  // Strict user prompt for TranslateGemma (with the two required line breaks)
+  // (see prompt guide here: https://ollama.com/library/translategemma)
+  // (Note: This prompt is straight from the TranslateGemma documentation, so we cannot really change it without risking the quality of the translation, since the model was trained with this prompt in mind.)
+  const prompt = `You are a professional ${sourceLangName} (${sourceLang}) to ${targetLangName} (${targetLang}) translator. Your goal is to accurately convey the meaning and nuances of the original ${sourceLangName} text while adhering to ${targetLangName} grammar, vocabulary, and cultural sensitivities. Produce only the ${targetLangName} translation, without any additional explanations or commentary. Please translate the following ${sourceLangName} text into ${targetLangName}:
 
-  // Add the placeholder rule ONLY if there are protected tokens in this fragment
-  if (protectedTokens.length > 0) {
-    promptRules += `\n${ruleCounter}. PLACEHOLDERS: Copy placeholders like TOKENPLACEHOLDER0X exactly as they appear.`;
-    ruleCounter++;
-  }
 
-  let contextBlock = '';
-  if (prevContext || nextContext) {
-    promptRules += `\n${ruleCounter}. CONTEXT ONLY: Use the information below in <PREVIOUS_NODE> and <NEXT_NODE> strictly to understand grammar and flow. DO NOT translate nor include the context nodes in the output.`;
-    
-    if (prevContext) contextBlock += `<PREVIOUS_NODE>\n${prevContext.trim()}\n</PREVIOUS_NODE>\n\n`;
-    if (nextContext) contextBlock += `<NEXT_NODE>\n${nextContext.trim()}\n</NEXT_NODE>\n\n`;
-  }
-
-  const systemPrompt = `You are a professional data translation engine, as part of an automated pipeline. Your task is to translate text from ${localeEnglishNames[sourceLang]} to ${localeEnglishNames[targetLang]}.
-
-${promptRules}
-${contextBlock}
-
-If you output anything other than the exact translation, the system will crash.
-`;
-
-  // To simplify the prompt for the LLM (especially the smaller ones), we keep all the rules and context in the system prompt, and only send it the text to translate in the user prompt. This reduces the chance of the LLM misinterpreting the instructions.
-  const prompt = protectedText;
-
-console.debug('SYSTEM PROMPT SENT TO LLM:\n', systemPrompt);
-console.debug('PROMPT SENT TO LLM:\n', prompt);
+${protectedText}`;
 
   try {
-    // Send the prompt to the Ollama API
-    // (The full URL is the base URL without the trailing slash (/) + and the endpoint (/api/generate))
     const response = await fetch(ollama_url.replace(/\/$/, '') + OLLAMA_GENERATE_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: llm_model,
-        system: systemPrompt,
         prompt: prompt,
         stream: false,
         options: {
@@ -218,24 +224,14 @@ console.debug('PROMPT SENT TO LLM:\n', prompt);
     });
 
     const data = await response.json();
-    
-    if (!data.response) {
-      throw new Error('No response from Ollama API');
-    }
+    if (!data.response) throw new Error('No response from Ollama API');
 
     let translatedText = data.response.trim();
 
-    console.debug('RAW TRANSLATED TEXT RECEIVED FROM LLM:\n', translatedText);
-
-    // Restore the original protected tokens back into the translated text
+    // Restore the protected tokens (like URLs, project names, etc.) back into the translated text
     protectedTokens.forEach((token, index) => {
       translatedText = translatedText.replace(`TOKENPLACEHOLDER${index}X`, token);
     });
-
-    // Remove bold (**) and italics (_) that the ministral-3:3b model insists on adding, even though we explicitly told it not to in the system prompt. This is a safeguard to ensure that the output is clean.
-    translatedText = translatedText.replace(/\*\*/g, '').replace(/__/g, '').replace(/\*/g, '').replace(/_/g, '');
-    
-    console.debug('TRANSLATED TEXT AFTER CLEANING:\n', translatedText);
 
     // Stop the stopwatch and calculate elapsed seconds
     const endTime = performance.now();
@@ -246,8 +242,8 @@ console.debug('PROMPT SENT TO LLM:\n', prompt);
 
     console.log(`   🔹 [${duration}s] Translated: "${textSnippet}" -> "${translatedSnippet}"`);
     
-    if (leadingSpace) console.log(`       🔸 Added back leading whitespace: "${leadingSpace}" (length: ${leadingSpace.length})`);
-    if (trailingSpace) console.log(`       🔸 Added back trailing whitespace: "${trailingSpace}" (length: ${trailingSpace.length})`);
+    if (leadingSpace) console.debug(`       🔸 Added back leading whitespace: "${leadingSpace}" (length: ${leadingSpace.length})`);
+    if (trailingSpace) console.debug(`       🔸 Added back trailing whitespace: "${trailingSpace}" (length: ${trailingSpace.length})`);
     
     // Return the translated text with the original leading and trailing whitespace preserved
     return `${leadingSpace}${translatedText}${trailingSpace}`;
