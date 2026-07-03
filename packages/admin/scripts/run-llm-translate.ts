@@ -11,6 +11,7 @@ interface CliOptions {
   debug: boolean;
   url: string;
   model: string;
+  glob?: string;
 }
 
 program
@@ -18,7 +19,8 @@ program
   .description('Translate all .mdoc files in the posts directory to all supported locales using LLM.')
   .option('-d, --debug', 'enable debug logs', false)
   .option('--url <url>', 'ollama api url', DEFAULT_OLLAMA_URL)
-  .option('-m, --model <model>', 'llm model name', DEFAULT_LLM_MODEL);
+  .option('-m, --model <model>', 'llm model name', DEFAULT_LLM_MODEL)
+  .option('-g, --glob <glob-pattern>', 'glob pattern to match files (optional)');
 
 program.parse(process.argv);
 
@@ -48,8 +50,21 @@ const run = async () => {
   // Read the directory using native Node.js fs module
   const files = await fs.readdir(postsDir);
   
-  // Filter the results to keep only the .mdoc files
-  const mdocFiles = files.filter(file => file.endsWith('.mdoc'));
+  
+
+  // Convert the glob pattern to a regex pattern
+  // - Escape special regex characters (like ., ?, +, etc.)
+  // - Convert '*' to '.*' (which means "anything" in regex)
+  // - Anchor to the start '^' and end '$'
+  if (options.glob) {
+    console.log(`🎯 Using glob pattern: ${options.glob}`);
+    const escapedPattern = options.glob.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
+    var globToRegex = new RegExp(`^${escapedPattern}$`);
+  }
+
+  // Filter the results to keep only the .mdoc files, and apply the glob pattern if provided
+  const mdocFiles = files.filter(file => 
+    file.endsWith('.mdoc') && (!options.glob || globToRegex.test(file)));
 
   for (const filename of mdocFiles) {
     const inputFile = path.join(postsDir, filename);
