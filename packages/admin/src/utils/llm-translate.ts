@@ -189,11 +189,15 @@ export async function translateText(text: string, sourceLang: Locale, targetLang
   let protectedText = coreText;
   const protectedTokens: string[] = [];
 
+  // Create a unique placeholder token for each protected content match
+  // (Note: just in case, we use the word "TOKENPLACEHOLDER" without its vowels as "TKNPLCHLDR" to prevent the LLM from accidentally translating the placeholder itself, which could happen if it were a real word. We have not seen this behavior happen with "TOKENPLACEHOLDER", but we want to be extra cautious.)
+  const createProtectedToken = (index: number) => `TKNPLCHLDR${index}X`;
+
   for (const pattern of PROTECTED_PATTERNS) {
     protectedText = protectedText.replace(pattern, (match) => {
       protectedTokens.push(match);
       // Note: We use a purely alphanumeric placeholder to avoid any special characters that might confuse the LLM. The index ensures uniqueness for multiple URLs.
-      return `TOKENPLACEHOLDER${protectedTokens.length - 1}X`;
+      return createProtectedToken(protectedTokens.length - 1);
     });
   }
 
@@ -231,7 +235,7 @@ ${protectedText}`;
 
     // Restore the protected tokens (like URLs, project names, etc.) back into the translated text
     protectedTokens.forEach((token, index) => {
-      translatedText = translatedText.replace(`TOKENPLACEHOLDER${index}X`, token);
+      translatedText = translatedText.replace(createProtectedToken(index), token);
     });
 
     // Stop the stopwatch and calculate elapsed seconds
