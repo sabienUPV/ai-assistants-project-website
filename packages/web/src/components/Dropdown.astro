@@ -66,6 +66,9 @@ const {
     position: relative;
     display: inline-flex;
     align-items: center;
+
+    /* Make sure this dropdown anchor does not affect other dropdowns on the page */
+    anchor-scope: --dropdown-anchor;
   }
 
   .dropdown-trigger {
@@ -78,6 +81,10 @@ const {
     justify-content: center;
     padding: 0.5rem;
     font-family: inherit;
+
+    /* Set the anchor for the popover to this button */
+    anchor-name: --dropdown-anchor;
+    
   }
 
   /* Popover API: https://developer.mozilla.org/en-US/docs/Web/API/Popover_API */
@@ -107,9 +114,11 @@ const {
       inset: unset; /* We need to do this to override the default popover styles */
       
       /* Use anchor positioning to position the popover relative to the button */
-      /* Note: The popover API creates an implicit anchor association, so we can use anchor() without defining an explicit anchor */
+      /* Note: The popover API creates an implicit anchor association ONLY IN CHROMIUM-BASED BROWSERS, so we still need to use the position-anchor property explicitly to make sure it works in all browsers (since we have seen that implicit anchor association does not work on Firefox). */
       /* https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Anchor_positioning/Using#implicit_anchor_association */
       
+      position-anchor: --dropdown-anchor;
+
       top: anchor(bottom);
 
       &.is-left {
