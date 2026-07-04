@@ -125,3 +125,9 @@ a:hover {
   background-color: var(--color-text);
   clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
 }
+
+/* Fix for circle-flag icons to make sure they are always displayed as circles instead of squares */
+/* (they normally show properly as circles, but in some cases they for some unknown reason are displayed as squares, so this makes sure those cases are fixed) */
+.flag-icon {
+  border-radius: 50%;
+}
