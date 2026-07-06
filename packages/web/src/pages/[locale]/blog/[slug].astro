@@ -5,6 +5,7 @@ import AiDisclaimer from '@components/AiDisclaimer.astro';
 import { locales } from '@languages';
 import { getCollectionWithFallbacks, getEntryOrFallbackFromSlug, getSlugFromEntryId } from '@utils/dynamicContent';
 import PostNavigation from '@components/entries/posts/PostNavigation.astro';
+import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
 
 export const prerender = true;
 
@@ -12,7 +13,7 @@ const { locale } = Astro.locals;
 
 const { slug } = Astro.params;
 if (!slug) throw new Error('Slug not found');
-const post = await getEntryOrFallbackFromSlug('posts', locale, slug);
+const { entry: post, isFallback } = await getEntryOrFallbackFromSlug('posts', locale, slug);
 
 if (!post) throw new Error('No post found for this slug');
 const { Content } = await render(post);
@@ -38,6 +39,12 @@ export async function getStaticPaths() {
 <Layout title={post.data.title}>
   <article class="post-container">
     <header class="post-header">
+      {isFallback && (
+        <div class="not-in-language-pill-container">
+          <ContentNotInLanguagePill />
+        </div>
+      )}
+
       <h1>{post.data.title}</h1>
       
       <div class="post-meta">

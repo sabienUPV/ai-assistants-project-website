@@ -11,8 +11,8 @@ export type CourseEntry = DynamicContentEntry<'courses', Course>;
 
 // Helper functions for dynamic content (e.g. blog posts)
 
-export type CollectionWithFallbacksResult<Collection extends DynamicContentEntry<DynamicContentCollectionName, Data>, Data extends Record<string, unknown>> = {
-  collection: Collection[],
+export type CollectionWithFallbacksResult<ContentEntry extends DynamicContentEntry<DynamicContentCollectionName, Data>, Data extends Record<string, unknown>> = {
+  collection: ContentEntry[],
   fallbackIds?: string[],
 };
 
@@ -55,18 +55,23 @@ export async function getCollectionWithFallbacks<Data extends Record<string, unk
   return { collection: combinedEntries, fallbackIds };
 }
 
-// More overload declarations for getEntryOrFallbackFromSlug to allow TypeScript to infer the correct return type based on the collectionName parameter (see above in getCollectionWithFallbacks for an in-depth explanation)
-export async function getEntryOrFallbackFromSlug(collectionName: 'posts', locale: Locale, slug: string): Promise<PostEntry | undefined>;
-export async function getEntryOrFallbackFromSlug(collectionName: 'courses', locale: Locale, slug: string): Promise<CourseEntry | undefined>;
+export type EntryOrFallbackResult<ContentEntry extends DynamicContentEntry<DynamicContentCollectionName, Data>, Data extends Record<string, unknown>> = {
+  entry: ContentEntry | undefined;
+  isFallback: boolean;
+}
 
-export async function getEntryOrFallbackFromSlug<Data extends Record<string, unknown>>(collectionName: DynamicContentCollectionName, locale: Locale, slug: string): Promise<DynamicContentEntry<DynamicContentCollectionName, Data> | undefined> {
+// More overload declarations for getEntryOrFallbackFromSlug to allow TypeScript to infer the correct return type based on the collectionName parameter (see above in getCollectionWithFallbacks for an in-depth explanation)
+export async function getEntryOrFallbackFromSlug(collectionName: 'posts', locale: Locale, slug: string): Promise<EntryOrFallbackResult<PostEntry, Post>>;
+export async function getEntryOrFallbackFromSlug(collectionName: 'courses', locale: Locale, slug: string): Promise<EntryOrFallbackResult<CourseEntry, Course>>;
+
+export async function getEntryOrFallbackFromSlug<Data extends Record<string, unknown>>(collectionName: DynamicContentCollectionName, locale: Locale, slug: string): Promise<EntryOrFallbackResult<DynamicContentEntry<DynamicContentCollectionName, Data>, Data>> {
   // Try to get the entry in the current locale
   const entry = await getEntry(`${collectionName}_${locale}`, getEntryIdFromSlug(locale, collectionName, slug)) as DynamicContentEntry<DynamicContentCollectionName, Data> | undefined;
-  if (entry) return entry;
+  if (entry) return { entry, isFallback: false };
 
   // If not found, try to get the entry in the default locale
   const fallbackEntry = await getEntry(`${collectionName}_${defaultLocale}`, getEntryIdFromSlug(defaultLocale, collectionName, slug)) as DynamicContentEntry<DynamicContentCollectionName, Data> | undefined;
-  return fallbackEntry;
+  return { entry: fallbackEntry, isFallback: true };
 }
 
 export function getSlugFromEntryId(entryId: string): string {

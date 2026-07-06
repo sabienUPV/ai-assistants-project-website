@@ -5,6 +5,7 @@ import CourseNavigation from '@components/entries/courses/CourseNavigation.astro
 import TableOfContents from '@components/entries/courses/TableOfContents.astro';
 import { locales } from '@languages';
 import { getCollectionWithFallbacks, getEntryOrFallbackFromSlug, getSlugFromEntryId } from '@utils/dynamicContent';
+import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
 
 export const prerender = true;
 
@@ -13,7 +14,7 @@ const { locale } = Astro.locals;
 const { slug } = Astro.params;
 if (!slug) throw new Error('Slug not found');
 
-const course = await getEntryOrFallbackFromSlug('courses', locale, slug);
+const { entry: course, isFallback } = await getEntryOrFallbackFromSlug('courses', locale, slug);
 
 if (!course) throw new Error('No course found for this slug');
 const { Content } = await render(course);
@@ -46,6 +47,12 @@ export async function getStaticPaths() {
     <div class="course-main-column">
       <article class="course-container">
         <header class="course-header">
+          {isFallback && (
+            <div class="not-in-language-pill-container">
+              <ContentNotInLanguagePill />
+            </div>
+          )}
+
           <h1>{course.data.unit}. {course.data.title}</h1>
           
           {course.data.description && (
