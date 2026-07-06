@@ -3,18 +3,16 @@ import { getStaticPathsFromLocales as getStaticPaths } from '@utils/translation'
 
 export { getStaticPaths };
 
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
-import type { Post } from '@sabien-upv-astro-cms/core';
-import type { Locale } from '@languages';
-import { getExcerptFromBody, getSlugFromEntryId } from '@utils/dynamicContent';
+import { getExcerptFromBody, getSlugFromEntryId, type PostEntry } from '@utils/dynamicContent';
 
 export const prerender = true;
 
 const { locale, t } = Astro.locals;
 
 // 1. Fetch all entries from the posts collection
-const allPosts = await getCollection(`posts_${locale}`) as (CollectionEntry<`posts_${Locale}`> & { data: Post })[];
+const allPosts = await getCollection(`posts_${locale}`) as PostEntry[];
 
 // 2. Sort posts by publication date (newest first)
 const sortedPosts = allPosts.sort((a, b) => {

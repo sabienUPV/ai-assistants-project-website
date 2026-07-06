@@ -1,4 +1,13 @@
+import type { Locale } from '@languages';
 import Markdoc from '@markdoc/markdoc';
+import type { Course, Post } from '@sabien-upv-astro-cms/core';
+import type { CollectionEntry } from 'astro:content';
+
+type DynamicContentCollectionName = 'posts' | 'courses';
+type DynamicContentEntry<Name extends DynamicContentCollectionName, Data extends Record<string, unknown>> = CollectionEntry<`${Name}_${Locale}`> & { data: Data };
+
+export type PostEntry = DynamicContentEntry<'posts', Post>;
+export type CourseEntry = DynamicContentEntry<'courses', Course>;
 
 // Helper functions for dynamic content (e.g. blog posts)
 

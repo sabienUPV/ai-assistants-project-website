@@ -1,8 +1,7 @@
 ---
-import type { Locale } from '@languages';
-import type { Post } from '@sabien-upv-astro-cms/core';
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import EntryNavigation from '@components/entries/EntryNavigation.astro';
+import type { PostEntry } from '@utils/dynamicContent';
 
 const { locale, t } = Astro.locals;
 
@@ -13,7 +12,6 @@ interface Props {
 const { currentPostId } = Astro.props;
 
 // 1. Fetch all entries from the posts collection
-type PostEntry = CollectionEntry<`posts_${Locale}`> & { data: Post };
 const allPosts = await getCollection(`posts_${locale}`) as PostEntry[];
 
 // 2. Sort posts by id

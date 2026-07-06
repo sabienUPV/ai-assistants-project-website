@@ -1,10 +1,9 @@
 ---
-import { getCollection, getEntry, render, type CollectionEntry } from 'astro:content';
+import { getCollection, getEntry, render } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import AiDisclaimer from '@components/AiDisclaimer.astro';
-import { locales, type Locale } from '@languages';
-import type { Post } from '@sabien-upv-astro-cms/core';
-import { getEntryIdFromSlug, getSlugFromEntryId } from '@utils/dynamicContent';
+import { locales } from '@languages';
+import { getEntryIdFromSlug, getSlugFromEntryId, type PostEntry } from '@utils/dynamicContent';
 import PostNavigation from '@components/entries/posts/PostNavigation.astro';
 
 export const prerender = true;
@@ -13,7 +12,7 @@ const { locale } = Astro.locals;
 
 const { slug } = Astro.params;
 if (!slug) throw new Error('Slug not found');
-const post = await getEntry(`posts_${locale}`, getEntryIdFromSlug(locale, 'posts', slug)) as CollectionEntry<`posts_${Locale}`> & { data: Post };
+const post = await getEntry(`posts_${locale}`, getEntryIdFromSlug(locale, 'posts', slug)) as PostEntry;
 
 if (!post) throw new Error('No post found for this slug');
 const { Content } = await render(post);

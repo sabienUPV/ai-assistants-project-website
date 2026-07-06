@@ -3,11 +3,10 @@ import { getStaticPathsFromLocales as getStaticPaths } from '@utils/translation'
 
 export { getStaticPaths };
 
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
-import type { Course } from '@sabien-upv-astro-cms/core';
-import { defaultLocale, type Locale } from '@languages';
-import { getExcerptFromBody, getSlugFromEntryId } from '@utils/dynamicContent';
+import { defaultLocale } from '@languages';
+import { getExcerptFromBody, getSlugFromEntryId, type CourseEntry } from '@utils/dynamicContent';
 import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
 
 export const prerender = true;
@@ -15,7 +14,6 @@ export const prerender = true;
 const { locale, t } = Astro.locals;
 
 // 1. Fetch all entries from the courses collection
-type CourseEntry = CollectionEntry<`courses_${Locale}`> & { data: Course };
 const allCourses = await getCollection(`courses_${locale}`) as CourseEntry[];
 
 // 1.5 Also fetch all entries from the courses collection in the default locale (if the current locale is not the default) to provide a fallback for courses that are not available in the current locale

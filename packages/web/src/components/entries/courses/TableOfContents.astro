@@ -1,9 +1,8 @@
 ---
-import type { Locale } from '@languages';
-import type { Course } from '@sabien-upv-astro-cms/core';
-import { getSlugFromEntryId } from '@utils/dynamicContent';
+import { defaultLocale } from '@languages';
+import { getSlugFromEntryId, type CourseEntry } from '@utils/dynamicContent';
 import { getSiblingUrl } from '@utils/url';
-import { getCollection, type CollectionEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 
 const { locale, t } = Astro.locals;
 
@@ -14,8 +13,16 @@ interface Props {
 const { currentUnit } = Astro.props;
 
 // Fetch all courses for the current locale
-type CourseEntry = CollectionEntry<`courses_${Locale}`> & { data: Course };
 const allCourses = await getCollection(`courses_${locale}`) as CourseEntry[];
+
+// Also fetch all entries from the courses collection in the default locale (if the current locale is not the default) to provide a fallback for courses that are not available in the current locale
+if (locale !== defaultLocale) {
+  const defaultLocaleCourses = await getCollection(`courses_${defaultLocale}`) as CourseEntry[];
+  const missingCourses = defaultLocaleCourses.filter(defaultCourse => !allCourses.some(course => course.id === defaultCourse.id));
+  if (missingCourses) {
+    allCourses.push(...missingCourses);
+  }
+}
 
 // Sort courses by unit number properly (e.g., 1 -> 1.1 -> 1.2 -> 1.10 -> 2)
 const sortedCourses = allCourses.sort((a, b) => {
