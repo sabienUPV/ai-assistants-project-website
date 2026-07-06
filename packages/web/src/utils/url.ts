@@ -32,3 +32,30 @@ export function tryRemoveBaseUrlFromPath(path: string): string {
   }
   return path;
 }
+
+/**
+ * Get the absolute URL path to a sibling page, preserving the current locale and any other path segments.
+ * 
+ * Example:
+ * ("/es/courses/unidad-1", "unidad-2") => "/es/courses/unidad-2"
+ * 
+ * This function is needed because if you use a relative path like "unit-2" in a link, the browser will do it properly only if the URL does NOT end with a slash (/). Because if it does, the browser thinks the page is a "directory", and will append the relative path to that directory instead of replacing the last segment. This function ensures that the last segment is replaced correctly, regardless of whether the current URL ends with a slash or not, and returns the resulting absolute path so the browser cannot misinterpret it.
+ * 
+ * @param astroUrlPathName The value of `Astro.url.pathname` (you can access it from your Astro page or component)
+ * @param relativePath The relative path to the sibling page you want to link to (e.g., "unit-2" or "unit-3")
+ * @returns The absolute URL path to the sibling page, preserving the current locale and any other path segments
+ */
+export function getSiblingUrl(astroUrlPathName: string, relativePath: string): string {
+  // Remove any trailing slash from the current URL path to avoid double slashes when joining
+  const cleanPath = astroUrlPathName.replace(/\/$/, '');
+  
+  // Break down the URL into segments: ['', 'es', 'courses', 'unit-1']
+  const segments = cleanPath.split('/');
+  
+  // Replace the last segment with the new relative path (e.g., "unidad-2")
+  const newSlug = relativePath.startsWith('/') ? relativePath.slice(1) : relativePath; // Remove leading slash if present
+  segments[segments.length - 1] = newSlug;
+  
+  // Join the segments back together to form the new URL path (e.g., "/es/courses/unidad-2")
+  return segments.join('/');
+}
