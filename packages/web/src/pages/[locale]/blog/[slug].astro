@@ -5,6 +5,7 @@ import AiDisclaimer from '@components/AiDisclaimer.astro';
 import { locales, type Locale } from '@languages';
 import type { Post } from '@sabien-upv-astro-cms/core';
 import { getEntryIdFromSlug, getSlugFromEntryId } from '@utils/dynamicContent';
+import PostNavigation from '@components/entries/posts/PostNavigation.astro';
 
 export const prerender = true;
 
@@ -58,6 +59,7 @@ export async function getStaticPaths() {
       <Content />
     </div>
   </article>
+  <PostNavigation currentPostId={post.id} />
 </Layout>
 
 <style>

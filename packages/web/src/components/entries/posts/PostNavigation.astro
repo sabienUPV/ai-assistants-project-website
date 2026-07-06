@@ -1,0 +1,33 @@
+---
+import type { Locale } from '@languages';
+import type { Post } from '@sabien-upv-astro-cms/core';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import EntryNavigation from '@components/entries/EntryNavigation.astro';
+
+const { locale, t } = Astro.locals;
+
+interface Props {
+  currentPostId: string;
+}
+
+const { currentPostId } = Astro.props;
+
+// 1. Fetch all entries from the posts collection
+type PostEntry = CollectionEntry<`posts_${Locale}`> & { data: Post };
+const allPosts = await getCollection(`posts_${locale}`) as PostEntry[];
+
+// 2. Sort posts by id
+const sortedPosts = allPosts.sort((a, b) => a.id.localeCompare(b.id));
+
+// 3. Find the index of the current post based on its id
+const currentIndex = sortedPosts.findIndex(post => post.id === currentPostId);
+
+// 4. Calculate previous and next posts (handling array boundaries)
+const prevPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
+const nextPost = currentIndex !== -1 && currentIndex < sortedPosts.length - 1 ? sortedPosts [currentIndex + 1] : null;
+
+const previousEntry = prevPost ? { id: prevPost.id, title: prevPost.data.title } : undefined;
+const nextEntry = nextPost ? { id: nextPost.id, title: nextPost.data.title } : undefined;
+---
+
+<EntryNavigation previousEntry={previousEntry} nextEntry={nextEntry} />

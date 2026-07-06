@@ -36,7 +36,7 @@ const courseUnits = allCourses.filter(course => course.data.unit.indexOf('.') ==
           <div class="card-body">
             {/* Modified header semantic spacing to match global line-height specs */}
             <h2 class="card-title">
-              <a href={getSlugFromEntryId(course.id)}>{course.data.title}</a>
+              <a href={getSlugFromEntryId(course.id)}>{course.data.unit}. {course.data.title}</a>
             </h2>
             <p class="card-excerpt">
               {course.data.description

@@ -1,63 +1,39 @@
 ---
-import type { Locale } from '@languages';
-import type { Course } from '@sabien-upv-astro-cms/core';
 import { getSlugFromEntryId } from '@utils/dynamicContent';
-import { getCollection, type CollectionEntry } from 'astro:content';
 
-const { locale, t } = Astro.locals;
+const { t } = Astro.locals;
 
-interface Props {
-  currentUnit: string;
+interface Entry {
+  id: string;
+  title: string;
 }
 
-const { currentUnit } = Astro.props;
+interface Props {
+  previousEntry?: Entry;
+  nextEntry?: Entry;
+}
 
-// 1. Fetch all entries from the courses collection
-const allCourses = await getCollection(`courses_${locale}`) as (CollectionEntry<`courses_${Locale}`> & { data: Course })[];
-
-// 2. Sort courses by unit and then by title for consistent ordering (sorting properly subunits, e.g., 1.10 comes after 1.2)
-const sortedCourses = allCourses.sort((a, b) => {
-  const partsA = a.data.unit.split('.').map(Number);
-  const partsB = b.data.unit.split('.').map(Number);
-  const maxLength = Math.max(partsA.length, partsB.length);
-
-  for (let i = 0; i < maxLength; i++) {
-    const valA = partsA[i] || 0; // If there are no more levels, assume 0
-    const valB = partsB[i] || 0;
-    
-    if (valA !== valB) {
-      return valA - valB;
-    }
-  }
-  return a.data.title.localeCompare(b.data.title);
-});
-
-// 3. Find the index of the current course based on the provided currentUnit
-const currentIndex = sortedCourses.findIndex(course => course.data.unit === currentUnit);
-
-// 4. Calculate previous and next courses (handling array boundaries)
-const prevCourse = currentIndex > 0 ? sortedCourses[currentIndex - 1] : null;
-const nextCourse = currentIndex !== -1 && currentIndex < sortedCourses.length - 1 ? sortedCourses[currentIndex + 1] : null;
+const { previousEntry, nextEntry} = Astro.props;
 ---
 
-<nav class="course-navigation" aria-label={t('course_nav_label')}>
-  {prevCourse ? (
-    <a href={getSlugFromEntryId(prevCourse.id)} class="nav-button prev">
+<nav class="entry-navigation" aria-label={t('entry_nav_label')}>
+  {previousEntry ? (
+    <a href={getSlugFromEntryId(previousEntry.id)} class="nav-button prev">
       <span class="nav-icon" aria-hidden="true">&larr;</span>
       <div class="nav-text">
-        <span class="nav-label">{t('course_nav_previous')}</span>
-        <span class="nav-title">{prevCourse.data.unit} - {prevCourse.data.title}</span>
+        <span class="nav-label">{t('entry_nav_previous')}</span>
+        <span class="nav-title">{previousEntry.title}</span>
       </div>
     </a>
   ) : (
     <div class="empty-placeholder"></div>
   )}
 
-  {nextCourse ? (
-    <a href={getSlugFromEntryId(nextCourse.id)} class="nav-button next">
+  {nextEntry ? (
+    <a href={getSlugFromEntryId(nextEntry.id)} class="nav-button next">
       <div class="nav-text text-right">
-        <span class="nav-label">{t('course_nav_next')}</span>
-        <span class="nav-title">{nextCourse.data.unit} - {nextCourse.data.title}</span>
+        <span class="nav-label">{t('entry_nav_next')}</span>
+        <span class="nav-title">{nextEntry.title}</span>
       </div>
       <span class="nav-icon" aria-hidden="true">&rarr;</span>
     </a>
@@ -67,7 +43,7 @@ const nextCourse = currentIndex !== -1 && currentIndex < sortedCourses.length - 
 </nav>
 
 <style>
-  .course-navigation {
+  .entry-navigation {
     display: flex;
     justify-content: space-between;
     align-items: stretch;
@@ -157,7 +133,7 @@ const nextCourse = currentIndex !== -1 && currentIndex < sortedCourses.length - 
 
   /* Responsive for mobile */
   @media (max-width: 767px) {
-    .course-navigation {
+    .entry-navigation {
       flex-direction: column;
       gap: 1rem;
     }
