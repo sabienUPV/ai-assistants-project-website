@@ -1,0 +1,145 @@
+---
+import { getCollection, getEntry, render, type CollectionEntry } from 'astro:content';
+import Layout from '@layouts/Layout.astro';
+import AiDisclaimer from '@components/AiDisclaimer.astro';
+import { locales, type Locale } from '@languages';
+import type { Course } from '@sabien-upv-astro-cms/core';
+import { getEntryIdFromSlug, getSlugFromEntryId } from '@utils/dynamicContent';
+
+export const prerender = true;
+
+const { locale } = Astro.locals;
+
+const { slug } = Astro.params;
+if (!slug) throw new Error('Slug not found');
+const course = await getEntry(`courses_${locale}`, getEntryIdFromSlug(locale, 'courses', slug)) as CollectionEntry<`courses_${Locale}`> & { data: Course };
+
+if (!course) throw new Error('No course found for this slug');
+const { Content } = await render(course);
+
+// Generate static pages at build time (SSG)
+export async function getStaticPaths() {
+  let allCourses = [];
+  for (const locale of locales) {
+    const courses = await getCollection(`courses_${locale}`);
+    if (courses.length === 0) {
+      console.warn(`No courses found for locale: ${locale}`);
+    }
+    allCourses.push(...courses.map(course => ({ params: { locale, slug: getSlugFromEntryId(course.id) } })));
+  }
+  return allCourses;
+}
+---
+
+<Layout title={course.data.title}>
+  <article class="course-container">
+    <header class="course-header">
+      <h1>{course.data.title}</h1>
+      
+      {course.data.description && (
+        <p class="course-description">{course.data.description}</p>
+      )}
+    </header>
+
+    <div class="course-content">
+      <Content />
+    </div>
+  </article>
+</Layout>
+
+<style>
+  /* Scoped styles for the article layout */
+  .course-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    /* Font-family, font-size, and background are inherited cleanly from global body */
+    color: var(--color-text);
+  }
+
+  .course-header {
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 2rem;
+    /* Centers all inline and block elements within the header to match the global h1 alignment */
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    text-align: center;
+  }
+
+  .course-header h1 {
+    /* Overriding default global h1 margins to handle specific article headers tightly */
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 2.5rem;
+  }
+
+  .course-meta {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--color-logo-dark-grey); /* Integration with your brand grey */
+    margin-bottom: 0.5rem;
+  }
+
+  .course-description {
+    font-size: 1.2rem;
+    color: var(--color-text);
+    max-width: 650px; /* Keeps the centered description short and balanced */
+    margin: 1rem 0 0 0;
+    line-height: 1.6;
+  }
+
+  /* Styling HTML elements generated dynamically by Markdoc */
+  .course-content :global(p) {
+    /* Respects your global text alignment (left) and accessibility choices */
+    font-size: 1.05rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .course-content :global(h2) {
+    /* Overrides the global h2 centered text inside the reading area for better accessibility */
+    text-align: left;
+    font-size: 1.75rem;
+    color: var(--color-secondary); /* Dark blue corporate identity */
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .course-content :global(h3) {
+    text-align: left;
+    font-size: 1.3rem;
+    color: var(--color-dark-blue);
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .course-content :global(ul), .course-content :global(ol) {
+    margin-bottom: 1.6rem;
+    padding-left: 2rem;
+  }
+
+  .course-content :global(li) {
+    margin-bottom: 0.6rem;
+  }
+
+  .course-content :global(a) {
+    color: var(--color-link);
+    text-decoration: none;
+  }
+
+  .course-content :global(a:hover) {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+  }
+
+  .course-content :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 2rem auto;
+    display: block; /* Centers images cleanly if they aren't full width */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+</style>

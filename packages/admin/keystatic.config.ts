@@ -1,7 +1,7 @@
 import { config, fields, collection, type Config } from '@keystatic/core';
 import { inline, wrapper } from '@keystatic/core/content-components';
-import type { Post } from '@sabien-upv-astro-cms/core';
-import { markdocTagAttributes } from '@sabien-upv-astro-cms/core';
+import type { Post, Course } from '@sabien-upv-astro-cms/core';
+import { courseUnitRegex, courseUnitValidationMessage, markdocTagAttributes } from '@sabien-upv-astro-cms/core';
 import React from 'react';
 import { locales, type Locale } from '@languages';
 
@@ -13,6 +13,11 @@ type KeystaticPostSchema = {
   [K in keyof Post]: any; 
 } & {
   content: any; // Añadimos 'content' porque Keystatic lo necesita para el Markdoc
+};
+type KeystaticCourseSchema = {
+  [K in keyof Course]: any; 
+} & {
+  content: any;
 };
 
 // Define custom inline components for Keystatic using shared core attributes
@@ -55,6 +60,27 @@ const isLocal = import.meta.env.KEYSTATIC_STORAGE_LOCAL
   ? import.meta.env.KEYSTATIC_STORAGE_LOCAL === 'true'
   : import.meta.env.DEV;
 
+// Muy útil para arreglar nombres de archivos con tildes, espacios, mayúsculas, etc. que pueden dar problemas al subirlos a la web
+function cleanFileName(filename: string): string {
+  // Separamos el nombre de la extensión
+  const parts = filename.split('.');
+  const ext = parts.pop();
+  const name = parts.join('.');
+
+  // Aplicamos un slugify básico usando regex nativo de JS
+  const cleanName = name
+    .toLowerCase()
+    .normalize('NFD')                     // Descompone caracteres con tildes
+    .replace(/[\u0300-\u036f]/g, '')      // Elimina los acentos
+    .replace(/[^a-z0-9\s-]/g, '')         // Elimina caracteres raros
+    .trim()
+    .replace(/\s+/g, '-')                 // Cambia espacios por guiones
+    .replace(/-+/g, '-');                 // Evita guiones dobles
+
+  // Devolvemos el nombre limpio con su extensión original
+  return `${cleanName}.${ext}`;
+}
+
 // Create a collection for each locale dynamically, using the same post schema definition
 // FACTORY FUNCTION: We wrap the collection creation in a function to preserve strict TypeScript inference for the schema fields
 const createPostCollection = (locale: Locale) => {
@@ -81,25 +107,7 @@ const createPostCollection = (locale: Locale) => {
             // IMPORTANT: "@admin-assets" is an alias defined in tsconfig.json, that should be defined in BOTH the ADMIN and WEB projects, and BOTH should point to the /admin/src/assets folder. This way, when we upload an image from the admin, it will be stored in the admin's assets folder, but we can access it from the web using the @admin-assets alias.
             publicPath: '@admin-assets/images/posts/',
             // Muy útil para arreglar nombres de archivos con tildes, espacios, mayúsculas, etc. que pueden dar problemas al subirlos a la web
-            transformFilename: (filename) => {
-              // Separamos el nombre de la extensión
-              const parts = filename.split('.');
-              const ext = parts.pop();
-              const name = parts.join('.');
-
-              // Aplicamos un slugify básico usando regex nativo de JS
-              const cleanName = name
-                .toLowerCase()
-                .normalize('NFD')                     // Descompone caracteres con tildes
-                .replace(/[\u0300-\u036f]/g, '')      // Elimina los acentos
-                .replace(/[^a-z0-9\s-]/g, '')         // Elimina caracteres raros
-                .trim()
-                .replace(/\s+/g, '-')                 // Cambia espacios por guiones
-                .replace(/-+/g, '-');                 // Evita guiones dobles
-
-              // Devolvemos el nombre limpio con su extensión original
-              return `${cleanName}.${ext}`;
-            }
+            transformFilename: cleanFileName,
           },
         },
         // Register custom components in Markdoc options
@@ -112,12 +120,53 @@ const createPostCollection = (locale: Locale) => {
   });
 };
 
+const createCourseCollection = (locale: Locale) => {
+  return collection({
+    label: `Courses (${locale.toUpperCase()})`,
+    slugField: 'title',
+    path: `src/content/${locale}/courses/*`,
+    format: { contentField: 'content' },
+    schema: {
+      unit: fields.text({
+        label: 'Unit',
+        validation: {
+          pattern: {
+            regex: courseUnitRegex,
+            message: courseUnitValidationMessage,
+          }
+        }
+      }),
+      title: fields.slug({ name: { label: 'Title' } }),
+      description: fields.text({ label: 'Description' }),
+      content: fields.markdoc({
+        label: 'Content',
+        options: {
+          image: {
+            directory: 'src/assets/images/courses',
+            publicPath: '@admin-assets/images/courses/',
+            transformFilename: cleanFileName,
+          },
+        },
+        components: {
+          flag: flagComponent, 
+          notranslate: noTranslateComponent,
+        }
+      }),
+    } satisfies KeystaticCourseSchema,
+  });
+};
+
 // 2. DYNAMIC GENERATION
 // Generate the collections object by mapping over the available locales
 const postCollections = locales.reduce((acc, locale) => {
   acc[`posts_${locale}`] = createPostCollection(locale);
   return acc;
 }, {} as Record<`posts_${Locale}`, ReturnType<typeof createPostCollection>>);
+
+const courseCollections = locales.reduce((acc, locale) => {
+  acc[`courses_${locale}`] = createCourseCollection(locale);
+  return acc;
+}, {} as Record<`courses_${Locale}`, ReturnType<typeof createCourseCollection>>);
 
 export default config({
   storage: isLocal ? {
@@ -134,5 +183,6 @@ export default config({
   }),
   collections: {
     ...postCollections,
+    ...courseCollections,
   },
 });

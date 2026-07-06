@@ -2,7 +2,7 @@ import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { file, glob } from 'astro/loaders';
 import { parse as parseCsv } from 'csv-parse/sync';
-import { postSchema } from '@sabien-upv-astro-cms/core';
+import { postSchema, courseSchema } from '@sabien-upv-astro-cms/core';
 
 // 1. Import the supported languages and their types
 // from a single source of truth
@@ -63,4 +63,15 @@ const posts = locales.reduce((acc, locale) => {
   return acc;
 }, {} as Record<`posts_${Locale}`, ReturnType<typeof defineCollection>>); // Type assertion for strict typing
 
-export const collections = { i18n, glossary, ...posts };
+// Create one courses_<locale> collection for each supported locale
+const courses = locales.reduce((acc, locale) => {
+  acc[`courses_${locale}`] = defineCollection({
+    // Load all .md and .mdoc files in the locale-specific courses directory
+    loader: glob({ pattern: `${locale}/courses/*.{md,mdoc}`, base: '../admin/src/content' }),
+    // Type-check frontmatter using the shared courseSchema from core
+    schema: courseSchema,
+  });
+  return acc;
+}, {} as Record<`courses_${Locale}`, ReturnType<typeof defineCollection>>); // Type assertion for strict typing
+
+export const collections = { i18n, glossary, ...posts, ...courses };
