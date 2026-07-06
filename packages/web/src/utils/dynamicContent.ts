@@ -42,7 +42,7 @@ export async function getCollectionWithFallbacks<Data extends Record<string, unk
 
   // Combine entries from the current locale with fallbacks from the default locale
   const fallbackIds: string[] = [];
-  const combinedEntries: DynamicContentEntry<DynamicContentCollectionName, Data>[] = [];
+  const combinedEntries: DynamicContentEntry<DynamicContentCollectionName, Data>[] = currentLocaleEntries.slice(); // Start with current locale entries
   for (const defaultEntry of defaultLocaleEntries) {
     const slug = getSlugFromEntryId(defaultEntry.id);
     const isMissingInCurrentLocale = !currentLocaleEntriesMap.has(slug);
