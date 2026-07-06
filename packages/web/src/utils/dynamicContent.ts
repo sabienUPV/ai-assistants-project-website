@@ -61,12 +61,11 @@ export async function getEntryOrFallbackFromSlug(collectionName: 'courses', loca
 
 export async function getEntryOrFallbackFromSlug<Data extends Record<string, unknown>>(collectionName: DynamicContentCollectionName, locale: Locale, slug: string): Promise<DynamicContentEntry<DynamicContentCollectionName, Data> | undefined> {
   // Try to get the entry in the current locale
-  const entryId = getEntryIdFromSlug(locale, collectionName, slug);
-  const entry = await getEntry(`${collectionName}_${locale}`, entryId) as DynamicContentEntry<DynamicContentCollectionName, Data> | undefined;
+  const entry = await getEntry(`${collectionName}_${locale}`, getEntryIdFromSlug(locale, collectionName, slug)) as DynamicContentEntry<DynamicContentCollectionName, Data> | undefined;
   if (entry) return entry;
 
   // If not found, try to get the entry in the default locale
-  const fallbackEntry = await getEntry(`${collectionName}_${defaultLocale}`, entryId) as DynamicContentEntry<DynamicContentCollectionName, Data> | undefined;
+  const fallbackEntry = await getEntry(`${collectionName}_${defaultLocale}`, getEntryIdFromSlug(defaultLocale, collectionName, slug)) as DynamicContentEntry<DynamicContentCollectionName, Data> | undefined;
   return fallbackEntry;
 }
 
