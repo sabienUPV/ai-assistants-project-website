@@ -1,0 +1,171 @@
+---
+import type { Locale } from '@languages';
+import type { Course } from '@sabien-upv-astro-cms/core';
+import { getSlugFromEntryId } from '@utils/dynamicContent';
+import { getCollection, type CollectionEntry } from 'astro:content';
+
+const { locale, t } = Astro.locals;
+
+interface Props {
+  currentUnit: string;
+}
+
+const { currentUnit } = Astro.props;
+
+// 1. Fetch all entries from the courses collection
+const allCourses = await getCollection(`courses_${locale}`) as (CollectionEntry<`courses_${Locale}`> & { data: Course })[];
+
+// 2. Sort courses by unit and then by title for consistent ordering (sorting properly subunits, e.g., 1.10 comes after 1.2)
+const sortedCourses = allCourses.sort((a, b) => {
+  const partsA = a.data.unit.split('.').map(Number);
+  const partsB = b.data.unit.split('.').map(Number);
+  const maxLength = Math.max(partsA.length, partsB.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    const valA = partsA[i] || 0; // If there are no more levels, assume 0
+    const valB = partsB[i] || 0;
+    
+    if (valA !== valB) {
+      return valA - valB;
+    }
+  }
+  return a.data.title.localeCompare(b.data.title);
+});
+
+// 3. Find the index of the current course based on the provided currentUnit
+const currentIndex = sortedCourses.findIndex(course => course.data.unit === currentUnit);
+
+// 4. Calculate previous and next courses (handling array boundaries)
+const prevCourse = currentIndex > 0 ? sortedCourses[currentIndex - 1] : null;
+const nextCourse = currentIndex !== -1 && currentIndex < sortedCourses.length - 1 ? sortedCourses[currentIndex + 1] : null;
+---
+
+<nav class="course-navigation" aria-label="Navegación entre unidades">
+  {prevCourse ? (
+    <a href={getSlugFromEntryId(prevCourse.id)} class="nav-button prev">
+      <span class="nav-icon" aria-hidden="true">&larr;</span>
+      <div class="nav-text">
+        <span class="nav-label">{t('course_nav_previous')}</span>
+        <span class="nav-title">{prevCourse.data.unit} - {prevCourse.data.title}</span>
+      </div>
+    </a>
+  ) : (
+    <div class="empty-placeholder"></div>
+  )}
+
+  {nextCourse ? (
+    <a href={getSlugFromEntryId(nextCourse.id)} class="nav-button next">
+      <div class="nav-text text-right">
+        <span class="nav-label">{t('course_nav_next')}</span>
+        <span class="nav-title">{nextCourse.data.unit} - {nextCourse.data.title}</span>
+      </div>
+      <span class="nav-icon" aria-hidden="true">&rarr;</span>
+    </a>
+  ) : (
+    <div class="empty-placeholder"></div>
+  )}
+</nav>
+
+<style>
+  .course-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    margin-top: 4rem;
+    gap: 1.5rem;
+  }
+
+  .nav-button {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background-color: var(--color-background);
+    border: 2px solid var(--color-logo-light-blue);
+    border-radius: 8px;
+    color: var(--color-text);
+    text-decoration: none;
+    flex: 1;
+    max-width: calc(50% - 0.75rem);
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Override the default link behavior from the layout */
+  .nav-button:hover {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    text-decoration: none;
+  }
+
+  .empty-placeholder {
+    flex: 1;
+    max-width: calc(50% - 0.75rem);
+  }
+
+  .nav-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .text-right {
+    text-align: right;
+  }
+
+  .nav-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-logo-dark-grey);
+    margin-bottom: 0.4rem;
+    font-weight: 700;
+    transition: color 0.2s ease-in-out;
+  }
+
+  .nav-title {
+    font-weight: 700;
+    color: var(--color-secondary);
+    font-size: 1.1rem;
+    line-height: 1.3;
+    transition: color 0.2s ease-in-out;
+  }
+
+  .nav-button.next {
+    justify-content: flex-end;
+  }
+
+  .nav-icon {
+    font-size: 1.8rem;
+    color: var(--color-primary);
+    transition: transform 0.2s ease-in-out, color 0.2s ease-in-out;
+  }
+
+  /* Hover effects to improve contrast (WCAG) */
+  .nav-button:hover .nav-icon,
+  .nav-button:hover .nav-label,
+  .nav-button:hover .nav-title {
+    color: white; 
+  }
+
+  .nav-button.prev:hover .nav-icon {
+    transform: translateX(-4px);
+  }
+
+  .nav-button.next:hover .nav-icon {
+    transform: translateX(4px);
+  }
+
+  /* Responsive for mobile */
+  @media (max-width: 767px) {
+    .course-navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button, 
+    .empty-placeholder {
+      max-width: 100%;
+      width: 100%;
+    }
+  }
+</style>

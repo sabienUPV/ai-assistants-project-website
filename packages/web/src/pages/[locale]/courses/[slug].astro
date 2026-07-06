@@ -1,7 +1,7 @@
 ---
 import { getCollection, getEntry, render, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
-import AiDisclaimer from '@components/AiDisclaimer.astro';
+import CourseNavigation from '@components/courses/CourseNavigation.astro';
 import { locales, type Locale } from '@languages';
 import type { Course } from '@sabien-upv-astro-cms/core';
 import { getEntryIdFromSlug, getSlugFromEntryId } from '@utils/dynamicContent';
@@ -45,6 +45,7 @@ export async function getStaticPaths() {
       <Content />
     </div>
   </article>
+  <CourseNavigation currentUnit={course.data.unit} />
 </Layout>
 
 <style>
