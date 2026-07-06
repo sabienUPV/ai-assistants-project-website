@@ -6,14 +6,13 @@ export { getStaticPaths };
 import Layout from '@layouts/Layout.astro';
 import { getCollectionWithFallbacks, getExcerptFromBody, getSlugFromEntryId } from '@utils/dynamicContent';
 import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
-import type { Course } from '@sabien-upv-astro-cms/core';
 
 export const prerender = true;
 
 const { locale, t } = Astro.locals;
 
 // 1. Fetch all entries from the courses collection
-const { collection: allCourses, fallbackIds: missingCourseIds } = await getCollectionWithFallbacks<Course>('courses', locale);
+const { collection: allCourses, fallbackIds: missingCourseIds } = await getCollectionWithFallbacks('courses', locale);
 
 // 2. Filter courses that are a first-level unit, sort them by unit, and finally by title for consistent ordering
 const courseUnits = allCourses.filter(course => course.data.unit.indexOf('.') === -1) // If there's no dot, it's a first-level unit

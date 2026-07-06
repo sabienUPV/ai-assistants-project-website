@@ -11,10 +11,18 @@ export type CourseEntry = DynamicContentEntry<'courses', Course>;
 
 // Helper functions for dynamic content (e.g. blog posts)
 
-export async function getCollectionWithFallbacks<Data extends Record<string, unknown>>(collectionName: DynamicContentCollectionName, locale: Locale): Promise<{
-  collection: DynamicContentEntry<DynamicContentCollectionName, Data>[],
+export type CollectionWithFallbacksResult<Collection extends DynamicContentEntry<DynamicContentCollectionName, Data>, Data extends Record<string, unknown>> = {
+  collection: Collection[],
   fallbackIds?: string[],
-}> {
+};
+
+// Overload declarations: Turns out that in TypeScript you can declare multiple function signatures for the same function name, allowing you to specify different parameter types and return types based on the input, WITHOUT having to write separate functions or change the implementation.
+// This won't be read by JavaScript, and only used by TypeScript for type-checking.
+// What this allows is TypeScript to automatically infer that if you pass 'posts' as the collectionName, the return type will be PostEntry[], and if you pass 'courses', the return type will be CourseEntry[], WITHOUT having to manually specify the Data generic type parameter when calling the function. This makes the function easier to use and reduces the chance of type errors.
+export async function getCollectionWithFallbacks(collectionName: 'posts', locale: Locale): Promise<CollectionWithFallbacksResult<PostEntry, Post>>;
+export async function getCollectionWithFallbacks(collectionName: 'courses', locale: Locale): Promise<CollectionWithFallbacksResult<CourseEntry, Course>>;
+
+export async function getCollectionWithFallbacks<Data extends Record<string, unknown>>(collectionName: DynamicContentCollectionName, locale: Locale): Promise<CollectionWithFallbacksResult<DynamicContentEntry<DynamicContentCollectionName, Data>, Data>> {
   // Fetch all entries from the specified collection in the current locale
   const currentLocaleEntries = await getCollection(`${collectionName}_${locale}`) as DynamicContentEntry<DynamicContentCollectionName, Data>[];
 
@@ -46,6 +54,10 @@ export async function getCollectionWithFallbacks<Data extends Record<string, unk
 
   return { collection: combinedEntries, fallbackIds };
 }
+
+// More overload declarations for getEntryOrFallbackFromSlug to allow TypeScript to infer the correct return type based on the collectionName parameter (see above in getCollectionWithFallbacks for an in-depth explanation)
+export async function getEntryOrFallbackFromSlug(collectionName: 'posts', locale: Locale, slug: string): Promise<PostEntry | undefined>;
+export async function getEntryOrFallbackFromSlug(collectionName: 'courses', locale: Locale, slug: string): Promise<CourseEntry | undefined>;
 
 export async function getEntryOrFallbackFromSlug<Data extends Record<string, unknown>>(collectionName: DynamicContentCollectionName, locale: Locale, slug: string): Promise<DynamicContentEntry<DynamicContentCollectionName, Data> | undefined> {
   // Try to get the entry in the current locale

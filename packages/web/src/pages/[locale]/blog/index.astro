@@ -6,14 +6,13 @@ export { getStaticPaths };
 import Layout from '@layouts/Layout.astro';
 import { getCollectionWithFallbacks, getExcerptFromBody, getSlugFromEntryId } from '@utils/dynamicContent';
 import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
-import type { Post } from '@sabien-upv-astro-cms/core';
 
 export const prerender = true;
 
 const { locale, t } = Astro.locals;
 
 // 1. Fetch all entries from the posts collection
-const { collection: allPosts, fallbackIds: missingPostIds } = await getCollectionWithFallbacks<Post>('posts', locale);
+const { collection: allPosts, fallbackIds: missingPostIds } = await getCollectionWithFallbacks('posts', locale);
 
 // 2. Sort posts by publication date (newest first)
 const sortedPosts = allPosts.sort((a, b) => {

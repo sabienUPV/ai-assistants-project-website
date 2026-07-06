@@ -2,10 +2,9 @@
 import { getCollection, render } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import AiDisclaimer from '@components/AiDisclaimer.astro';
-import { defaultLocale, locales } from '@languages';
-import { getEntryIdFromSlug, getEntryOrFallbackFromSlug, getSlugFromEntryId, type PostEntry } from '@utils/dynamicContent';
+import { locales } from '@languages';
+import { getCollectionWithFallbacks, getEntryIdFromSlug, getEntryOrFallbackFromSlug, getSlugFromEntryId, type PostEntry } from '@utils/dynamicContent';
 import PostNavigation from '@components/entries/posts/PostNavigation.astro';
-import type { Post } from '@sabien-upv-astro-cms/core';
 
 export const prerender = true;
 
@@ -13,28 +12,21 @@ const { locale } = Astro.locals;
 
 const { slug } = Astro.params;
 if (!slug) throw new Error('Slug not found');
-const post = await getEntryOrFallbackFromSlug<Post>('posts', locale, getEntryIdFromSlug(locale, 'posts', slug));
+const post = await getEntryOrFallbackFromSlug('posts', locale, getEntryIdFromSlug(locale, 'posts', slug));
 
 if (!post) throw new Error('No post found for this slug');
 const { Content } = await render(post);
 
 // We get the rest of the posts as well for navigation (prev/next navigation)
-const allPosts = await getCollection(`posts_${locale}`) as PostEntry[];
+const { collection: allPosts } = await getCollectionWithFallbacks('posts', locale);
 
 // Generate static pages at build time (SSG)
 export async function getStaticPaths() {
   let allPosts = [];
   for (const locale of locales) {
-    const posts = await getCollection(`posts_${locale}`);
+    const { collection: posts } = await getCollectionWithFallbacks('posts', locale);
     if (posts.length === 0) {
       console.warn(`No posts found for locale: ${locale}`);
-    }
-
-    // Also fetch all entries from the posts collection in the default locale (if the current locale is not the default) to provide a fallback for posts that are not available in the current locale
-    if (locale !== defaultLocale) {
-      const defaultLocalePosts = await getCollection(`posts_${defaultLocale}`) as PostEntry[];
-      const missingPosts = defaultLocalePosts.filter(defaultPost => !posts.some(post => post.id === defaultPost.id));
-      if (missingPosts) posts.push(...missingPosts);
     }
 
     allPosts.push(...posts.map(post => ({ params: { locale, slug: getSlugFromEntryId(post.id) } })));
