@@ -1,10 +1,10 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { render } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import CourseNavigation from '@components/entries/courses/CourseNavigation.astro';
 import TableOfContents from '@components/entries/courses/TableOfContents.astro';
-import { defaultLocale, locales } from '@languages';
-import { getCollectionWithFallbacks, getEntryIdFromSlug, getEntryOrFallbackFromSlug, getSlugFromEntryId, type CourseEntry } from '@utils/dynamicContent';
+import { locales } from '@languages';
+import { getCollectionWithFallbacks, getEntryOrFallbackFromSlug, getSlugFromEntryId } from '@utils/dynamicContent';
 
 export const prerender = true;
 
@@ -13,7 +13,7 @@ const { locale } = Astro.locals;
 const { slug } = Astro.params;
 if (!slug) throw new Error('Slug not found');
 
-const course = await getEntryOrFallbackFromSlug('courses', locale, getEntryIdFromSlug(locale, 'courses', slug));
+const course = await getEntryOrFallbackFromSlug('courses', locale, slug);
 
 if (!course) throw new Error('No course found for this slug');
 const { Content } = await render(course);

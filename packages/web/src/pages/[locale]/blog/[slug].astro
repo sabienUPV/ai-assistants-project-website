@@ -1,9 +1,9 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { render } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import AiDisclaimer from '@components/AiDisclaimer.astro';
 import { locales } from '@languages';
-import { getCollectionWithFallbacks, getEntryIdFromSlug, getEntryOrFallbackFromSlug, getSlugFromEntryId, type PostEntry } from '@utils/dynamicContent';
+import { getCollectionWithFallbacks, getEntryOrFallbackFromSlug, getSlugFromEntryId } from '@utils/dynamicContent';
 import PostNavigation from '@components/entries/posts/PostNavigation.astro';
 
 export const prerender = true;
@@ -12,7 +12,7 @@ const { locale } = Astro.locals;
 
 const { slug } = Astro.params;
 if (!slug) throw new Error('Slug not found');
-const post = await getEntryOrFallbackFromSlug('posts', locale, getEntryIdFromSlug(locale, 'posts', slug));
+const post = await getEntryOrFallbackFromSlug('posts', locale, slug);
 
 if (!post) throw new Error('No post found for this slug');
 const { Content } = await render(post);
