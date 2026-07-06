@@ -36,34 +36,33 @@ const sortedCourses = allCourses.sort((a, b) => {
 ---
 
 <aside class="toc-sidebar" aria-label="Table of contents">
-  <div class="toc-header">
-    <span class="toc-title-main">{t('course_toc_label')}</span>
-  </div>
-  
-  <ul class="toc-list">
-    {sortedCourses.map((course) => {
-      // Calculate hierarchy depth based on the number of dots in the unit
-      // "1" -> depth 0, "1.2" -> depth 1, "1.2.1" -> depth 2
-      const depth = course.data.unit.split('.').length - 1;
-      const isActive = course.data.unit === currentUnit;
-      
-      return (
-        <li 
-          class={`toc-item ${isActive ? 'is-active' : ''}`} 
-          style={`--depth: ${depth};`}
-        >
-          <a 
-            href={getSiblingUrl(Astro.url.pathname, getSlugFromEntryId(course.id))} 
-            class="toc-link" 
-            aria-current={isActive ? 'page' : undefined}
+  <details class="toc-details" open>
+    <summary class="toc-header">{t('course_toc_label')}</summary>
+    <ul class="toc-list">
+      {sortedCourses.map((course) => {
+        // Calculate hierarchy depth based on the number of dots in the unit
+        // "1" -> depth 0, "1.2" -> depth 1, "1.2.1" -> depth 2
+        const depth = course.data.unit.split('.').length - 1;
+        const isActive = course.data.unit === currentUnit;
+        
+        return (
+          <li 
+            class={`toc-item ${isActive ? 'is-active' : ''}`} 
+            style={`--depth: ${depth};`}
           >
-            <span class="toc-unit-number">{course.data.unit}</span>
-            <span class="toc-unit-title">{course.data.title}</span>
-          </a>
-        </li>
-      );
-    })}
-  </ul>
+            <a 
+              href={getSiblingUrl(Astro.url.pathname, getSlugFromEntryId(course.id))} 
+              class="toc-link" 
+              aria-current={isActive ? 'page' : undefined}
+            >
+              <span class="toc-unit-number">{course.data.unit}</span>
+              <span class="toc-unit-title">{course.data.title}</span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </details>
 </aside>
 
 <style>
@@ -81,17 +80,19 @@ const sortedCourses = allCourses.sort((a, b) => {
   }
 
   .toc-header {
-    padding: 0 1.5rem 1rem 1.5rem;
-    border-bottom: 2px solid var(--color-logo-light-blue);
-    margin-bottom: 1rem;
-  }
+    padding-inline: 1.5rem;
 
-  .toc-title-main {
     font-weight: 700;
     font-size: 1.2rem;
     color: var(--color-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
+  }
+
+  .toc-details[open] .toc-header {
+    border-bottom: 2px solid var(--color-logo-light-blue);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
   }
 
   .toc-list {
