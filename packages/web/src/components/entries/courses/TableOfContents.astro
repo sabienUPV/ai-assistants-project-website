@@ -1,0 +1,172 @@
+---
+import type { Locale } from '@languages';
+import type { Course } from '@sabien-upv-astro-cms/core';
+import { getSlugFromEntryId } from '@utils/dynamicContent';
+import { getSiblingUrl } from '@utils/url';
+import { getCollection, type CollectionEntry } from 'astro:content';
+
+const { locale, t } = Astro.locals;
+
+interface Props {
+  currentUnit: string;
+}
+
+const { currentUnit } = Astro.props;
+
+// Fetch all courses for the current locale
+type CourseEntry = CollectionEntry<`courses_${Locale}`> & { data: Course };
+const allCourses = await getCollection(`courses_${locale}`) as CourseEntry[];
+
+// Sort courses by unit number properly (e.g., 1 -> 1.1 -> 1.2 -> 1.10 -> 2)
+const sortedCourses = allCourses.sort((a, b) => {
+  const partsA = a.data.unit.split('.').map(Number);
+  const partsB = b.data.unit.split('.').map(Number);
+  const maxLength = Math.max(partsA.length, partsB.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    const valA = partsA[i] || 0; // Default to 0 if the segment doesn't exist
+    const valB = partsB[i] || 0;
+    
+    if (valA !== valB) {
+      return valA - valB;
+    }
+  }
+  return a.data.title.localeCompare(b.data.title);
+});
+---
+
+<aside class="toc-sidebar" aria-label="Table of contents">
+  <div class="toc-header">
+    <span class="toc-title-main">{t('course_toc_label')}</span>
+  </div>
+  
+  <ul class="toc-list">
+    {sortedCourses.map((course) => {
+      // Calculate hierarchy depth based on the number of dots in the unit
+      // "1" -> depth 0, "1.2" -> depth 1, "1.2.1" -> depth 2
+      const depth = course.data.unit.split('.').length - 1;
+      const isActive = course.data.unit === currentUnit;
+      
+      return (
+        <li 
+          class={`toc-item ${isActive ? 'is-active' : ''}`} 
+          style={`--depth: ${depth};`}
+        >
+          <a 
+            href={getSiblingUrl(Astro.url.pathname, getSlugFromEntryId(course.id))} 
+            class="toc-link" 
+            aria-current={isActive ? 'page' : undefined}
+          >
+            <span class="toc-unit-number">{course.data.unit}</span>
+            <span class="toc-unit-title">{course.data.title}</span>
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+</aside>
+
+<style>
+  .toc-sidebar {
+    /* Sticky positioning keeps it visible when scrolling the main content */
+    position: sticky;
+    top: 2rem;
+    background-color: var(--color-background);
+    border: 1px solid var(--color-logo-light-blue);
+    border-radius: 8px;
+    padding: 1.5rem 0;
+    width: 100%;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto; /* Allow scrolling within the TOC if it gets too long */
+  }
+
+  .toc-header {
+    padding: 0 1.5rem 1rem 1.5rem;
+    border-bottom: 2px solid var(--color-logo-light-blue);
+    margin-bottom: 1rem;
+  }
+
+  .toc-title-main {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--color-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .toc-item {
+    margin: 0;
+    padding: 0;
+  }
+
+  .toc-link {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.6rem 1.5rem;
+    /* Use the CSS variable calculated in the HTML to create visual hierarchy */
+    padding-left: calc(1.5rem + (var(--depth) * 1.5rem));
+    color: var(--color-text);
+    text-decoration: none;
+    line-height: 1.4;
+    transition: all 0.2s ease-in-out;
+    border-left: 4px solid transparent;
+  }
+
+  .toc-unit-number {
+    font-weight: 700;
+    color: var(--color-logo-dark-grey);
+    min-width: max-content;
+  }
+
+  .toc-unit-title {
+    flex: 1;
+  }
+
+  /* Hover state */
+  .toc-link:hover {
+    background-color: #e9e9e9; /* Slightly darker than background for contrast */
+    color: var(--color-secondary);
+    text-decoration: none;
+  }
+
+  /* Active state (current page) */
+  .toc-item.is-active .toc-link {
+    background-color: var(--color-logo-light-blue);
+    border-left-color: var(--color-primary);
+  }
+
+  .toc-item.is-active .toc-unit-number,
+  .toc-item.is-active .toc-unit-title {
+    color: var(--color-secondary);
+    font-weight: 700;
+  }
+
+  /* Custom scrollbar for webkit browsers */
+  .toc-sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .toc-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .toc-sidebar::-webkit-scrollbar-thumb {
+    background-color: var(--color-logo-light-blue);
+    border-radius: 10px;
+  }
+
+  /* Responsive for mobile - changes to static position and expands */
+  @media (max-width: 767px) {
+    .toc-sidebar {
+      position: static;
+      max-height: none;
+      margin-bottom: 2rem;
+    }
+  }
+</style>

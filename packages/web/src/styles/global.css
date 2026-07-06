@@ -51,7 +51,7 @@ body {
   font-size: 1rem; /* 16px = 12pt */
   line-height: var(--default-line-height); /* Lectura fácil recommends 1.5, but I think it's based on Microsoft Word's way of calculating line height which is different from how browsers do it. In my tests, 1.8 seems to provide a similar amount of spacing between lines as Word's 1.5, while 1.5 looks too cramped in the browser.) */
   text-align: left;
-  overflow-x: hidden; /* Prevent horizontal scrollbars from minor overflows */
+  overflow-x: clip; /* Prevent horizontal scrollbars from minor overflows */
 }
 
 /* Increased spacing between paragraphs for accessibility */

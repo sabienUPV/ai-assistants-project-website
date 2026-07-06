@@ -2,6 +2,7 @@
 import { getCollection, getEntry, render, type CollectionEntry } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import CourseNavigation from '@components/entries/courses/CourseNavigation.astro';
+import TableOfContents from '@components/entries/courses/TableOfContents.astro';
 import { locales, type Locale } from '@languages';
 import type { Course } from '@sabien-upv-astro-cms/core';
 import { getEntryIdFromSlug, getSlugFromEntryId } from '@utils/dynamicContent';
@@ -32,30 +33,63 @@ export async function getStaticPaths() {
 ---
 
 <Layout title={`${course.data.unit}. ${course.data.title}`}>
-  <article class="course-container">
-    <header class="course-header">
-      <h1>{course.data.unit}. {course.data.title}</h1>
-      
-      {course.data.description && (
-        <p class="course-description">{course.data.description}</p>
-      )}
-    </header>
+  <div class="course-page">
+    
+    <!-- Table of Contents (on the left - except on mobile) -->
+    <TableOfContents currentUnit={course.data.unit} />
+    
+    <!-- Main content column (on the right - except on mobile) -->
+    <div class="course-main-column">
+      <article class="course-container">
+        <header class="course-header">
+          <h1>{course.data.unit}. {course.data.title}</h1>
+          
+          {course.data.description && (
+            <p class="course-description">{course.data.description}</p>
+          )}
+        </header>
 
-    <div class="course-content">
-      <Content />
+        <div class="course-content">
+          <Content />
+        </div>
+      </article>
+
+      <!-- Inside the main content column so that the TOC stays sticky -->
+      <CourseNavigation currentUnit={course.data.unit} />
     </div>
-  </article>
-  <CourseNavigation currentUnit={course.data.unit} />
+
+  </div>
 </Layout>
 
 <style>
-  /* Scoped styles for the article layout */
+  .course-page {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    padding: 2rem 1rem;
+    align-items: flex-start; /* IMPORTANT: This allows the children to not stretch vertically, enabling the sticky behavior */
+  }
+
+  .course-page :global(aside) {
+    flex: 0 0 250px;
+    margin-top: 1rem;
+  }
+
+  .course-main-column {
+    flex: 1;
+    min-width: 0; /* Prevent long contents or iframes from breaking the flexbox's width */
+    display: flex;
+    flex-direction: column;
+  }
+
   .course-container {
+    flex: 1;
     max-width: 800px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 0 1rem;
     /* Font-family, font-size, and background are inherited cleanly from global body */
     color: var(--color-text);
+    width: 100%;
   }
 
   .course-header {
@@ -142,5 +176,20 @@ export async function getStaticPaths() {
     margin: 2rem auto;
     display: block; /* Centers images cleanly if they aren't full width */
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  /* --- Responsive on mobile --- */
+  @media (max-width: 767px) {
+    .course-page {
+      flex-direction: column; /* Place TOC on top of content */
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .course-page :global(aside) {
+      flex: auto;
+      width: 100%;
+      margin-top: 0;
+    }
   }
 </style>
