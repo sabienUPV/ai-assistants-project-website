@@ -1,0 +1,45 @@
+---
+import { Icon } from 'astro-icon/components';
+
+const { t } = Astro.locals;
+---
+
+<div class="not-in-language-pill" role="status">
+  <Icon name="warning" class="warning-icon" aria-hidden="true" />
+  <span class="message">
+    {t('content_not_available_in_your_language')}
+  </span>
+</div>
+
+<style>
+  .not-in-language-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    /* Colors matching the ones from AiDisclaimer.astro */
+    background-color: #fffbeb;
+    color: #92400e;
+    border: 1px solid #f59e0b;
+    
+    /* Small 'pill' design */
+    border-radius: 100vw; /* Completely rounded borders (pill-shaped) */
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap; /* Don't wrap if there's not enough space */
+  }
+
+  .warning-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    color: #d97706;
+  }
+
+  .message {
+    margin: 0;
+    padding: 0;
+  }
+</style>
