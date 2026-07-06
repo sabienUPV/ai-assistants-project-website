@@ -52,9 +52,16 @@ export function getSiblingUrl(astroUrlPathName: string, relativePath: string): s
   // Break down the URL into segments: ['', 'es', 'courses', 'unit-1']
   const segments = cleanPath.split('/');
   
+  // Remove leading slash from relative path if present
+  const newRelativePath = relativePath.startsWith('/') ? relativePath.slice(1) : relativePath;
+
+  if (segments.length < 2) {
+    // If there are no segments (or only the root ('/')), just return the new slug with a leading slash
+    return `/${newRelativePath}`;
+  }
+
   // Replace the last segment with the new relative path (e.g., "unidad-2")
-  const newSlug = relativePath.startsWith('/') ? relativePath.slice(1) : relativePath; // Remove leading slash if present
-  segments[segments.length - 1] = newSlug;
+  segments[segments.length - 1] = newRelativePath;
   
   // Join the segments back together to form the new URL path (e.g., "/es/courses/unidad-2")
   return segments.join('/');
