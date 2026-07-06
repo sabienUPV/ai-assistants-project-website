@@ -40,7 +40,7 @@ const prevCourse = currentIndex > 0 ? sortedCourses[currentIndex - 1] : null;
 const nextCourse = currentIndex !== -1 && currentIndex < sortedCourses.length - 1 ? sortedCourses[currentIndex + 1] : null;
 ---
 
-<nav class="course-navigation" aria-label="Navegación entre unidades">
+<nav class="course-navigation" aria-label={t('course_nav_label')}>
   {prevCourse ? (
     <a href={getSlugFromEntryId(prevCourse.id)} class="nav-button prev">
       <span class="nav-icon" aria-hidden="true">&larr;</span>
