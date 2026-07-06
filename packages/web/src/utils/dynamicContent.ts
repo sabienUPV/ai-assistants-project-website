@@ -1,7 +1,7 @@
-import type { Locale } from '@languages';
+import { defaultLocale, type Locale } from '@languages';
 import Markdoc from '@markdoc/markdoc';
 import type { Course, Post } from '@sabien-upv-astro-cms/core';
-import type { CollectionEntry } from 'astro:content';
+import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 
 type DynamicContentCollectionName = 'posts' | 'courses';
 type DynamicContentEntry<Name extends DynamicContentCollectionName, Data extends Record<string, unknown>> = CollectionEntry<`${Name}_${Locale}`> & { data: Data };
@@ -10,6 +10,53 @@ export type PostEntry = DynamicContentEntry<'posts', Post>;
 export type CourseEntry = DynamicContentEntry<'courses', Course>;
 
 // Helper functions for dynamic content (e.g. blog posts)
+
+export async function getCollectionWithFallbacks<Data extends Record<string, unknown>>(collectionName: DynamicContentCollectionName, locale: Locale): Promise<{
+  collection: DynamicContentEntry<DynamicContentCollectionName, Data>[],
+  fallbackIds?: string[],
+}> {
+  // Fetch all entries from the specified collection in the current locale
+  const currentLocaleEntries = await getCollection(`${collectionName}_${locale}`) as DynamicContentEntry<DynamicContentCollectionName, Data>[];
+
+  // If the current locale is the default locale, we don't need to fetch fallbacks
+  if (locale === defaultLocale) {
+    return { collection: currentLocaleEntries };
+  }
+
+  // Create a map of current locale entries for quick lookup by slug
+  const currentLocaleEntriesMap = new Map<string, DynamicContentEntry<DynamicContentCollectionName, Data>>();
+  for (const entry of currentLocaleEntries) {
+    currentLocaleEntriesMap.set(getSlugFromEntryId(entry.id), entry);
+  }
+
+  // Fetch all entries from the specified collection in the default locale
+  const defaultLocaleEntries = await getCollection(`${collectionName}_${defaultLocale}`) as DynamicContentEntry<DynamicContentCollectionName, Data>[];
+
+  // Combine entries from the current locale with fallbacks from the default locale
+  const fallbackIds: string[] = [];
+  const combinedEntries: DynamicContentEntry<DynamicContentCollectionName, Data>[] = [];
+  for (const defaultEntry of defaultLocaleEntries) {
+    const slug = getSlugFromEntryId(defaultEntry.id);
+    const isMissingInCurrentLocale = !currentLocaleEntriesMap.has(slug);
+    if (isMissingInCurrentLocale) {
+      fallbackIds.push(defaultEntry.id);
+      combinedEntries.push(defaultEntry);
+    }
+  }
+
+  return { collection: combinedEntries, fallbackIds };
+}
+
+export async function getEntryOrFallbackFromSlug<Data extends Record<string, unknown>>(collectionName: DynamicContentCollectionName, locale: Locale, slug: string): Promise<DynamicContentEntry<DynamicContentCollectionName, Data> | undefined> {
+  // Try to get the entry in the current locale
+  const entryId = getEntryIdFromSlug(locale, collectionName, slug);
+  const entry = await getEntry(`${collectionName}_${locale}`, entryId) as DynamicContentEntry<DynamicContentCollectionName, Data> | undefined;
+  if (entry) return entry;
+
+  // If not found, try to get the entry in the default locale
+  const fallbackEntry = await getEntry(`${collectionName}_${defaultLocale}`, entryId) as DynamicContentEntry<DynamicContentCollectionName, Data> | undefined;
+  return fallbackEntry;
+}
 
 export function getSlugFromEntryId(entryId: string): string {
   // Assuming the entryId is in the format "locale/posts/slug", we can split by '/' and take the last part

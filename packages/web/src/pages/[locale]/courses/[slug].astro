@@ -1,10 +1,11 @@
 ---
-import { getCollection, getEntry, render } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import CourseNavigation from '@components/entries/courses/CourseNavigation.astro';
 import TableOfContents from '@components/entries/courses/TableOfContents.astro';
 import { defaultLocale, locales } from '@languages';
-import { getEntryIdFromSlug, getSlugFromEntryId, type CourseEntry } from '@utils/dynamicContent';
+import { getEntryIdFromSlug, getEntryOrFallbackFromSlug, getSlugFromEntryId, type CourseEntry } from '@utils/dynamicContent';
+import type { Course } from '@sabien-upv-astro-cms/core';
 
 export const prerender = true;
 
@@ -13,16 +14,7 @@ const { locale } = Astro.locals;
 const { slug } = Astro.params;
 if (!slug) throw new Error('Slug not found');
 
-let course = await getEntry(`courses_${locale}`, getEntryIdFromSlug(locale, 'courses', slug)) as CourseEntry;
-
-// First try to fall back to the default locale if the course is not found in the current locale
-if (!course) {
-  const defaultLocaleCourse = await getEntry(`courses_${defaultLocale}`, getEntryIdFromSlug(defaultLocale, 'courses', slug)) as CourseEntry;
-  if (defaultLocaleCourse) {
-    console.warn(`Course not found in locale ${locale}, falling back to default locale ${defaultLocale}`);
-    course = defaultLocaleCourse;
-  }
-}
+const course = await getEntryOrFallbackFromSlug<Course>('courses', locale, getEntryIdFromSlug(locale, 'courses', slug));
 
 if (!course) throw new Error('No course found for this slug');
 const { Content } = await render(course);

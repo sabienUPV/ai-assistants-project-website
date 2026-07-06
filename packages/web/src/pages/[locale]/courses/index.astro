@@ -3,30 +3,17 @@ import { getStaticPathsFromLocales as getStaticPaths } from '@utils/translation'
 
 export { getStaticPaths };
 
-import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
-import { defaultLocale } from '@languages';
-import { getExcerptFromBody, getSlugFromEntryId, type CourseEntry } from '@utils/dynamicContent';
+import { getCollectionWithFallbacks, getExcerptFromBody, getSlugFromEntryId } from '@utils/dynamicContent';
 import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
+import type { Course } from '@sabien-upv-astro-cms/core';
 
 export const prerender = true;
 
 const { locale, t } = Astro.locals;
 
 // 1. Fetch all entries from the courses collection
-const allCourses = await getCollection(`courses_${locale}`) as CourseEntry[];
-
-// 1.5 Also fetch all entries from the courses collection in the default locale (if the current locale is not the default) to provide a fallback for courses that are not available in the current locale
-let missingCourseIds: string[] | undefined;
-if (locale !== defaultLocale) {
-  const defaultLocaleCourses = await getCollection(`courses_${defaultLocale}`) as CourseEntry[];
-  // Note: We compare by slug instead of ID because the IDs are locale-specific, but the slugs are consistent across locales
-  const missingCourses = defaultLocaleCourses.filter(defaultCourse => !allCourses.some(course => getSlugFromEntryId(course.id) === getSlugFromEntryId(defaultCourse.id)));
-  if (missingCourses) {
-    missingCourseIds = missingCourses.map(course => course.id);
-    allCourses.push(...missingCourses);
-  }
-}
+const { collection: allCourses, fallbackIds: missingCourseIds } = await getCollectionWithFallbacks<Course>('courses', locale);
 
 // 2. Filter courses that are a first-level unit, sort them by unit, and finally by title for consistent ordering
 const courseUnits = allCourses.filter(course => course.data.unit.indexOf('.') === -1) // If there's no dot, it's a first-level unit

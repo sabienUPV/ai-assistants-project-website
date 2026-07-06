@@ -3,30 +3,17 @@ import { getStaticPathsFromLocales as getStaticPaths } from '@utils/translation'
 
 export { getStaticPaths };
 
-import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
-import { getExcerptFromBody, getSlugFromEntryId, type PostEntry } from '@utils/dynamicContent';
-import { defaultLocale } from '@languages';
+import { getCollectionWithFallbacks, getExcerptFromBody, getSlugFromEntryId } from '@utils/dynamicContent';
 import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
+import type { Post } from '@sabien-upv-astro-cms/core';
 
 export const prerender = true;
 
 const { locale, t } = Astro.locals;
 
 // 1. Fetch all entries from the posts collection
-const allPosts = await getCollection(`posts_${locale}`) as PostEntry[];
-
-// 1.5 Also fetch all entries from the posts collection in the default locale (if the current locale is not the default) to provide a fallback for posts that are not available in the current locale
-let missingPostIds: string[] | undefined;
-if (locale !== defaultLocale) {
-  const defaultLocalePosts = await getCollection(`posts_${defaultLocale}`) as PostEntry[];
-  // Note: We compare by slug instead of ID because the IDs are locale-specific, but the slugs are consistent across locales
-  const missingPosts = defaultLocalePosts.filter(defaultPost => !allPosts.some(post => getSlugFromEntryId(post.id) === getSlugFromEntryId(defaultPost.id)));
-  if (missingPosts) {
-    missingPostIds = missingPosts.map(post => post.id);
-    allPosts.push(...missingPosts);
-  }
-}
+const { collection: allPosts, fallbackIds: missingPostIds } = await getCollectionWithFallbacks<Post>('posts', locale);
 
 // 2. Sort posts by publication date (newest first)
 const sortedPosts = allPosts.sort((a, b) => {

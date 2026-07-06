@@ -1,10 +1,11 @@
 ---
-import { getCollection, getEntry, render } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import AiDisclaimer from '@components/AiDisclaimer.astro';
 import { defaultLocale, locales } from '@languages';
-import { getEntryIdFromSlug, getSlugFromEntryId, type PostEntry } from '@utils/dynamicContent';
+import { getEntryIdFromSlug, getEntryOrFallbackFromSlug, getSlugFromEntryId, type PostEntry } from '@utils/dynamicContent';
 import PostNavigation from '@components/entries/posts/PostNavigation.astro';
+import type { Post } from '@sabien-upv-astro-cms/core';
 
 export const prerender = true;
 
@@ -12,16 +13,7 @@ const { locale } = Astro.locals;
 
 const { slug } = Astro.params;
 if (!slug) throw new Error('Slug not found');
-let post = await getEntry(`posts_${locale}`, getEntryIdFromSlug(locale, 'posts', slug)) as PostEntry;
-
-// First try to fall back to the default locale if the post is not found in the current locale
-if (!post) {
-  const defaultLocalePost = await getEntry(`posts_${defaultLocale}`, getEntryIdFromSlug(defaultLocale, 'posts', slug)) as PostEntry;
-  if (defaultLocalePost) {
-    console.warn(`Post not found in locale ${locale}, falling back to default locale ${defaultLocale}`);
-    post = defaultLocalePost;
-  }
-}
+const post = await getEntryOrFallbackFromSlug<Post>('posts', locale, getEntryIdFromSlug(locale, 'posts', slug));
 
 if (!post) throw new Error('No post found for this slug');
 const { Content } = await render(post);
