@@ -2,7 +2,7 @@
 import { getCollection, getEntry, render } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import AiDisclaimer from '@components/AiDisclaimer.astro';
-import { locales } from '@languages';
+import { defaultLocale, locales } from '@languages';
 import { getEntryIdFromSlug, getSlugFromEntryId, type PostEntry } from '@utils/dynamicContent';
 import PostNavigation from '@components/entries/posts/PostNavigation.astro';
 
@@ -12,7 +12,16 @@ const { locale } = Astro.locals;
 
 const { slug } = Astro.params;
 if (!slug) throw new Error('Slug not found');
-const post = await getEntry(`posts_${locale}`, getEntryIdFromSlug(locale, 'posts', slug)) as PostEntry;
+let post = await getEntry(`posts_${locale}`, getEntryIdFromSlug(locale, 'posts', slug)) as PostEntry;
+
+// First try to fall back to the default locale if the post is not found in the current locale
+if (!post) {
+  const defaultLocalePost = await getEntry(`posts_${defaultLocale}`, getEntryIdFromSlug(defaultLocale, 'posts', slug)) as PostEntry;
+  if (defaultLocalePost) {
+    console.warn(`Post not found in locale ${locale}, falling back to default locale ${defaultLocale}`);
+    post = defaultLocalePost;
+  }
+}
 
 if (!post) throw new Error('No post found for this slug');
 const { Content } = await render(post);
@@ -28,6 +37,14 @@ export async function getStaticPaths() {
     if (posts.length === 0) {
       console.warn(`No posts found for locale: ${locale}`);
     }
+
+    // Also fetch all entries from the posts collection in the default locale (if the current locale is not the default) to provide a fallback for posts that are not available in the current locale
+    if (locale !== defaultLocale) {
+      const defaultLocalePosts = await getCollection(`posts_${defaultLocale}`) as PostEntry[];
+      const missingPosts = defaultLocalePosts.filter(defaultPost => !posts.some(post => post.id === defaultPost.id));
+      if (missingPosts) posts.push(...missingPosts);
+    }
+
     allPosts.push(...posts.map(post => ({ params: { locale, slug: getSlugFromEntryId(post.id) } })));
   }
   return allPosts;

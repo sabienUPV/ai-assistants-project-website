@@ -6,6 +6,8 @@ export { getStaticPaths };
 import { getCollection } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
 import { getExcerptFromBody, getSlugFromEntryId, type PostEntry } from '@utils/dynamicContent';
+import { defaultLocale } from '@languages';
+import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
 
 export const prerender = true;
 
@@ -13,6 +15,18 @@ const { locale, t } = Astro.locals;
 
 // 1. Fetch all entries from the posts collection
 const allPosts = await getCollection(`posts_${locale}`) as PostEntry[];
+
+// 1.5 Also fetch all entries from the posts collection in the default locale (if the current locale is not the default) to provide a fallback for posts that are not available in the current locale
+let missingPostIds: string[] | undefined;
+if (locale !== defaultLocale) {
+  const defaultLocalePosts = await getCollection(`posts_${defaultLocale}`) as PostEntry[];
+  // Note: We compare by slug instead of ID because the IDs are locale-specific, but the slugs are consistent across locales
+  const missingPosts = defaultLocalePosts.filter(defaultPost => !allPosts.some(post => getSlugFromEntryId(post.id) === getSlugFromEntryId(defaultPost.id)));
+  if (missingPosts) {
+    missingPostIds = missingPosts.map(post => post.id);
+    allPosts.push(...missingPosts);
+  }
+}
 
 // 2. Sort posts by publication date (newest first)
 const sortedPosts = allPosts.sort((a, b) => {
@@ -30,6 +44,11 @@ const sortedPosts = allPosts.sort((a, b) => {
       {sortedPosts.map(post => (
         <article class="post-card">
           <div class="card-body">
+            {missingPostIds?.includes(post.id) && (
+              <div class="not-in-language-pill-container">
+                <ContentNotInLanguagePill />
+              </div>
+            )}
             {/* Modified header semantic spacing to match global line-height specs */}
             <h2 class="card-title">
               <a href={getSlugFromEntryId(post.id)}>{post.data.title}</a>
@@ -79,6 +98,7 @@ const sortedPosts = allPosts.sort((a, b) => {
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     padding: 1.5rem;
+    padding-top: 1rem; /* So that the title itself gives the extra 0.5rem padding so that if the pill is present, the title is properly spaced and the pill is closer to the top (it looks better) */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -104,7 +124,8 @@ const sortedPosts = allPosts.sort((a, b) => {
     text-align: left; 
     /* RESET: Override global heading margins to fit tightly inside a card layout */
     margin: 0 0 0.5rem 0;
-    padding-block: 0;
+    padding-top: 0.5rem;
+    padding-bottom: 0;
   }
 
   .card-title a {

@@ -39,7 +39,7 @@ export async function getStaticPaths() {
       console.warn(`No courses found for locale: ${locale}`);
     }
 
-    // Extra: Also fetch all entries from the courses collection in the default locale (if the current locale is not the default) to provide a fallback for courses that are not available in the current locale
+    // Also fetch all entries from the courses collection in the default locale (if the current locale is not the default) to provide a fallback for courses that are not available in the current locale
     if (locale !== defaultLocale) {
       const defaultLocaleCourses = await getCollection(`courses_${defaultLocale}`) as CourseEntry[];
       const missingCourses = defaultLocaleCourses.filter(defaultCourse => !courses.some(course => course.id === defaultCourse.id));
