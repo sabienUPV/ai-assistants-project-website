@@ -27,6 +27,9 @@ if (!course) {
 if (!course) throw new Error('No course found for this slug');
 const { Content } = await render(course);
 
+// We get the rest of the courses as well for navigation (TOC + prev/next navigation)
+const allCourses = await getCollection(`courses_${locale}`) as CourseEntry[];
+
 // Generate static pages at build time (SSG)
 export async function getStaticPaths() {
   let allCourses = [];
@@ -53,7 +56,7 @@ export async function getStaticPaths() {
   <div class="course-page">
     
     <!-- Table of Contents (on the left - except on mobile) -->
-    <TableOfContents currentUnit={course.data.unit} />
+    <TableOfContents courses={allCourses} currentUnit={course.data.unit} />
     
     <!-- Main content column (on the right - except on mobile) -->
     <div class="course-main-column">
@@ -72,7 +75,7 @@ export async function getStaticPaths() {
       </article>
 
       <!-- Inside the main content column so that the TOC stays sticky -->
-      <CourseNavigation currentUnit={course.data.unit} />
+      <CourseNavigation courses={allCourses} currentUnit={course.data.unit} />
     </div>
 
   </div>

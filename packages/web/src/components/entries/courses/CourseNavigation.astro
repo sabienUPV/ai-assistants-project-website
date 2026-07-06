@@ -1,21 +1,16 @@
 ---
-import { getCollection } from 'astro:content';
 import EntryNavigation from '@components/entries/EntryNavigation.astro';
 import type { CourseEntry } from '@utils/dynamicContent';
 
-const { locale, t } = Astro.locals;
-
 interface Props {
+  courses: CourseEntry[];
   currentUnit: string;
 }
 
-const { currentUnit } = Astro.props;
+const { courses, currentUnit } = Astro.props;
 
-// 1. Fetch all entries from the courses collection
-const allCourses = await getCollection(`courses_${locale}`) as CourseEntry[];
-
-// 2. Sort courses by unit and then by title for consistent ordering (sorting properly subunits, e.g., 1.10 comes after 1.2)
-const sortedCourses = allCourses.sort((a, b) => {
+// Sort courses by unit and then by title for consistent ordering (sorting properly subunits, e.g., 1.10 comes after 1.2)
+const sortedCourses = courses.sort((a, b) => {
   const partsA = a.data.unit.split('.').map(Number);
   const partsB = b.data.unit.split('.').map(Number);
   const maxLength = Math.max(partsA.length, partsB.length);

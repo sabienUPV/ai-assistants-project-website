@@ -1,26 +1,21 @@
 ---
-import { getCollection } from 'astro:content';
 import EntryNavigation from '@components/entries/EntryNavigation.astro';
 import type { PostEntry } from '@utils/dynamicContent';
 
-const { locale, t } = Astro.locals;
-
 interface Props {
+  posts: PostEntry[];
   currentPostId: string;
 }
 
-const { currentPostId } = Astro.props;
+const { posts, currentPostId } = Astro.props;
 
-// 1. Fetch all entries from the posts collection
-const allPosts = await getCollection(`posts_${locale}`) as PostEntry[];
+// Sort posts by id
+const sortedPosts = posts.sort((a, b) => a.id.localeCompare(b.id));
 
-// 2. Sort posts by id
-const sortedPosts = allPosts.sort((a, b) => a.id.localeCompare(b.id));
-
-// 3. Find the index of the current post based on its id
+// Find the index of the current post based on its id
 const currentIndex = sortedPosts.findIndex(post => post.id === currentPostId);
 
-// 4. Calculate previous and next posts (handling array boundaries)
+// Calculate previous and next posts (handling array boundaries)
 const prevPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
 const nextPost = currentIndex !== -1 && currentIndex < sortedPosts.length - 1 ? sortedPosts [currentIndex + 1] : null;
 

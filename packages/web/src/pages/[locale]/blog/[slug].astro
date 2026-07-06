@@ -17,6 +17,9 @@ const post = await getEntry(`posts_${locale}`, getEntryIdFromSlug(locale, 'posts
 if (!post) throw new Error('No post found for this slug');
 const { Content } = await render(post);
 
+// We get the rest of the posts as well for navigation (prev/next navigation)
+const allPosts = await getCollection(`posts_${locale}`) as PostEntry[];
+
 // Generate static pages at build time (SSG)
 export async function getStaticPaths() {
   let allPosts = [];
@@ -58,7 +61,7 @@ export async function getStaticPaths() {
       <Content />
     </div>
   </article>
-  <PostNavigation currentPostId={post.id} />
+  <PostNavigation posts={allPosts} currentPostId={post.id} />
 </Layout>
 
 <style>
