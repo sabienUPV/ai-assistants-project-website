@@ -22,7 +22,7 @@ const { previousEntry, nextEntry} = Astro.props;
     <a href={getSiblingUrl(Astro.url.pathname, getSlugFromEntryId(previousEntry.id))} class="nav-button prev">
       <span class="nav-icon" aria-hidden="true">&larr;</span>
       <div class="nav-text">
-        <span class="nav-label">{t('entry_nav_previous')}</span>
+        <span class="nav-label">{t('page_nav_previous')}</span>
         <span class="nav-title">{previousEntry.title}</span>
       </div>
     </a>
@@ -33,7 +33,7 @@ const { previousEntry, nextEntry} = Astro.props;
   {nextEntry ? (
     <a href={getSiblingUrl(Astro.url.pathname, getSlugFromEntryId(nextEntry.id))} class="nav-button next">
       <div class="nav-text text-right">
-        <span class="nav-label">{t('entry_nav_next')}</span>
+        <span class="nav-label">{t('page_nav_next')}</span>
         <span class="nav-title">{nextEntry.title}</span>
       </div>
       <span class="nav-icon" aria-hidden="true">&rarr;</span>

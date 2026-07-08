@@ -1,6 +1,7 @@
 import { defaultLocale, type Locale } from '@languages';
 import Markdoc from '@markdoc/markdoc';
 import type { Course, Post } from '@sabien-upv-astro-cms/core';
+import type { AstroGlobal } from 'astro';
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 
 type DynamicContentCollectionName = 'posts' | 'courses';
@@ -121,4 +122,25 @@ export function getExcerptFromBody(body: string | undefined, maxLength: number =
   }
 
   return cleanText;
+}
+
+/**
+ * We use Astro.rewrite to generate a copy of the first page
+ * 
+ * (Note: this is NOT the same as Astro.redirect, since we are not redirecting the user to a different URL, we are just rewriting the URL to point to a different page, so it only makes one request to the server instead of two, which is what would happen if we used Astro.redirect)
+ */
+export function rewriteMainContentPageToFirstPage(Astro: AstroGlobal) {
+  return Astro.rewrite(new URL("./1", Astro.url))
+}
+
+// Helper function ONLY for courses
+// (Note: we need to have it in a separate file because getStaticPaths cannot get functions defined on top of it in the same component, because apparently Astro runs getStaticPaths in a different context than the rest of the component, so it cannot access functions defined on top of it, which is why we need to have this function in a separate file)
+export async function getFirstLevelCourses(locale: Locale): Promise<CollectionWithFallbacksResult<CourseEntry, Course>> {
+  // 1. Fetch all entries from the courses collection
+  const result = await getCollectionWithFallbacks('courses', locale);
+
+  // 2. Filter courses that are a first-level unit
+  result.collection = result.collection.filter(course => course.data.unit.indexOf('.') === -1); // If there's no dot, it's a first-level unit
+
+  return result;
 }

@@ -1,0 +1,58 @@
+---
+import type { Page } from 'astro';
+
+const { t } = Astro.locals;
+
+// Expected props: the 'page' object that Astro injects into the component
+interface Props {
+  page: Page;
+}
+
+const { page } = Astro.props;
+---
+
+<nav aria-label={t('page_nav_label')} class="pagination-nav">
+  {page.url.prev ? (
+    <a href={page.url.prev} rel="prev" class="nav-link">
+      ← {t('page_nav_previous')}
+    </a>
+  ) : (
+    <span class="nav-link disabled">← {t('page_nav_previous')}</span>
+  )}
+
+  <span class="page-info">
+    {t('page_nav_info', false, page.currentPage, page.lastPage)}
+  </span>
+
+  {page.url.next ? (
+    <a href={page.url.next} rel="next" class="nav-link">
+      {t('page_nav_next')} →
+    </a>
+  ) : (
+    <span class="nav-link disabled">{t('page_nav_next')} →</span>
+  )}
+</nav>
+
+<style>
+  .pagination-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding: 1rem 0;
+    border-top: 1px solid #eaeaea;
+  }
+  .nav-link {
+    text-decoration: none;
+    color: #0070f3;
+    font-weight: 600;
+  }
+  .nav-link.disabled {
+    color: #ccc;
+    cursor: not-allowed;
+  }
+  .page-info {
+    font-size: 0.9rem;
+    color: #666;
+  }
+</style>

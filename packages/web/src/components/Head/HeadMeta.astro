@@ -4,7 +4,8 @@ import { homeNoLocale } from '@utils/url.ts';
 
 // Build the canonical URL (without extra parameters, forcing how we want it to be read)
 // Astro.url.pathname gives us the current path
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+// We also make sure that it does NOT end with (/1) or (/1/) because that is the first page of paginated content, and we want to canonicalize it to the main content page (e.g. /blog) instead of the first page (e.g. /blog/1). This is important for SEO, because search engines would see both pages having the same content, and it would be considered duplicate content, which is bad for SEO. By having the same canonical URL, we are telling search engines that both pages are actually the same, and not duplicates.
+const canonicalURL = new URL(Astro.url.pathname.replace(/\/1\/?$/, ''), Astro.site || Astro.url.origin);
 
 interface Props {
   title?: string;
