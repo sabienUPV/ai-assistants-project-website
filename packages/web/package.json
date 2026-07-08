@@ -12,13 +12,13 @@
     "extract-and-convert-eu-logos": "node scripts/extract-and-convert-eu-logos.js"
   },
   "dependencies": {
-    "@astrojs/markdoc": "^1.0.6",
+    "@astrojs/markdoc": "^2.0.3",
     "@iconify-json/circle-flags": "^1.2.10",
     "@markdoc/markdoc": "^0.5.7",
     "@sabien-upv-astro-cms/core": "0.0.0",
-    "astro": "^6.0.4",
+    "astro": "^7.0.6",
     "astro-icon": "^1.1.5",
-    "csv-parse": "^6.1.0"  
+    "csv-parse": "^6.1.0"
   },
   "devDependencies": {
     "adm-zip": "^0.5.16",

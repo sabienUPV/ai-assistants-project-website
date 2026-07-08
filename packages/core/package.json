@@ -5,6 +5,6 @@
   "main": "./src/index.ts",
   "private": true,
   "dependencies": {
-    "astro": "^6.0.4"
+    "astro": "^7.0.6"
   }
 }
