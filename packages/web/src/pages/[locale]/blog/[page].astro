@@ -60,7 +60,7 @@ const paginatedPosts = sortedPosts.slice((page.currentPage - 1) * page.size, pag
 
     <div class="posts-grid">
       {paginatedPosts.map(post => {
-        const postUrl = getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro, getSlugFromEntryId(post.id));
+        const postUrl = getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro.url.pathname, getSlugFromEntryId(post.id));
         return (
           <article class="post-card">
             <div class="card-body">

@@ -61,7 +61,7 @@ const paginatedCourses = courseUnits.slice((page.currentPage - 1) * page.size, p
 
     <div class="courses-grid">
       {paginatedCourses.map(course => {
-        const courseUrl = getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro, getSlugFromEntryId(course.id));
+        const courseUrl = getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro.url.pathname, getSlugFromEntryId(course.id));
         return (
           <article class="post-card">
             <div class="card-body">
