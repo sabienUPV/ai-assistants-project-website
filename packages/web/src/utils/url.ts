@@ -1,3 +1,5 @@
+import type { AstroGlobal } from "astro";
+
 /**
  * Base path for the site, normalized to be always WITHOUT a trailing slash to ensure consistent URL construction
  */
@@ -34,6 +36,15 @@ export function tryRemoveBaseUrlFromPath(path: string): string {
 }
 
 /**
+ * We use Astro.rewrite to generate a copy of the first page
+ * 
+ * (Note: this is NOT the same as Astro.redirect, since we are not redirecting the user to a different URL, we are just rewriting the URL to point to a different page, so it only makes one request to the server instead of two, which is what would happen if we used Astro.redirect)
+ */
+export function rewriteMainContentPageToFirstPage(Astro: AstroGlobal) {
+  return Astro.rewrite(new URL("./1", Astro.url))
+}
+
+/**
  * Get the absolute URL path to a sibling page, preserving the current locale and any other path segments.
  * 
  * Example:
@@ -41,13 +52,39 @@ export function tryRemoveBaseUrlFromPath(path: string): string {
  * 
  * This function is needed because if you use a relative path like "unit-2" in a link, the browser will do it properly only if the URL does NOT end with a slash (/). Because if it does, the browser thinks the page is a "directory", and will append the relative path to that directory instead of replacing the last segment. This function ensures that the last segment is replaced correctly, regardless of whether the current URL ends with a slash or not, and returns the resulting absolute path so the browser cannot misinterpret it.
  * 
- * @param astroUrlPathName The value of `Astro.url.pathname` (you can access it from your Astro page or component)
+ * @param Astro The Astro global object (you can access it from your Astro page or component)
  * @param relativePath The relative path to the sibling page you want to link to (e.g., "unit-2" or "unit-3")
  * @returns The absolute URL path to the sibling page, preserving the current locale and any other path segments
  */
-export function getSiblingUrl(astroUrlPathName: string, relativePath: string): string {
+export function getSiblingUrl(Astro: AstroGlobal, relativePath: string): string {
+  return applyRelativePathToCurrentUrlPath(Astro, relativePath, 'replace');
+}
+
+/**
+ * Get the absolute URL path to a child page, preserving the current locale and any other path segments.
+ * 
+ * This function handles cases where the current URL ends with a page number (e.g., "/es/courses/1") by replacing that number with the new relative path (e.g., "/es/courses/unit-2"), to prevent the wrong URL (e.g., "/es/courses/1/unit-2") from being inferred by the browser from the relative path.
+ * 
+ * @param Astro The Astro global object (you can access it from your Astro page or component)
+ * @param relativePath The relative path to the child page you want to link to (e.g., "unit-2" or "unit-3")
+ * @returns The absolute URL path to the child page, preserving the current locale and any other path segments
+ */
+export function getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro: AstroGlobal, relativePath: string): string {
+  return applyRelativePathToCurrentUrlPath(Astro, relativePath, (segments) => {
+    // If the last segment is a number (indicating a page number), we want to replace it with the new relative path
+    const lastSegment = segments[segments.length - 1];
+    if (/^\d+$/.test(lastSegment)) {
+      return 'replace';
+    }
+    // Otherwise, we want to append the new relative path as a new segment
+    return 'append';
+  });
+}
+
+type RelativePathOperation = 'replace' | 'append';
+function applyRelativePathToCurrentUrlPath(Astro: AstroGlobal, relativePath: string, operationValueOrFn: RelativePathOperation | ((segments: string[]) => RelativePathOperation)): string {
   // Remove any trailing slash from the current URL path to avoid double slashes when joining
-  const cleanPath = astroUrlPathName.replace(/\/$/, '');
+  const cleanPath = Astro.url.pathname.replace(/\/$/, '');
   
   // Break down the URL into segments: ['', 'es', 'courses', 'unit-1']
   const segments = cleanPath.split('/');
@@ -60,8 +97,28 @@ export function getSiblingUrl(astroUrlPathName: string, relativePath: string): s
     return `/${newRelativePath}`;
   }
 
-  // Replace the last segment with the new relative path (e.g., "unidad-2")
-  segments[segments.length - 1] = newRelativePath;
+  // We allow two modes: either saying the operation directly, or providing a function that takes the segments and returns the operation.
+  // This allows for more complex logic (such as, in getAbsoluteUrlFromRelativePathWithoutPageNumber, where we only want to replace the last segment if it is a page number, otherwise we want to append the new relative path).
+  let actualOperation;
+  if (typeof operationValueOrFn === 'function') {
+    actualOperation = operationValueOrFn(segments);
+  }
+  else {
+    actualOperation = operationValueOrFn;
+  }
+
+  switch (actualOperation) {
+    case 'replace':
+      // Replace the last segment with the new relative path (e.g., "unidad-2")
+      segments[segments.length - 1] = newRelativePath;
+      break;
+    case 'append':
+      // Append the new relative path as a new segment
+      segments.push(newRelativePath);
+      break;
+    default:
+      throw new Error(`Unsupported operation: ${actualOperation}`);
+  }
   
   // Join the segments back together to form the new URL path (e.g., "/es/courses/unidad-2")
   return segments.join('/');

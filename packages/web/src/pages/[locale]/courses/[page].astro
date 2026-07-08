@@ -5,6 +5,7 @@ import { getExcerptFromBody, getFirstLevelCourses, getSlugFromEntryId } from '@u
 import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
 import PageNavigation from '@components/entries/PageNavigation.astro';
 import { locales } from "@languages";
+import { getAbsoluteUrlFromRelativePathWithoutPageNumber } from "@utils/url";
 
 export const prerender = true;
 
@@ -59,30 +60,33 @@ const paginatedCourses = courseUnits.slice((page.currentPage - 1) * page.size, p
     <h1 class="directory-title">{t('nav_courses')}</h1>
 
     <div class="courses-grid">
-      {paginatedCourses.map(course => (
-        <article class="post-card">
-          <div class="card-body">
-            {missingCourseIds?.includes(course.id) && (
-              <div class="not-in-language-pill-container">
-                <ContentNotInLanguagePill />
-              </div>
-            )}
-            {/* Modified header semantic spacing to match global line-height specs */}
-            <h2 class="card-title">
-              <a href={getSlugFromEntryId(course.id)}>{course.data.unit}. {course.data.title}</a>
-            </h2>
-            <p class="card-excerpt">
-              {course.data.description
-                || (course.body
-                    ? getExcerptFromBody(course.body, 150)
-                    : t('blog_card_click_to_read'))}
-            </p>
-          </div>
-          <a href={getSlugFromEntryId(course.id)} class="read-more-btn">
-            {t('blog_card_read_more')} &rarr;
-          </a>
-        </article>
-      ))}
+      {paginatedCourses.map(course => {
+        const courseUrl = getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro, getSlugFromEntryId(course.id));
+        return (
+          <article class="post-card">
+            <div class="card-body">
+              {missingCourseIds?.includes(course.id) && (
+                <div class="not-in-language-pill-container">
+                  <ContentNotInLanguagePill />
+                </div>
+              )}
+              {/* Modified header semantic spacing to match global line-height specs */}
+              <h2 class="card-title">
+                <a href={courseUrl}>{course.data.unit}. {course.data.title}</a>
+              </h2>
+              <p class="card-excerpt">
+                {course.data.description
+                  || (course.body
+                      ? getExcerptFromBody(course.body, 150)
+                      : t('blog_card_click_to_read'))}
+              </p>
+            </div>
+            <a href={courseUrl} class="read-more-btn">
+              {t('blog_card_read_more')} &rarr;
+            </a>
+          </article>
+        ); 
+      })}
     </div>
     <PageNavigation page={page} />
   </main>

@@ -1,7 +1,6 @@
 import { defaultLocale, type Locale } from '@languages';
 import Markdoc from '@markdoc/markdoc';
 import type { Course, Post } from '@sabien-upv-astro-cms/core';
-import type { AstroGlobal } from 'astro';
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 
 type DynamicContentCollectionName = 'posts' | 'courses';
@@ -122,15 +121,6 @@ export function getExcerptFromBody(body: string | undefined, maxLength: number =
   }
 
   return cleanText;
-}
-
-/**
- * We use Astro.rewrite to generate a copy of the first page
- * 
- * (Note: this is NOT the same as Astro.redirect, since we are not redirecting the user to a different URL, we are just rewriting the URL to point to a different page, so it only makes one request to the server instead of two, which is what would happen if we used Astro.redirect)
- */
-export function rewriteMainContentPageToFirstPage(Astro: AstroGlobal) {
-  return Astro.rewrite(new URL("./1", Astro.url))
 }
 
 // Helper function ONLY for courses

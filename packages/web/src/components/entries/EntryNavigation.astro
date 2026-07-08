@@ -19,7 +19,7 @@ const { previousEntry, nextEntry} = Astro.props;
   
 <nav class="entry-navigation" aria-label={t('entry_nav_label')}>
   {previousEntry ? (
-    <a href={getSiblingUrl(Astro.url.pathname, getSlugFromEntryId(previousEntry.id))} class="nav-button prev">
+    <a href={getSiblingUrl(Astro, getSlugFromEntryId(previousEntry.id))} class="nav-button prev">
       <span class="nav-icon" aria-hidden="true">&larr;</span>
       <div class="nav-text">
         <span class="nav-label">{t('page_nav_previous')}</span>
@@ -31,7 +31,7 @@ const { previousEntry, nextEntry} = Astro.props;
   )}
 
   {nextEntry ? (
-    <a href={getSiblingUrl(Astro.url.pathname, getSlugFromEntryId(nextEntry.id))} class="nav-button next">
+    <a href={getSiblingUrl(Astro, getSlugFromEntryId(nextEntry.id))} class="nav-button next">
       <div class="nav-text text-right">
         <span class="nav-label">{t('page_nav_next')}</span>
         <span class="nav-title">{nextEntry.title}</span>

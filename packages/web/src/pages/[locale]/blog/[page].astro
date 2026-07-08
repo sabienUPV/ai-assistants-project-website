@@ -5,6 +5,7 @@ import { getCollectionWithFallbacks, getExcerptFromBody, getSlugFromEntryId } fr
 import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
 import PageNavigation from '@components/entries/PageNavigation.astro';
 import { locales } from "@languages";
+import { getAbsoluteUrlFromRelativePathWithoutPageNumber } from "@utils/url";
 
 export const prerender = true;
 
@@ -58,33 +59,36 @@ const paginatedPosts = sortedPosts.slice((page.currentPage - 1) * page.size, pag
     <h1 class="directory-title">{t('blog_list_title')}</h1>
 
     <div class="posts-grid">
-      {paginatedPosts.map(post => (
-        <article class="post-card">
-          <div class="card-body">
-            {missingPostIds?.includes(post.id) && (
-              <div class="not-in-language-pill-container">
-                <ContentNotInLanguagePill />
+      {paginatedPosts.map(post => {
+        const postUrl = getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro, getSlugFromEntryId(post.id));
+        return (
+          <article class="post-card">
+            <div class="card-body">
+              {missingPostIds?.includes(post.id) && (
+                <div class="not-in-language-pill-container">
+                  <ContentNotInLanguagePill />
+                </div>
+              )}
+              {/* Modified header semantic spacing to match global line-height specs */}
+              <h2 class="card-title">
+                <a href={postUrl}>{post.data.title}</a>
+              </h2>
+              <div class="card-date">
+                {post.data.pubDate?.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
               </div>
-            )}
-            {/* Modified header semantic spacing to match global line-height specs */}
-            <h2 class="card-title">
-              <a href={getSlugFromEntryId(post.id)}>{post.data.title}</a>
-            </h2>
-            <div class="card-date">
-              {post.data.pubDate?.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              <p class="card-excerpt">
+                {post.data.description
+                  || (post.body
+                      ? getExcerptFromBody(post.body, 150)
+                      : t('blog_card_click_to_read'))}
+              </p>
             </div>
-            <p class="card-excerpt">
-              {post.data.description
-                || (post.body
-                    ? getExcerptFromBody(post.body, 150)
-                    : t('blog_card_click_to_read'))}
-            </p>
-          </div>
-          <a href={getSlugFromEntryId(post.id)} class="read-more-btn">
-            {t('blog_card_read_more')} &rarr;
-          </a>
-        </article>
-      ))}
+            <a href={postUrl} class="read-more-btn">
+              {t('blog_card_read_more')} &rarr;
+            </a>
+          </article>
+        );
+      })}
     </div>
     <PageNavigation page={page} />
   </main>
