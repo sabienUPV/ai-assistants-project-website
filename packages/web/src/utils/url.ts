@@ -36,21 +36,38 @@ export function tryRemoveBaseUrlFromPath(path: string): string {
 }
 
 /**
- * We use Astro.rewrite to generate a copy of the first page
+ * Get the URL to the first page of the main content (e.g., "/1") for the current locale, for use with Astro.rewrite so the main content page (e.g., "/courses") will show the same as first page of the content (e.g., "/courses/1") without requiring a separate request from the client.
+ *
+ * (Note: Astro.rewrite is NOT the same as Astro.redirect, since we are not redirecting the user to a different URL, we are just rewriting the URL to point to a different page, so it only makes one request to the server instead of two, which is what would happen if we used Astro.redirect)
  * 
- * (Note: this is NOT the same as Astro.redirect, since we are not redirecting the user to a different URL, we are just rewriting the URL to point to a different page, so it only makes one request to the server instead of two, which is what would happen if we used Astro.redirect)
+ * @example
+ * // Example usage in an Astro page
+ * // (not meant for components, since Astro.rewrite is only for pages)
+ * ---
+ * import { getStaticPathsFromLocales as getStaticPaths } from '@utils/translation';
+ * import { getFirstPageRewriteUrl } from '@utils/url';
+ * 
+ * export { getStaticPaths };
+ * 
+ * return Astro.rewrite(getFirstPageRewriteUrl(Astro.url));
+ * ---
+ * 
+ * @param currentUrl The current URL object or string. Typically you want to pass the value of `Astro.url` (you can access it from your Astro page or component)
+ * @returns The URL object pointing to the first page of the main content (e.g., "/en/courses/1") for the current locale, for use with Astro.rewrite
  */
-export function rewriteMainContentPageToFirstPage(Astro: AstroGlobal) {
-  return Astro.rewrite(new URL("./1", Astro.url))
+export function getFirstPageRewriteUrl(currentUrl: URL | string): URL {
+  return new URL("./1", currentUrl);
 }
 
 /**
  * Get the absolute URL path to a sibling page, preserving the current locale and any other path segments.
  * 
- * Example:
- * ("/es/courses/unidad-1", "unidad-2") => "/es/courses/unidad-2"
- * 
  * This function is needed because if you use a relative path like "unit-2" in a link, the browser will do it properly only if the URL does NOT end with a slash (/). Because if it does, the browser thinks the page is a "directory", and will append the relative path to that directory instead of replacing the last segment. This function ensures that the last segment is replaced correctly, regardless of whether the current URL ends with a slash or not, and returns the resulting absolute path so the browser cannot misinterpret it.
+ * 
+ * @example
+ * // Usage in an Astro page/component
+ * // Astro.url.pathname = "/es/courses/unidad-1"
+ * getSiblingUrl(Astro.url.pathname, "unidad-2") // => "/es/courses/unidad-2"
  * 
  * @param astroUrlPathName The value of `Astro.url.pathname` (you can access it from your Astro page or component)
  * @param relativePath The relative path to the sibling page you want to link to (e.g., "unit-2" or "unit-3")
@@ -64,6 +81,11 @@ export function getSiblingUrl(astroUrlPathName: string, relativePath: string): s
  * Get the absolute URL path to a child page, preserving the current locale and any other path segments.
  * 
  * This function handles cases where the current URL ends with a page number (e.g., "/es/courses/1") by replacing that number with the new relative path (e.g., "/es/courses/unit-2"), to prevent the wrong URL (e.g., "/es/courses/1/unit-2") from being inferred by the browser from the relative path.
+ * 
+ * @example
+ * // Usage in an Astro page/component
+ * // Astro.url.pathname = "/es/courses/1"
+ * getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro.url.pathname, "unit-2") // => "/es/courses/unit-2"
  * 
  * @param astroUrlPathName The value of `Astro.url.pathname` (you can access it from your Astro page or component)
  * @param relativePath The relative path to the child page you want to link to (e.g., "unit-2" or "unit-3")
