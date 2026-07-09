@@ -10,6 +10,7 @@
       "@constants": ["../core/src/constants.ts"],
       "@utils/*": ["./src/utils/*"],
       "@projectTypes/*": ["../core/src/types/*"], // @types is a reserved keyword, so we use @projectTypes instead
+      "@schemas/*": ["../core/src/schemas/*"],
     }
   }
 }

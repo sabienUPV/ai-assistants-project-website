@@ -1,4 +1,6 @@
 import { component, type AstroMarkdocConfig } from "@astrojs/markdoc/config";
+import type { SchemaAttribute } from "@markdoc/markdoc";
+import type { SlideSchema } from "./schemas/slideshow";
 
 type Project = 'web' | 'admin';
 type AstroTagConfig = NonNullable<AstroMarkdocConfig['tags']>[string];
@@ -25,17 +27,27 @@ export const markdocTagAttributes = {
   notranslate: {
     description: "Mark content to be ignored by the LLM translation process, and preserved as-is in any translated versions.",
   },
+  slide: {
+    description: "Define a single slide for a slideshow component.",
+    attributes: {
+      title: {
+        type: String,
+        description: "The title of the slide.",
+      },
+      image: {
+        type: String,
+        description: "The URL of the image for the slide.",
+      },
+      alt: {
+        type: String,
+        description: "The alternative text for the image.",
+      },
+    } satisfies Record<keyof SlideSchema, SchemaAttribute>,
+  
+  },
   slideshow: {
     description: "Render a slideshow component with the provided slides.",
-    attributes: {
-      slides: {
-        // This is a dynamic array for Markdoc, but the structure of each slide object in the array will be defined and enforced in the Keystatic configuration
-        // (by using the fields.array and fields.object schema definitions, along with satisfies to ensure conformity with the Slide type from core).
-        type: Array,
-        required: true,
-        description: "Array of slide objects",
-      }
-    }
+    children: ['slide']
   }
 } satisfies AstroMarkdocConfig['tags'];
 

@@ -41,8 +41,8 @@
             <img src={slide.image} alt={slide.alt || 'Image supporting the slide'} class="slide-image" />
           {/if}
           
-          {#if slide.text}
-            <p class="slide-text">{slide.text}</p>
+          {#if slide.content}
+            <p class="slide-content">{slide.content}</p>
           {/if}
 
         </div>
@@ -121,7 +121,7 @@
     object-fit: contain;
   }
 
-  .slide-text {
+  .slide-content {
     font-size: 1.25rem;
     line-height: 1.6;
     color: var(--color-text);
