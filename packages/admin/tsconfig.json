@@ -8,7 +8,8 @@
       "@styles/*": ["./src/styles/*"],
       "@languages": ["../core/src/languages.ts"],
       "@constants": ["../core/src/constants.ts"],
-      "@utils/*": ["./src/utils/*"]
+      "@utils/*": ["./src/utils/*"],
+      "@projectTypes/*": ["../core/src/types/*"], // @types is a reserved keyword, so we use @projectTypes instead
     }
   }
 }

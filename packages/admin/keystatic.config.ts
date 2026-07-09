@@ -1,26 +1,27 @@
-import { config, fields, collection, type Config } from '@keystatic/core';
-import { inline, wrapper } from '@keystatic/core/content-components';
+import { config, fields, collection, type Config, type ComponentSchema } from '@keystatic/core';
+import { block, inline, wrapper } from '@keystatic/core/content-components';
 import type { Post, Course } from '@sabien-upv-astro-cms/core';
 import { courseUnitRegex, courseUnitValidationMessage, markdocTagAttributes } from '@sabien-upv-astro-cms/core';
 import React from 'react';
 import { locales, type Locale } from '@languages';
+import type { Slide } from '@projectTypes/slideshow';
 
 // 1. CREAMOS EL TIPO MAPEADO
 // Le exigimos a TS que este objeto tenga obligatoriamente todas las keys de tu Post de Zod.
 // Usamos `any` como valor porque no nos importa el tipo interno de Keystatic (fields.text, etc.),
 // solo nos importa que la KEY (title, author, pubDate) exista.
 type KeystaticPostSchema = {
-  [K in keyof Post]: any; 
+  [K in keyof Post]: ComponentSchema; 
 } & {
-  content: any; // Añadimos 'content' porque Keystatic lo necesita para el Markdoc
+  content: ComponentSchema; // We add 'content' because Keystatic requires it for Markdoc
 };
 type KeystaticCourseSchema = {
-  [K in keyof Course]: any; 
+  [K in keyof Course]: ComponentSchema; 
 } & {
-  content: any;
+  content: ComponentSchema;
 };
 
-// Define custom inline components for Keystatic using shared core attributes
+// Define custom components for Keystatic using shared core attributes
 const flagComponent = inline({
   label: 'Flag',
   description: markdocTagAttributes.flag.description,
@@ -46,9 +47,70 @@ const flagComponent = inline({
 const noTranslateComponent = wrapper({
   label: 'No Translate',
   description: markdocTagAttributes.notranslate.description,
-  schema: {}, // Vacío, porque el contenido son sus propios hijos nativos
+  schema: {}, // Empty, because the content is its own content
   ContentView: (props) => {
     return React.createElement('div', {}, props.children);
+  }
+});
+const slideshowComponent = block({
+  label: 'Slideshow',
+  description: markdocTagAttributes.slideshow.description,
+  schema: {
+    // fields.array creates an interactive dynamic list in the editor
+    slides: fields.array(
+      fields.object({
+        title: fields.text({ label: 'Title' }),
+        image: fields.text({ label: 'Image URL' }),
+        alt: fields.text({ label: 'Alt Text' }),
+        text: fields.text({ label: 'Text Content', multiline: true }),
+      } satisfies Record<keyof Slide, ComponentSchema>), // Ensure the object schema matches the Slide type
+      {
+        label: 'Slides',
+        itemLabel: props => props.fields.title.value || 'New Slide' // Shows the title in the editor's list
+      }
+    )
+  },
+  ContentView: (props) => {
+    const slides = props.value?.slides || [];
+    const slidesCount = slides.length;
+    
+    // Iterate over the slides to create a list of slide items for display in the editor
+    const slideItems = slides.map((slide, index) => {
+      const title = slide.title || `Slide ${index + 1}`;
+      // Create a text snippet (max 60 characters) for better readability in the editor
+      const textSnippet = slide.text 
+        ? (slide.text.length > 60 ? slide.text.substring(0, 60) + '...' : slide.text)
+        : '[No text]';
+        
+      return React.createElement(
+        'li',
+        { 
+          key: index, 
+          style: { 
+            padding: '8px', 
+            backgroundColor: '#ffffff', 
+            border: '1px solid #e0e0e0', 
+            borderRadius: '4px', 
+            fontSize: '0.9rem',
+            textAlign: 'left' // Make sure the text is aligned to the left for better readability
+          } 
+        },
+        React.createElement('strong', { style: { color: '#0284c7', display: 'block' } }, title),
+        React.createElement('span', { style: { color: '#666', marginTop: '4px', display: 'block' } }, textSnippet)
+      );
+    });
+
+    return React.createElement(
+      'div',
+      { style: { padding: '16px', border: '2px dashed #0284c7', borderRadius: '8px', backgroundColor: '#f0f9ff' } },
+      React.createElement('h4', { style: { margin: '0 0 12px 0', textAlign: 'center', color: '#0284c7' } }, `🖼️ Slideshow (${slidesCount} slides)`),
+      // Only render the list (ul) if there are slides to display
+      slidesCount > 0 && React.createElement(
+        'ul',
+        { style: { listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' } },
+        slideItems
+      )
+    );
   }
 });
 
@@ -114,6 +176,7 @@ const createPostCollection = (locale: Locale) => {
         components: {
           flag: flagComponent, 
           notranslate: noTranslateComponent,
+          slideshow: slideshowComponent,
         }
       }),
     } satisfies KeystaticPostSchema, // 2. LE DECIMOS A TS QUE ESTE OBJETO DEBE CUMPLIR EL TIPO MAPEADO. SI VES "satisfies" EN ROJO, ES QUE FALTA ALGÚN CAMPO DE TU POST, REVISA EN EL PROYECTO core/src/schemas/posts.ts Y ASEGÚRATE DE QUE TODOS LOS CAMPOS ESTÉN AQUÍ
@@ -150,6 +213,7 @@ const createCourseCollection = (locale: Locale) => {
         components: {
           flag: flagComponent, 
           notranslate: noTranslateComponent,
+          slideshow: slideshowComponent,
         }
       }),
     } satisfies KeystaticCourseSchema,

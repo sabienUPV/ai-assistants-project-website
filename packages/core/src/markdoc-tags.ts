@@ -1,6 +1,10 @@
 import { component, type AstroMarkdocConfig } from "@astrojs/markdoc/config";
 
 type Project = 'web' | 'admin';
+type AstroTagConfig = NonNullable<AstroMarkdocConfig['tags']>[string];
+type MarkdocTagsFromAttributes = {
+  [K in keyof typeof markdocTagAttributes]: AstroTagConfig;
+};
 
 /**
  * Single source of truth for all Markdoc tag definitions.
@@ -20,6 +24,18 @@ export const markdocTagAttributes = {
   },
   notranslate: {
     description: "Mark content to be ignored by the LLM translation process, and preserved as-is in any translated versions.",
+  },
+  slideshow: {
+    description: "Render a slideshow component with the provided slides.",
+    attributes: {
+      slides: {
+        // This is a dynamic array for Markdoc, but the structure of each slide object in the array will be defined and enforced in the Keystatic configuration
+        // (by using the fields.array and fields.object schema definitions, along with satisfies to ensure conformity with the Slide type from core).
+        type: Array,
+        required: true,
+        description: "Array of slide objects",
+      }
+    }
   }
 } satisfies AstroMarkdocConfig['tags'];
 
@@ -39,8 +55,12 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
       // which is why we need to re-include its attributes
       ...markdocTagAttributes.flag,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/MarkdocFlag.astro'),
-    }
-  };
+    },
+    slideshow: {
+      ...markdocTagAttributes.slideshow,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/entries/courses/Slideshow.astro'),
+    },
+  } satisfies AstroMarkdocConfig['tags'] & MarkdocTagsFromAttributes;
 }
 
 /**

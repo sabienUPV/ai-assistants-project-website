@@ -1,0 +1,37 @@
+---
+import SlideshowSvelte from '@components/client/Slideshow.svelte';
+
+import type { Slide } from '@projectTypes/slideshow';
+
+const { t } = Astro.locals;
+
+const localizedTexts = {
+  prevText: t('page_nav_previous'),
+  nextText: t('page_nav_next'),
+  prevAriaLabel: t('slideshow_prev_label'),
+  nextAriaLabel: t('slideshow_next_label'),
+};
+
+interface Props {
+  slides: Slide[];
+}
+
+const { slides = [] } = Astro.props;
+
+// const slides : Slide[] = [
+//   {
+//     title: 'Slide 1',
+//     text: 'This is a test for the slideshow component. It should be able to handle multiple slides and display them correctly.',
+//   },
+//   {
+//     title: 'Slide 2',
+//     text: 'This is the second slide. It should also be displayed correctly and allow for navigation between slides.',
+//   },
+//   {
+//     title: 'Slide 3',
+//     text: 'This is the third slide. The slideshow component should handle this as well.',
+//   },
+// ];
+---
+
+<SlideshowSvelte client:load slides={slides} localizedTexts={localizedTexts} />

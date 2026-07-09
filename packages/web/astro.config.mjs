@@ -5,6 +5,7 @@ import { defaultLocale, locales } from '../core/src/languages';
 import icon from 'astro-icon';
 
 import markdoc from '@astrojs/markdoc';
+import svelte from '@astrojs/svelte';
 
 // https://astro.build/config
 export default defineConfig({
@@ -33,5 +34,5 @@ export default defineConfig({
   integrations: [icon({
     // We use the "astro-icon" integration to easily use icons from various icon libraries in our components
     iconDir: 'src/assets/icons',
-  }), markdoc()]
+  }), markdoc(), svelte()],
 });

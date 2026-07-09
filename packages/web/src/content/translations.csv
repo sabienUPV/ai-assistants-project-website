@@ -71,5 +71,7 @@ page_nav_next,Next,Siguiente,Nächste,Próximo,Successivo,Sljedeći,Suivant
 page_nav_info,Page {0} of {1},Página {0} de {1},Seite {0} von {1},Página {0} de {1},Pagina {0} di {1},Stranica {0} od {1},Page {0} sur {1}
 page_nav_label,Page Navigation,Navegación de página,Seitennavigation,Navegação de página,Navigazione di pagina,Navigacija stranice,Navigation de page
 entry_nav_label,Navigation between entries,Navegación entre entradas,Navigation zwischen Einträgen,Navegação entre entradas,Navigazione tra le voci,Navigacija između unosa,Navigation entre les entrées
+slideshow_prev_label,Previous Slide,Diapositiva anterior,Vorherige Folie,Slide anterior,Diapositiva precedente,Prethodni slajd,Diapositive précédente
+slideshow_next_label,Next Slide,Siguiente diapositiva,Nächste Folie,Próximo slide,Diapositiva successiva,Sljedeći slajd,Diapositive suivante
 course_toc_label,Course Contents,Contenido del curso,Kursinhalt,Conteúdo do curso,Contenuti del corso,Sadržaj tečaja,Contenu du cours
 content_not_available_in_your_language,Content not available in your language,Contenido no disponible en tu idioma,Inhalt nicht in Ihrer Sprache verfügbar,Conteúdo não disponível no seu idioma,Contenuto non disponibile nella tua lingua,Sadržaj nije dostupan na vašem jeziku,Contenu non disponible dans votre langue
