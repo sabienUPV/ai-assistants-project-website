@@ -61,12 +61,12 @@
     </button>
 
     <div class="counter" aria-live="polite">
-      {currentIndex + 1} / {slides.length}
+      {slides.length > 0 ? currentIndex + 1 : 0} / {slides.length}
     </div>
 
     <button 
       onclick={next} 
-      disabled={currentIndex === slides.length - 1} 
+      disabled={currentIndex >= slides.length - 1} 
       class="nav-btn"
       aria-label={localizedTexts?.nextAriaLabel || 'Next slide'}
     >
