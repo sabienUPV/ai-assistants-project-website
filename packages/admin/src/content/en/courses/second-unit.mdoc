@@ -6,6 +6,8 @@ This is a second unit
 
 {% slideshow %}
 {% slide title="Test Slide" %}
+{% columns %}
+{% column %}
 ### Testing
 
 **bold**
@@ -13,12 +15,14 @@ This is a second unit
 *italic*
 
 - 1
-
 - 2
-
 - 3
+{% /column %}
 
-  ![](@admin-assets/images/courses/second-unit/prueba-a.png)
+{% column %}
+![](@admin-assets/images/courses/second-unit/prueba-a.png)
+{% /column %}
+{% /columns %}
 {% /slide %}
 
 {% slide title="Test Slide 2" %}

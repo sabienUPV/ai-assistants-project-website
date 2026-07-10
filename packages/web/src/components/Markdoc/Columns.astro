@@ -1,0 +1,14 @@
+<div class="markdoc-columns">
+  <slot />
+</div>
+
+<style>
+  .markdoc-columns {
+    display: grid;
+    /* Esto crea automáticamente tantas columnas como metas, y las apila en pantallas pequeñas (móviles) */
+    grid-template-columns: repeat(auto-fit, minmax(142px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+    align-items: start;
+  }
+</style>

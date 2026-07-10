@@ -27,6 +27,10 @@ export const markdocTagAttributes = {
   notranslate: {
     description: "Mark content to be ignored by the LLM translation process, and preserved as-is in any translated versions.",
   },
+  slideshow: {
+    description: "Render a slideshow component with the provided slides.",
+    children: ['slide']
+  },
   slide: {
     description: "Define a single slide for a slideshow component.",
     attributes: {
@@ -37,10 +41,13 @@ export const markdocTagAttributes = {
     } satisfies Record<keyof SlideSchema, SchemaAttribute>,
   
   },
-  slideshow: {
-    description: "Render a slideshow component with the provided slides.",
-    children: ['slide']
-  }
+  columns: {
+    description: "Render a columns layout component with the provided column children.",
+    children: ['column']
+  },
+  column: {
+    description: "Define a single column for a columns layout component.",
+  },
 } satisfies AstroMarkdocConfig['tags'];
 
 /**
@@ -68,6 +75,14 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
       ...markdocTagAttributes.slide,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Slide.astro'),
     },
+    columns: {
+      ...markdocTagAttributes.columns,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Columns.astro'),
+    },
+    column: {
+      ...markdocTagAttributes.column,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Column.astro'),
+    }
   } satisfies AstroMarkdocConfig['tags'] & MarkdocTagsFromAttributes;
 }
 

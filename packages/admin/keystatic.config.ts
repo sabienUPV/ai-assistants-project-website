@@ -92,6 +92,18 @@ const slideComponent = wrapper({
     );
   }
 });
+const columnsComponent = repeating({
+  label: 'Columns',
+  description: markdocTagAttributes.columns.description,
+  children: ['column'], 
+  schema: {}, 
+});
+
+const columnComponent = wrapper({
+  label: 'Column',
+  description: markdocTagAttributes.column.description,
+  schema: {},
+});
 
 // Select storage kind based on environment variable:
 // - In local development, we default to 'local' storage for simplicity.
@@ -157,6 +169,8 @@ const createPostCollection = (locale: Locale) => {
           notranslate: noTranslateComponent,
           slideshow: slideshowComponent,
           slide: slideComponent,
+          columns: columnsComponent,
+          column: columnComponent,
         }
       }),
     } satisfies KeystaticPostSchema, // 2. LE DECIMOS A TS QUE ESTE OBJETO DEBE CUMPLIR EL TIPO MAPEADO. SI VES "satisfies" EN ROJO, ES QUE FALTA ALGÚN CAMPO DE TU POST, REVISA EN EL PROYECTO core/src/schemas/posts.ts Y ASEGÚRATE DE QUE TODOS LOS CAMPOS ESTÉN AQUÍ
@@ -195,6 +209,8 @@ const createCourseCollection = (locale: Locale) => {
           notranslate: noTranslateComponent,
           slideshow: slideshowComponent,
           slide: slideComponent,
+          columns: columnsComponent,
+          column: columnComponent,
         }
       }),
     } satisfies KeystaticCourseSchema,

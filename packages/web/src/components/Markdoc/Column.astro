@@ -1,0 +1,12 @@
+<div class="markdoc-column">
+  <slot />
+</div>
+
+<style>
+  .markdoc-column {
+    display: flex;
+    flex-direction: column;
+    /* Evita que los elementos internos rompan el grid */
+    min-width: 0; 
+  }
+</style>
