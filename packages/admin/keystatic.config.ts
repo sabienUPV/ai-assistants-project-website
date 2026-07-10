@@ -75,7 +75,18 @@ const slideComponent = wrapper({
       // 1. La cabecera con el título (Visible sin tener que editar)
       React.createElement(
         'div', 
-        { style: { backgroundColor: '#f0f9ff', padding: '12px 16px', borderBottom: '1px solid #e0e0e0', fontWeight: 'bold', color: '#0284c7', display: 'flex', alignItems: 'center', gap: '8px' } }, 
+        {
+          contentEditable: false, // Evita que el usuario edite el título directamente en la cabecera
+          style: {
+            userSelect: 'none', // Evita que el usuario seleccione el texto por error
+            backgroundColor: '#f0f9ff',
+            padding: '12px 16px',
+            borderBottom: '1px solid #e0e0e0',
+            fontWeight: 'bold',
+            color: '#0284c7',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px' } }, 
         `📝 ${title || 'Nueva Slide'}`
       ),
       // 2. El cuerpo con la imagen (si la hay) y el editor de contenido
