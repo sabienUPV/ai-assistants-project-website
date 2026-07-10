@@ -98,33 +98,7 @@
     position: relative;
     display: grid;
     place-items: center;
-  }
-
-  .slide {
-    /* La clase grid y placement aseguran que el contenido no salte de forma brusca con las transiciones fade */
-    grid-area: 1 / 1; 
-    width: 100%;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .slide-title {
-    font-size: 2rem;
-    color: var(--color-secondary); /* Azul oscuro corporativo */
-    margin: 0;
-  }
-
-  .slide-image {
-    max-width: 100%;
-    max-height: 300px;
-    border-radius: 8px;
-    object-fit: contain;
-  }
-
-  .slide-content {
+    
     font-size: 1.25rem;
     line-height: 1.6;
     color: var(--color-text);
