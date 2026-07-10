@@ -105,8 +105,6 @@
     font-size: 1.25rem;
     line-height: 1.6;
     color: var(--color-text);
-    max-width: 80%;
-    margin: 0 auto;
   }
 
   .navigation {
