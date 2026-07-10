@@ -128,6 +128,7 @@
     transition: background-color 0.2s, opacity 0.2s;
     /* Botones grandes para facilitar el clic (Accesibilidad) */
     min-width: 130px;
+    white-space: nowrap;
   }
 
   .nav-btn:hover:not(:disabled) {
@@ -144,5 +145,7 @@
     font-size: 1.2rem;
     font-weight: bold;
     color: var(--color-logo-dark-grey);
+    padding-inline: 1rem;
+    white-space: nowrap;
   }
 </style>
