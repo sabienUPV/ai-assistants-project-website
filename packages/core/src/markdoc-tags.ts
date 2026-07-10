@@ -34,14 +34,6 @@ export const markdocTagAttributes = {
         type: String,
         description: "The title of the slide.",
       },
-      image: {
-        type: String,
-        description: "The URL of the image for the slide.",
-      },
-      alt: {
-        type: String,
-        description: "The alternative text for the image.",
-      },
     } satisfies Record<keyof SlideSchema, SchemaAttribute>,
   
   },

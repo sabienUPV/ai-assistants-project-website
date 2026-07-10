@@ -63,11 +63,9 @@ const slideComponent = wrapper({
   description: markdocTagAttributes.slide.description,
   schema: {
     title: fields.text({ label: 'Title' }),
-    image: fields.text({ label: 'Image URL' }),
-    alt: fields.text({ label: 'Alt Text' }),
   } satisfies Record<keyof SlideSchema, ComponentSchema>, // Ensure all Slide fields are present
   ContentView: (props) => {
-    const { title, image, alt } = props.value || {};
+    const { title } = props.value || {};
     
     return React.createElement(
       'div',
@@ -80,23 +78,17 @@ const slideComponent = wrapper({
           style: {
             userSelect: 'none', // Evita que el usuario seleccione el texto por error
             backgroundColor: '#f0f9ff',
-            padding: '12px 16px',
+            padding: '12px 12px',
             borderBottom: '1px solid #e0e0e0',
             fontWeight: 'bold',
             color: '#0284c7',
             display: 'flex',
             alignItems: 'center',
             gap: '8px' } }, 
-        `📝 ${title || 'Nueva Slide'}`
+        `${title || 'Nueva Slide'}`
       ),
-      // 2. El cuerpo con la imagen (si la hay) y el editor de contenido
-      React.createElement(
-        'div',
-        { style: { padding: '16px' } },
-        image && React.createElement('img', { src: image, alt: alt || '', style: { maxHeight: '120px', display: 'block', marginBottom: '12px', borderRadius: '4px' } }),
-        // ¡La magia! props.children renderiza el editor de Markdoc anidado
-        React.createElement('div', { style: { paddingLeft: '12px', borderLeft: '3px solid #f0f9ff' } }, props.children)
-      )
+      // 2. El contenido
+      React.createElement('div', { style: { padding: '12px' } }, props.children)
     );
   }
 });
