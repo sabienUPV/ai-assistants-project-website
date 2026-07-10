@@ -1,6 +1,9 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
+
   // En Svelte 5, las propiedades (props) se reciben con $props()
   interface Props {
+    children?: Snippet;
     localizedTexts?: {
       prevText?: string;
       nextText?: string;
@@ -8,7 +11,7 @@
       nextAriaLabel?: string;
     };
   }
-  const { localizedTexts } : Props = $props();
+  const { children, localizedTexts } : Props = $props();
 
   // El estado interno para saber en qué diapositiva estamos (Svelte 5 usa $state)
   let currentIndex = $state(0);
@@ -42,7 +45,7 @@
 <div class="slideshow-wrapper">
   <!-- Contenedor estático: Astro vuelca el HTML aquí -->
   <div class="slide-content" bind:this={container}>
-    <slot />
+    {@render children?.()}
   </div>
 
   {#if slidesCount > 0}
@@ -98,7 +101,7 @@
     position: relative;
     display: grid;
     place-items: center;
-    
+
     font-size: 1.25rem;
     line-height: 1.6;
     color: var(--color-text);
