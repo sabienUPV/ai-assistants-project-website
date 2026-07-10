@@ -16,13 +16,10 @@ const { title } = Astro.props;
 </div>
 
 <style>
-  /* HACK: Ponemos .slide-title 2 veces a propósito para aumentar la especificidad
-  y asegurarnos de que este estilo tenga prioridad frente al estilo global en la página de cursos.
-  Esto es necesario porque ".course-content :global(h2)" se considera más específico que ".slide-title" y le acaba dando prioridad al global cuando no debería.
-  */
-  .slide-title.slide-title {
+  .slide-title {
     font-size: 2rem;
     color: var(--color-secondary); /* Azul oscuro corporativo */
     margin: 0;
+    margin-bottom: 1rem;
   }
 </style>

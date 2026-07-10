@@ -138,13 +138,14 @@ export async function getStaticPaths() {
   }
 
   /* Styling HTML elements generated dynamically by Markdoc */
-  .course-content :global(p) {
+  /* NOTE: We use :where() to avoid increasing specificity and allow styles from Markdoc tags to override these if needed. */
+  .course-content :global(:where(p)) {
     /* Respects your global text alignment (left) and accessibility choices */
     font-size: 1.05rem;
     margin-bottom: 1.6rem;
   }
 
-  .course-content :global(h2) {
+  .course-content :global(:where(h2)) {
     /* Overrides the global h2 centered text inside the reading area for better accessibility */
     text-align: left;
     font-size: 1.75rem;
@@ -153,7 +154,7 @@ export async function getStaticPaths() {
     margin-bottom: 1rem;
   }
 
-  .course-content :global(h3) {
+  .course-content :global(:where(h3)) {
     text-align: left;
     font-size: 1.3rem;
     color: var(--color-dark-blue);
@@ -161,26 +162,26 @@ export async function getStaticPaths() {
     margin-bottom: 0.75rem;
   }
 
-  .course-content :global(ul), .course-content :global(ol) {
+  .course-content :global(:where(ul)), .course-content :global(:where(ol)) {
     margin-bottom: 1.6rem;
     padding-left: 2rem;
   }
 
-  .course-content :global(li) {
+  .course-content :global(:where(li)) {
     margin-bottom: 0.6rem;
   }
 
-  .course-content :global(a) {
+  .course-content :global(:where(a)) {
     color: var(--color-link);
     text-decoration: none;
   }
 
-  .course-content :global(a:hover) {
+  .course-content :global(:where(a:hover)) {
     color: var(--color-link-hover);
     text-decoration: underline;
   }
 
-  .course-content :global(img) {
+  .course-content :global(:where(img)) {
     max-width: 100%;
     height: auto;
     border-radius: 8px;
