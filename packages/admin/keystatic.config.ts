@@ -96,7 +96,15 @@ const columnsComponent = repeating({
   label: 'Columns',
   description: markdocTagAttributes.columns.description,
   children: ['column'], 
-  schema: {}, 
+  schema: {},
+  // Show the Column components in actual columns (side by side) in the editor canvas, instead of stacked vertically
+  ContentView: (props) => {
+    return React.createElement(
+      'div',
+      { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', margin: '16px 0' } },
+      props.children
+    );
+  }
 });
 
 const columnComponent = wrapper({
