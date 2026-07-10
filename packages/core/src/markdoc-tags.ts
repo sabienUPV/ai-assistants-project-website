@@ -58,15 +58,15 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
       // so redefining the flag property does NOT merge the original flag object with the new one, it replaces it entirely,
       // which is why we need to re-include its attributes
       ...markdocTagAttributes.flag,
-      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/MarkdocFlag.astro'),
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Flag.astro'),
     },
     slideshow: {
       ...markdocTagAttributes.slideshow,
-      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/entries/courses/Slideshow.astro'),
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Slideshow.astro'),
     },
     slide: {
       ...markdocTagAttributes.slide,
-      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/entries/courses/Slide.astro'),
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Slide.astro'),
     },
   } satisfies AstroMarkdocConfig['tags'] & MarkdocTagsFromAttributes;
 }
