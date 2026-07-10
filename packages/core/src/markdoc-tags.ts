@@ -72,6 +72,10 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
       ...markdocTagAttributes.slideshow,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/entries/courses/Slideshow.astro'),
     },
+    slide: {
+      ...markdocTagAttributes.slide,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/entries/courses/Slide.astro'),
+    },
   } satisfies AstroMarkdocConfig['tags'] & MarkdocTagsFromAttributes;
 }
 

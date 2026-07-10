@@ -1,0 +1,22 @@
+---
+interface Props {
+  title?: string;
+  image?: string;
+  alt?: string;
+}
+
+const { title, image, alt } = Astro.props;
+---
+
+<!-- Svelte buscará todos los divs con la clase 'markdoc-slide' -->
+<div class="markdoc-slide" style="display: none;">
+  {title && <h2 class="slide-title">{title}</h2>}
+  
+  {image && (
+    <img src={image} alt={alt || ""} class="slide-image" />
+  )}
+  
+  <div class="slide-rich-text">
+    <slot /> <!-- Aquí Astro inyecta el HTML compilado de Markdoc (negritas, listas, etc.) -->
+  </div>
+</div>

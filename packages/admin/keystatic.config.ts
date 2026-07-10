@@ -66,16 +66,28 @@ const slideComponent = wrapper({
     image: fields.text({ label: 'Image URL' }),
     alt: fields.text({ label: 'Alt Text' }),
   } satisfies Record<keyof SlideSchema, ComponentSchema>, // Ensure all Slide fields are present
-  // ContentView: (props) => {
-  //   const { title, image, alt, text } = props.value || {};
-  //   return React.createElement(
-  //     'div',
-  //     { style: { border: '1px solid #ccc', padding: '8px', marginBottom: '8px' } },
-  //     React.createElement('h4', {}, title || 'No Title'),
-  //     image && React.createElement('img', { src: image, alt: alt || '', style: { maxWidth: '100%' } }),
-  //     text && React.createElement('div', {}, props.children)
-  //   );
-  // }
+  ContentView: (props) => {
+    const { title, image, alt } = props.value || {};
+    
+    return React.createElement(
+      'div',
+      { style: { border: '2px solid #e0e0e0', borderRadius: '8px', marginBottom: '16px', backgroundColor: '#fff', overflow: 'hidden' } },
+      // 1. La cabecera con el título (Visible sin tener que editar)
+      React.createElement(
+        'div', 
+        { style: { backgroundColor: '#f0f9ff', padding: '12px 16px', borderBottom: '1px solid #e0e0e0', fontWeight: 'bold', color: '#0284c7', display: 'flex', alignItems: 'center', gap: '8px' } }, 
+        `📝 ${title || 'Nueva Slide'}`
+      ),
+      // 2. El cuerpo con la imagen (si la hay) y el editor de contenido
+      React.createElement(
+        'div',
+        { style: { padding: '16px' } },
+        image && React.createElement('img', { src: image, alt: alt || '', style: { maxHeight: '120px', display: 'block', marginBottom: '12px', borderRadius: '4px' } }),
+        // ¡La magia! props.children renderiza el editor de Markdoc anidado
+        React.createElement('div', { style: { paddingLeft: '12px', borderLeft: '3px solid #f0f9ff' } }, props.children)
+      )
+    );
+  }
 });
 
 // Select storage kind based on environment variable:

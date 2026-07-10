@@ -13,7 +13,6 @@
       "@utils/*": ["./src/utils/*"],
       "@languages": ["../core/src/languages.ts"],
       "@constants": ["../core/src/constants.ts"],
-      "@projectTypes/*": ["../core/src/types/*"], // @types is a reserved keyword, so we use @projectTypes instead
       "@admin-assets/*": ["../admin/src/assets/*"]
     }
   }

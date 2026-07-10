@@ -1,11 +1,6 @@
 <script lang="ts">
-  import { fade } from 'svelte/transition';
-
-  import type { Slide } from '@sabien-upv-astro-cms/core/src/types/slideshow';
-
   // En Svelte 5, las propiedades (props) se reciben con $props()
   interface Props {
-    slides: Slide[];
     localizedTexts?: {
       prevText?: string;
       nextText?: string;
@@ -13,69 +8,77 @@
       nextAriaLabel?: string;
     };
   }
-  const { slides = [], localizedTexts } : Props = $props();
+  const { localizedTexts } : Props = $props();
 
   // El estado interno para saber en qué diapositiva estamos (Svelte 5 usa $state)
   let currentIndex = $state(0);
+  let slidesCount = $state(0);
+  let container: HTMLElement;
 
-  function next() {
-    if (currentIndex < slides.length - 1) currentIndex++;
-  }
+  // Se ejecuta cuando el componente se monta en el navegador
+  $effect(() => {
+    if (!container) return;
+    
+    // Buscamos todas las diapositivas estáticas generadas por Astro
+    const slides = container.querySelectorAll('.markdoc-slide');
+    slidesCount = slides.length;
 
-  function prev() {
-    if (currentIndex > 0) currentIndex--;
-  }
+    // Lógica de visibilidad puramente DOM
+    slides.forEach((slide, index) => {
+      const el = slide as HTMLElement;
+      if (index === currentIndex) {
+        el.style.display = 'block';
+        el.style.animation = 'fadeIn 0.3s ease-in-out';
+      } else {
+        el.style.display = 'none';
+      }
+    });
+  });
+
+  function next() { if (currentIndex < slidesCount - 1) currentIndex++; }
+  function prev() { if (currentIndex > 0) currentIndex--; }
 </script>
 
 <div class="slideshow-wrapper">
-  <div class="slide-content">
-    {#each slides as slide, i}
-      {#if i === currentIndex}
-        <div in:fade={{ duration: 250 }} class="slide">
-          
-          {#if slide.title}
-            <h2 class="slide-title">{slide.title}</h2>
-          {/if}
-          
-          {#if slide.image}
-            <img src={slide.image} alt={slide.alt || 'Image supporting the slide'} class="slide-image" />
-          {/if}
-          
-          {#if slide.content}
-            <p class="slide-content">{slide.content}</p>
-          {/if}
-
-        </div>
-      {/if}
-    {/each}
+  <!-- Contenedor estático: Astro vuelca el HTML aquí -->
+  <div class="slide-content" bind:this={container}>
+    <slot />
   </div>
 
-  <div class="navigation">
-    <button 
-      onclick={prev} 
-      disabled={currentIndex === 0} 
-      class="nav-btn"
-      aria-label={localizedTexts?.prevAriaLabel || 'Previous slide'}
-    >
-      &larr; {localizedTexts?.prevText || 'Previous'}
-    </button>
+  {#if slidesCount > 0}
+    <div class="navigation">
+      <button 
+        onclick={prev} 
+        disabled={currentIndex === 0} 
+        class="nav-btn"
+        aria-label={localizedTexts?.prevAriaLabel || 'Previous slide'}
+      >
+        &larr; {localizedTexts?.prevText || 'Previous'}
+      </button>
 
-    <div class="counter" aria-live="polite">
-      {slides.length > 0 ? currentIndex + 1 : 0} / {slides.length}
+      <div class="counter" aria-live="polite">
+        {slidesCount > 0 ? currentIndex + 1 : 0} / {slidesCount}
+      </div>
+
+      <button 
+        onclick={next} 
+        disabled={currentIndex >= slidesCount - 1} 
+        class="nav-btn"
+        aria-label={localizedTexts?.nextAriaLabel || 'Next slide'}
+      >
+        {localizedTexts?.nextText || 'Next'} &rarr;
+      </button>
     </div>
-
-    <button 
-      onclick={next} 
-      disabled={currentIndex >= slides.length - 1} 
-      class="nav-btn"
-      aria-label={localizedTexts?.nextAriaLabel || 'Next slide'}
-    >
-      {localizedTexts?.nextText || 'Next'} &rarr;
-    </button>
-  </div>
+  {/if}
 </div>
 
 <style>
+  /* Animación de entrada para que la transición entre slides HTML no sea tan seca */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   /* Integrado con tu sistema de diseño y las reglas de accesibilidad */
   .slideshow-wrapper {
     border: 2px solid #e5e7eb;
