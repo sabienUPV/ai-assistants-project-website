@@ -47,6 +47,11 @@ if (resolvedImage) {
   imgShiftY = dimensions.shiftY;
 }
 
+// Astro tries to be too smart optimizing images, so we need to account for our scaling and tell it to save the unscaled image size.
+// Otherwise, Astro will generate a smaller image than we need, and it will look pixelated when we scale it up in the browser.
+// (e.g. if the original image is 800px wide, and we scale it to 200%, we need Astro to give us 1600px wide, not 800px wide)
+const astroRequiredWidth = imgScaleX ? Math.round(finalWidth * (imgScaleX / 100)) : finalWidth;
+
 if (!resolvedImage) {
   console.warn(`Image not found for path: ${imageSrc}`);
 }
@@ -65,7 +70,7 @@ if (!resolvedImage) {
       src={resolvedImage} 
       alt={alt || ""}
       title={title || ""}
-      width={finalWidth}
+      width={astroRequiredWidth}
       class="cropped-image"
       style={`
         width: ${imgScaleX}%;
