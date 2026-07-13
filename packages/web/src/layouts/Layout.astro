@@ -105,6 +105,7 @@ const hasSidebar = Astro.slots.has('sidebar');
 
 	/* En tablets, hacemos 2 columnas en vez de 3 de forma que el contenido tome todo el espacio disponible por la derecha
 	/* (no pasa nada porque se quede descentrado por la derecha ya que como no hay mucho espacio queda bien) */
+	/* (aquí miramos el max-width a mano según cómo queda bien, no hace falta que en todo el modo tablet se vea así) */
 	@media (max-width: 1500px) {
 		.layout-with-sidebar {
 			grid-template-columns: 280px minmax(0, 1fr);
