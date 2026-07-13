@@ -67,7 +67,7 @@ main {
   margin: 0 auto;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1100px) {
   main {
     padding: 1rem;
     padding-top: 0.5rem;
