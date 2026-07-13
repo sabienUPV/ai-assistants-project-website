@@ -1,7 +1,8 @@
 import { config, fields, collection, type Config, type ComponentSchema } from '@keystatic/core';
 import { block, inline, repeating, wrapper } from '@keystatic/core/content-components';
-import type { Post, Course } from '@sabien-upv-astro-cms/core';
-import { courseUnitRegex, courseUnitValidationMessage, markdocTagAttributes } from '@sabien-upv-astro-cms/core';
+import type { Post } from '@sabien-upv-astro-cms/core/src/schemas/posts';
+import { type Course, courseUnitRegex, courseUnitValidationMessage } from '@sabien-upv-astro-cms/core/src/schemas/courses';
+import { markdocTagAttributes } from '@sabien-upv-astro-cms/core/src/markdoc-tags';
 import React from 'react';
 import { locales, type Locale } from '@languages';
 import type { SlideSchema } from '@schemas/slide';
