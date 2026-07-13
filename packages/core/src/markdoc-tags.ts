@@ -75,9 +75,21 @@ export const markdocTagAttributes = {
         type: Number,
         description: "The height of the image in pixels.",
       },
-      crop: {
-        type: Boolean,
-        description: "Whether to crop the image to the specified width and height.",
+      cropTop: {
+        type: Number,
+        description: "Percentage to crop from the top side of the image (0-100).",
+      },
+      cropRight: {
+        type: Number,
+        description: "Percentage to crop from the right side of the image (0-100).",
+      },
+      cropBottom: {
+        type: Number,
+        description: "Percentage to crop from the bottom side of the image (0-100).",
+      },
+      cropLeft: {
+        type: Number,
+        description: "Percentage to crop from the left side of the image (0-100).",
       },
     } satisfies Record<keyof ImageSchema, SchemaAttribute>,
   },

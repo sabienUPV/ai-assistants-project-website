@@ -7,6 +7,7 @@ import React from 'react';
 import { locales, type Locale } from '@languages';
 import type { SlideSchema } from '@schemas/slide';
 import type { ImageSchema } from '@schemas/image';
+import { calculateImageDimensionsForCrop } from '@core-utils/image';
 
 // 1. CREAMOS EL TIPO MAPEADO
 // Le exigimos a TS que este objeto tenga obligatoriamente todas las keys de tu Post de Zod.
@@ -157,10 +158,26 @@ const createComponents = (collectionName: string) => ({
       title: fields.text({ label: 'Title' }),
       width: fields.number({ label: 'Width (px)' }),
       height: fields.number({ label: 'Height (px)' }),
-      crop: fields.checkbox({ label: 'Crop to specified dimensions' }),
+      cropTop: fields.integer({
+        label: 'Top Crop (%)',
+        // The field is optional (returns null if empty), but strictly validates 0-100 if a value is provided
+        validation: { min: 0, max: 100 },
+      }),
+      cropRight: fields.integer({
+        label: 'Right Crop (%)',
+        validation: { min: 0, max: 100 },
+      }),
+      cropBottom: fields.integer({
+        label: 'Bottom Crop (%)',
+        validation: { min: 0, max: 100 },
+      }),
+      cropLeft: fields.integer({
+        label: 'Left Crop (%)',
+        validation: { min: 0, max: 100 },
+      }),
     } satisfies Record<keyof ImageSchema, ComponentSchema>,
     ContentView: (props) => {
-      const { image, alt, title, width, height, crop } = props.value || {};
+      const { image, alt, title, width, height, cropTop, cropRight, cropBottom, cropLeft } = props.value || {};
 
       // Determinamos qué src usar de forma segura
       let imageSrc;
@@ -175,24 +192,53 @@ const createComponents = (collectionName: string) => ({
           );
         }
       }
+
+      const { aspectRatio : aspectRatioFromCrop, scaleX, scaleY, shiftX, shiftY } = calculateImageDimensionsForCrop(
+        width || 800, // Default width if not provided
+        height || 600, // Default height if not provided
+        cropTop ?? 0,
+        cropRight ?? 0,   
+        cropBottom ?? 0,
+        cropLeft ?? 0
+      );
       
+      // Creamos el contenedor (Wrapper)
       return React.createElement(
-        'img',
-        { 
-          src: imageSrc || undefined,
+        'div',
+        {
+          style: {
+            position: 'relative',
+            overflow: 'hidden', // Las tijeras mágicas
+            // For the aspect ratio, if the user has provided both a width and height,
+            // we don't want to use the calculated aspect ratio from the crop, because that would distort the image,
+            // we want to use the user-provided width and height to determine the aspect ratio.
+            // If the user has not provided both a width and height, we fall back to the calculated aspect ratio from the crop.
+            aspectRatio: width && height ? (width / height) : aspectRatioFromCrop,
+            width: width ? `${width}px` : '100%',
+            maxWidth: '100%',
+            border: '1px solid #e0e0e0', // El borde ahora se queda a salvo
+            borderRadius: '4px',
+            display: imageSrc ? 'block' : 'none',
+            margin: '1rem auto'
+          }
+        },
+        // Creamos la imagen por dentro
+        React.createElement('img', {
+          src: imageSrc,
           alt: alt || '',
-          title: title || '', 
-          // Pasamos el width y height para que el contenedor tenga tamaño fijo en el editor
-          style: { 
-            width: width ? `${width}px` : 'auto', 
-            height: height ? `${height}px` : 'auto', 
-            objectFit: crop ? 'cover' : 'contain',
-            maxWidth: '100%', 
-            borderRadius: '4px', 
-            border: '1px solid #e0e0e0',
-            display: imageSrc ? 'block' : 'none'
-          } 
-        }
+          title: title || '',
+          style: {
+            position: 'absolute',
+            maxWidth: 'none', // Vital para que crezca más del 100%
+            objectFit: 'fill',
+            
+            // Aplicamos el tamaño gigante y el desplazamiento
+            width: `${scaleX}%`,
+            height: `${scaleY}%`,
+            left: `-${shiftX}%`,
+            top: `-${shiftY}%`
+          }
+        })
       );
     }
   }),
