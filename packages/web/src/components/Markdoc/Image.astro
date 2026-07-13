@@ -106,6 +106,12 @@ if (!resolvedImage) {
     position: absolute;
     max-width: none; /* Vital para que la imagen pueda crecer más allá del 100% del contenedor */
     object-fit: fill;
+
+    /* We make sure to reset the inherited margin, border and box shadow from courses/[slug].astro */
+    /* (this is important because if it tries to use a margin or border, it will break the crop) */
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
 
   .fallback {
