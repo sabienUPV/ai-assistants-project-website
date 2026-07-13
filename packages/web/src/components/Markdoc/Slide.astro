@@ -20,6 +20,8 @@ const { title, align = 'center' } = Astro.props;
     width: 100%; /* Ocupa todo el espacio disponible en el contenedor padre */
     display: grid; /* Usamos grid para poder centrar el contenido fácilmente */
     place-items: center; /* Centra el contenido horizontal y verticalmente */
+
+    min-width: 0; /* Evita que el contenido se desborde del contenedor */
   }
 
   .slide-title {
@@ -33,5 +35,8 @@ const { title, align = 'center' } = Astro.props;
     width: 100%; /* Ocupa todo el ancho disponible */
     display: grid; /* Usamos grid para poder centrar el contenido fácilmente */
     /* (place-items está en style inline para poder cambiarlo dinámicamente según el atributo 'align') */
+
+    min-width: 0; /* Evita que el contenido se desborde del contenedor */
+    overflow-wrap: break-word; /* Evita que URLs largas o palabras gigantes rompan la pantalla en móviles */
   }
 </style>
