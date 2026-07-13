@@ -28,6 +28,9 @@ interface Props {
 }
 
 const { title, description, includeLocaleSelector = true } = Astro.props;
+
+// Comprobamos si nos han pasado un slot llamado "sidebar"
+const hasSidebar = Astro.slots.has('sidebar');
 ---
 
 <!doctype html>
@@ -61,10 +64,64 @@ const { title, description, includeLocaleSelector = true } = Astro.props;
 	<body id="top">
 		<SkipLink />
 		<Header includeLocaleSelector={includeLocaleSelector} />
-		<main id="main-content">
-			<slot />
-		</main>
+		
+    {/* Renderizado condicional basado en la existencia del sidebar */}
+    {hasSidebar ? (
+      <div class="layout-with-sidebar">
+        <aside class="sidebar">
+          <slot name="sidebar" />
+        </aside>
+        <main id="main-content" class="main-content-area">
+          <slot />
+        </main>
+      </div>
+    ) : (
+      <main id="main-content">
+        <slot />
+      </main>
+    )}
+
 		<Footer />
 		<BackToTopButton />
 	</body>
 </html>
+
+<style>
+  /* CSS Base para cuando hay un sidebar (Aplicando la técnica de 3 columnas) */
+  .layout-with-sidebar {
+    display: grid;
+    /* Columna 1: Sidebar, Columna 2: Contenido, Columna 3: Espejo vacío para centrar */
+    grid-template-columns: 280px minmax(0, 1000px) 280px;
+    gap: 2rem;
+    justify-content: center;
+    align-items: start;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+	.layout-with-sidebar .main-content-area {
+		width: 100%; /* Make sure the content uses all the available width */
+	}
+
+	/* En tablets, hacemos 2 columnas en vez de 3 de forma que el contenido tome todo el espacio disponible por la derecha
+	/* (no pasa nada porque se quede descentrado por la derecha ya que como no hay mucho espacio queda bien) */
+	@media (max-width: 1500px) {
+		.layout-with-sidebar {
+			grid-template-columns: 280px minmax(0, 1fr);
+		}
+	}
+
+  /* En móviles, apilamos el TOC arriba del contenido */
+  @media (max-width: 1024px) {
+    .layout-with-sidebar {
+      grid-template-columns: 1fr;
+      padding: 1rem;
+    }
+
+		.layout-with-sidebar .sidebar {
+			/* Remove sticky behavior on mobile, move to top */
+			position: relative;
+			top: 0;
+		}
+  }
+</style>

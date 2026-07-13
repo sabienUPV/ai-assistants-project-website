@@ -38,65 +38,36 @@ export async function getStaticPaths() {
 ---
 
 <Layout title={`${course.data.unit}. ${course.data.title}`}>
-  <div class="course-page">
-    
-    <!-- Table of Contents (on the left - except on mobile) -->
-    <TableOfContents courses={allCourses} currentUnit={course.data.unit} />
-    
-    <!-- Main content column (on the right - except on mobile) -->
-    <div class="course-main-column">
-      <article class="course-container">
-        <header class="course-header">
-          {isFallback && (
-            <div class="not-in-language-pill-container">
-              <ContentNotInLanguagePill />
-            </div>
-          )}
+  <!-- Table of Contents (on the left thanks to the sidebar slot from Layout.astro - except on mobile) -->
+  <TableOfContents slot="sidebar" courses={allCourses} currentUnit={course.data.unit} />
+  
+  <!-- Main content (on the right - except on mobile) -->
+  <article class="course-container">
+      <header class="course-header">
+        {isFallback && (
+          <div class="not-in-language-pill-container">
+            <ContentNotInLanguagePill />
+          </div>
+        )}
 
-          <h1>{course.data.unit}. {course.data.title}</h1>
-          
-          {course.data.description && (
-            <p class="course-description">{course.data.description}</p>
-          )}
-        </header>
+        <h1>{course.data.unit}. {course.data.title}</h1>
+        
+        {course.data.description && (
+          <p class="course-description">{course.data.description}</p>
+        )}
+      </header>
 
-        <div class="course-content">
-          <Content />
-        </div>
-      </article>
+      <div class="course-content">
+        <Content />
+      </div>
+    </article>
 
-      <!-- Inside the main content column so that the TOC stays sticky -->
-      <CourseNavigation courses={allCourses} currentUnit={course.data.unit} />
-    </div>
-
-  </div>
+    <!-- Inside the main content column so that the TOC stays sticky -->
+    <CourseNavigation courses={allCourses} currentUnit={course.data.unit} />
 </Layout>
 
 <style>
-  .course-page {
-    display: flex;
-    flex-direction: row;
-    gap: 2rem;
-    padding: 2rem 1rem;
-    align-items: flex-start; /* IMPORTANT: This allows the children to not stretch vertically, enabling the sticky behavior */
-  }
-
-  .course-page :global(aside) {
-    flex: 0 0 255px;
-    margin-top: 1rem;
-  }
-
-  .course-main-column {
-    flex: 1;
-    min-width: 0; /* Prevent long contents or iframes from breaking the flexbox's width */
-    display: flex;
-    flex-direction: column;
-  }
-
   .course-container {
-    flex: 1;
-    max-width: 800px;
-    margin: 0 auto;
     padding: 0 1rem;
     /* Font-family, font-size, and background are inherited cleanly from global body */
     color: var(--color-text);
@@ -188,24 +159,5 @@ export async function getStaticPaths() {
     margin: 2rem auto;
     display: block; /* Centers images cleanly if they aren't full width */
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  }
-
-  /* --- Responsive on mobile --- */
-  @media (max-width: 1000px) {
-    .course-page {
-      flex-direction: column; /* Place TOC on top of content */
-      gap: 1rem;
-      padding: 1rem;
-    }
-
-    .course-page :global(aside) {
-      flex: auto;
-      width: 100%;
-      margin-top: 0;
-    }
-
-    .course-main-column {
-      width: 100%;
-    }
   }
 </style>
