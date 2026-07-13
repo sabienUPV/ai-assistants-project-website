@@ -1,10 +1,11 @@
 import { config, fields, collection, type Config, type ComponentSchema } from '@keystatic/core';
-import { inline, repeating, wrapper } from '@keystatic/core/content-components';
+import { block, inline, repeating, wrapper } from '@keystatic/core/content-components';
 import type { Post, Course } from '@sabien-upv-astro-cms/core';
 import { courseUnitRegex, courseUnitValidationMessage, markdocTagAttributes } from '@sabien-upv-astro-cms/core';
 import React from 'react';
 import { locales, type Locale } from '@languages';
-import type { SlideSchema } from '@schemas/slideshow';
+import type { SlideSchema } from '@schemas/slide';
+import type { ImageSchema } from '@schemas/image';
 
 // 1. CREAMOS EL TIPO MAPEADO
 // Le exigimos a TS que este objeto tenga obligatoriamente todas las keys de tu Post de Zod.
@@ -20,106 +21,6 @@ type KeystaticCourseSchema = {
 } & {
   content: ComponentSchema;
 };
-
-// Define custom components for Keystatic using shared core attributes
-const flagComponent = inline({
-  label: 'Flag',
-  description: markdocTagAttributes.flag.description,
-  schema: {
-    // Safely accessing the description metadata from the shared core configuration for consistency
-    country: fields.text({ 
-      label: 'Country Code (e.g., eu, es)', 
-      description: markdocTagAttributes.flag.attributes.country.description 
-    }),
-  },
-  // Customizing how the inline tag looks inside the editor canvas
-  ContentView: (props) => {
-    // 'props.value' contains the current state of our schema fields
-    const countryCode = props.value?.country || '...';
-    
-    return React.createElement(
-      'span',
-      { style: { color: '#0284c7', fontWeight: 'bold' } },
-      `🚩 flag: '${countryCode}'`
-    );
-  }
-});
-const noTranslateComponent = wrapper({
-  label: 'No Translate',
-  description: markdocTagAttributes.notranslate.description,
-  schema: {}, // Empty, because the content is its own content
-  ContentView: (props) => {
-    return React.createElement('div', {}, props.children);
-  }
-});
-const slideshowComponent = repeating({
-  label: 'Slideshow',
-  description: markdocTagAttributes.slideshow.description,
-  children: ['slide'], // Only allow slide components. This should match the tag name for slides
-  schema: {}, // No additional fields for the slideshow itself, just the slides
-});
-const slideComponent = wrapper({
-  label: 'Slide',
-  description: markdocTagAttributes.slide.description,
-  schema: {
-    title: fields.text({ label: 'Title' }),
-  } satisfies Record<keyof SlideSchema, ComponentSchema>, // Ensure all Slide fields are present
-  ContentView: (props) => {
-    const { title } = props.value || {};
-    
-    return React.createElement(
-      'div',
-      { style: { border: '2px solid #e0e0e0', borderRadius: '8px', marginBottom: '16px', backgroundColor: '#fff', overflow: 'hidden' } },
-      // 1. La cabecera con el título (Visible sin tener que editar)
-      React.createElement(
-        'div', 
-        {
-          contentEditable: false, // Evita que el usuario edite el título directamente en la cabecera
-          style: {
-            userSelect: 'none', // Evita que el usuario seleccione el texto por error
-            backgroundColor: '#f0f9ff',
-            padding: '12px 12px',
-            borderBottom: '1px solid #e0e0e0',
-            fontWeight: 'bold',
-            color: '#0284c7',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px' } }, 
-        `${title || 'Nueva Slide'}`
-      ),
-      // 2. El contenido
-      React.createElement('div', { style: { padding: '12px' } }, props.children)
-    );
-  }
-});
-const columnsComponent = repeating({
-  label: 'Columns',
-  description: markdocTagAttributes.columns.description,
-  children: ['column'], 
-  schema: {},
-  // Show the Column components in actual columns (side by side) in the editor canvas, instead of stacked vertically
-  ContentView: (props) => {
-    return React.createElement(
-      'div',
-      { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', margin: '16px 0' } },
-      props.children
-    );
-  }
-});
-
-const columnComponent = wrapper({
-  label: 'Column',
-  description: markdocTagAttributes.column.description,
-  schema: {},
-});
-
-// Select storage kind based on environment variable:
-// - In local development, we default to 'local' storage for simplicity.
-// - In production, we default to 'cloud' storage (Keystatic Cloud) to deploy directly to the production environment (the GitHub repository).
-// If we manually set the environment variable KEYSTATIC_STORAGE_LOCAL to 'true' or 'false', it will override the defaults.
-const isLocal = import.meta.env.KEYSTATIC_STORAGE_LOCAL 
-  ? import.meta.env.KEYSTATIC_STORAGE_LOCAL === 'true'
-  : import.meta.env.DEV;
 
 // Muy útil para arreglar nombres de archivos con tildes, espacios, mayúsculas, etc. que pueden dar problemas al subirlos a la web
 function cleanFileName(filename: string): string {
@@ -142,6 +43,168 @@ function cleanFileName(filename: string): string {
   return `${cleanName}.${ext}`;
 }
 
+const getImageSchemaOptions = (collectionName: string) => ({
+  directory: `src/assets/images/${collectionName}`, // Default directory for images in the admin
+  // IMPORTANT: "@admin-assets" is an alias defined in tsconfig.json, that should be defined in BOTH the ADMIN and WEB projects, and BOTH should point to the /admin/src/assets folder. This way, when we upload an image from the admin, it will be stored in the admin's assets folder, but we can access it from the web using the @admin-assets alias.
+  publicPath: `@admin-assets/images/${collectionName}/`, // Public path for the web project
+  transformFilename: cleanFileName, // Clean filenames to avoid issues with special characters
+});
+
+// Define custom components for Keystatic using shared core attributes
+const createComponents = (collectionName: string) => ({
+  flag: inline({
+    label: 'Flag',
+    description: markdocTagAttributes.flag.description,
+    schema: {
+      // Safely accessing the description metadata from the shared core configuration for consistency
+      country: fields.text({ 
+        label: 'Country Code (e.g., eu, es)', 
+        description: markdocTagAttributes.flag.attributes.country.description 
+      }),
+    },
+    // Customizing how the inline tag looks inside the editor canvas
+    ContentView: (props) => {
+      // 'props.value' contains the current state of our schema fields
+      const countryCode = props.value?.country || '...';
+      
+      return React.createElement(
+        'span',
+        { style: { color: '#0284c7', fontWeight: 'bold' } },
+        `🚩 flag: '${countryCode}'`
+      );
+    }
+  }),
+  notranslate: wrapper({
+    label: 'No Translate',
+    description: markdocTagAttributes.notranslate.description,
+    schema: {}, // Empty, because the content is its own content
+    ContentView: (props) => {
+      return React.createElement('div', {}, props.children);
+    }
+  }),
+  slideshow: repeating({
+    label: 'Slideshow',
+    description: markdocTagAttributes.slideshow.description,
+    children: ['slide'], // Only allow slide components. This should match the tag name for slides
+    schema: {}, // No additional fields for the slideshow itself, just the slides
+  }),
+  slide: wrapper({
+    label: 'Slide',
+    description: markdocTagAttributes.slide.description,
+    schema: {
+      title: fields.text({ label: 'Title' }),
+    } satisfies Record<keyof SlideSchema, ComponentSchema>, // Ensure all Slide fields are present
+    ContentView: (props) => {
+      const { title } = props.value || {};
+      
+      return React.createElement(
+        'div',
+        { style: { border: '2px solid #e0e0e0', borderRadius: '8px', marginBottom: '16px', backgroundColor: '#fff', overflow: 'hidden' } },
+        // 1. La cabecera con el título (Visible sin tener que editar)
+        React.createElement(
+          'div', 
+          {
+            contentEditable: false, // Evita que el usuario edite el título directamente en la cabecera
+            style: {
+              userSelect: 'none', // Evita que el usuario seleccione el texto por error
+              backgroundColor: '#f0f9ff',
+              padding: '12px 12px',
+              borderBottom: '1px solid #e0e0e0',
+              fontWeight: 'bold',
+              color: '#0284c7',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px' } }, 
+          `${title || 'New Slide'}`
+        ),
+        // 2. El contenido
+        React.createElement('div', { style: { padding: '12px' } }, props.children)
+      );
+    }
+  }),
+  columns: repeating({
+    label: 'Columns',
+    description: markdocTagAttributes.columns.description,
+    children: ['column'], 
+    schema: {},
+    // Show the Column components in actual columns (side by side) in the editor canvas, instead of stacked vertically
+    ContentView: (props) => {
+      return React.createElement(
+        'div',
+        { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', margin: '16px 0' } },
+        props.children
+      );
+    }
+  }),
+  column: wrapper({
+    label: 'Column',
+    description: markdocTagAttributes.column.description,
+    schema: {},
+  }),
+  // Note: We cannot call it "image" because Keystatic already has a built-in "image" component, so we call it "advancedImage" just for Markdoc and Keystatic
+  // (but in the UI and Astro component we still call it "Image" for clarity)
+  advancedImage: block({
+    label: 'Image',
+    description: markdocTagAttributes.advancedImage.description,
+    schema: {
+      image: fields.image({
+        label: 'Source Image',
+        validation: { isRequired: true },
+        ...getImageSchemaOptions(collectionName)
+      }),
+      alt: fields.text({ label: 'Alternative Text', validation: { isRequired: true } }),
+      title: fields.text({ label: 'Title' }),
+      width: fields.number({ label: 'Width (px)' }),
+      height: fields.number({ label: 'Height (px)' }),
+      crop: fields.checkbox({ label: 'Crop to specified dimensions' }),
+    } satisfies Record<keyof ImageSchema, ComponentSchema>,
+    ContentView: (props) => {
+      const { image, alt, title, width, height, crop } = props.value || {};
+
+      // Determinamos qué src usar de forma segura
+      let imageSrc;
+      if (image) {
+        if (typeof image === 'string') {
+          // 1. La imagen ya estaba guardada, es una ruta normal
+          imageSrc = image;
+        } else if (image.data) {
+          // 2. La imagen está recién subida al editor, creamos el Blob dinámico
+          imageSrc = URL.createObjectURL(
+            new Blob([new Uint8Array(image.data)], { type: 'image/' + image.extension })
+          );
+        }
+      }
+      
+      return React.createElement(
+        'img',
+        { 
+          src: imageSrc || undefined,
+          alt: alt || '',
+          title: title || '', 
+          // Pasamos el width y height para que el contenedor tenga tamaño fijo en el editor
+          style: { 
+            width: width ? `${width}px` : 'auto', 
+            height: height ? `${height}px` : 'auto', 
+            objectFit: crop ? 'cover' : 'contain',
+            maxWidth: '100%', 
+            borderRadius: '4px', 
+            border: '1px solid #e0e0e0',
+            display: imageSrc ? 'block' : 'none'
+          } 
+        }
+      );
+    }
+  }),
+});
+
+// Select storage kind based on environment variable:
+// - In local development, we default to 'local' storage for simplicity.
+// - In production, we default to 'cloud' storage (Keystatic Cloud) to deploy directly to the production environment (the GitHub repository).
+// If we manually set the environment variable KEYSTATIC_STORAGE_LOCAL to 'true' or 'false', it will override the defaults.
+const isLocal = import.meta.env.KEYSTATIC_STORAGE_LOCAL 
+  ? import.meta.env.KEYSTATIC_STORAGE_LOCAL === 'true'
+  : import.meta.env.DEV;
+
 // Create a collection for each locale dynamically, using the same post schema definition
 // FACTORY FUNCTION: We wrap the collection creation in a function to preserve strict TypeScript inference for the schema fields
 const createPostCollection = (locale: Locale) => {
@@ -163,23 +226,10 @@ const createPostCollection = (locale: Locale) => {
       content: fields.markdoc({
         label: 'Content',
         options: {
-          image: {
-            directory: 'src/assets/images/posts',
-            // IMPORTANT: "@admin-assets" is an alias defined in tsconfig.json, that should be defined in BOTH the ADMIN and WEB projects, and BOTH should point to the /admin/src/assets folder. This way, when we upload an image from the admin, it will be stored in the admin's assets folder, but we can access it from the web using the @admin-assets alias.
-            publicPath: '@admin-assets/images/posts/',
-            // Muy útil para arreglar nombres de archivos con tildes, espacios, mayúsculas, etc. que pueden dar problemas al subirlos a la web
-            transformFilename: cleanFileName,
-          },
+          image: getImageSchemaOptions('posts'),
         },
         // Register custom components in Markdoc options
-        components: {
-          flag: flagComponent, 
-          notranslate: noTranslateComponent,
-          slideshow: slideshowComponent,
-          slide: slideComponent,
-          columns: columnsComponent,
-          column: columnComponent,
-        }
+        components: createComponents('posts'),
       }),
     } satisfies KeystaticPostSchema, // 2. LE DECIMOS A TS QUE ESTE OBJETO DEBE CUMPLIR EL TIPO MAPEADO. SI VES "satisfies" EN ROJO, ES QUE FALTA ALGÚN CAMPO DE TU POST, REVISA EN EL PROYECTO core/src/schemas/posts.ts Y ASEGÚRATE DE QUE TODOS LOS CAMPOS ESTÉN AQUÍ
   });
@@ -206,20 +256,9 @@ const createCourseCollection = (locale: Locale) => {
       content: fields.markdoc({
         label: 'Content',
         options: {
-          image: {
-            directory: 'src/assets/images/courses',
-            publicPath: '@admin-assets/images/courses/',
-            transformFilename: cleanFileName,
-          },
+          image: getImageSchemaOptions('courses'),
         },
-        components: {
-          flag: flagComponent, 
-          notranslate: noTranslateComponent,
-          slideshow: slideshowComponent,
-          slide: slideComponent,
-          columns: columnsComponent,
-          column: columnComponent,
-        }
+        components: createComponents('courses'),
       }),
     } satisfies KeystaticCourseSchema,
   });

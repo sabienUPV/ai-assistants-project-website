@@ -1,0 +1,54 @@
+---
+import type { ImageSchema } from '@sabien-upv-astro-cms/core/src/schemas/image';
+import { Image } from 'astro:assets';
+
+interface Props extends ImageSchema {}
+
+const { image, alt, title, width = 800, height, crop } = Astro.props;
+
+// Astro's <Image /> component requires the actual imported file object for local files in the `src` directory, not just a string path.
+// We use import.meta.glob to dynamically find the image object based on the string path Keystatic gives us.
+const images = import.meta.glob<{ default: ImageMetadata }>('/src/assets/images/**/*.{jpeg,jpg,png,gif,webp}');
+
+// Make sure the path matches what Keystatic outputs (you might need to adjust this depending on how publicPath is resolving)
+// If Keystatic outputs "@admin-assets/images/...", you'll map that to the actual file path.
+let imagePromise;
+for (const path in images) {
+  // Simple check: if the path from Keystatic is part of the actual file path
+  if (path.includes(image?.filename)) {
+    imagePromise = images[path]();
+    break;
+  }
+}
+
+const resolvedImage = imagePromise ? (await imagePromise).default : null;
+---
+
+{resolvedImage ? (
+  <Image 
+    src={resolvedImage}
+    alt={alt || ""}
+    title={title}
+    width={width}
+    height={height}
+    quality={80}
+    class:list={["markdoc-optimized-image", crop && "is-cropped"]}
+  />
+) : (
+  <img alt={alt || ""} title={title} class:list={["markdoc-optimized-image", "fallback", crop && "is-cropped"]} loading="lazy" />
+)}
+º
+<style>
+  .markdoc-optimized-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 2rem auto;
+    display: block;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .is-cropped {
+    object-fit: cover;
+  }
+</style>

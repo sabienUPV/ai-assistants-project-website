@@ -1,6 +1,7 @@
 import { component, type AstroMarkdocConfig } from "@astrojs/markdoc/config";
 import type { SchemaAttribute } from "@markdoc/markdoc";
-import type { SlideSchema } from "./schemas/slideshow";
+import type { SlideSchema } from "./schemas/slide";
+import type { ImageSchema } from "./schemas/image";
 
 type Project = 'web' | 'admin';
 type AstroTagConfig = NonNullable<AstroMarkdocConfig['tags']>[string];
@@ -39,7 +40,6 @@ export const markdocTagAttributes = {
         description: "The title of the slide.",
       },
     } satisfies Record<keyof SlideSchema, SchemaAttribute>,
-  
   },
   columns: {
     description: "Render a columns layout component with the provided column children.",
@@ -47,6 +47,39 @@ export const markdocTagAttributes = {
   },
   column: {
     description: "Define a single column for a columns layout component.",
+  },
+  // Note: We cannot call it "image" because Keystatic already has a built-in "image" component, so we call it "advancedImage" just for Markdoc and Keystatic
+  // (but in the UI and Astro component we still call it "Image" for clarity)
+  advancedImage: {
+    description: "Render an optimized image component, allowing for further customization (e.g. width, height).",
+    attributes: {
+      image: {
+        type: Object,
+        required: true,
+        description: "The image to display.",
+      },
+      alt: {
+        type: String,
+        required: true,
+        description: "The alternative text for the image.",
+      },
+      title: {
+        type: String,
+        description: "The title of the image.",
+      },
+      width: {
+        type: Number,
+        description: "The width of the image in pixels.",
+      },
+      height: {
+        type: Number,
+        description: "The height of the image in pixels.",
+      },
+      crop: {
+        type: Boolean,
+        description: "Whether to crop the image to the specified width and height.",
+      },
+    } satisfies Record<keyof ImageSchema, SchemaAttribute>,
   },
 } satisfies AstroMarkdocConfig['tags'];
 
@@ -82,7 +115,11 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
     column: {
       ...markdocTagAttributes.column,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Column.astro'),
-    }
+    },
+    advancedImage: {
+      ...markdocTagAttributes.advancedImage,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Image.astro'),
+    },
   } satisfies AstroMarkdocConfig['tags'] & MarkdocTagsFromAttributes;
 }
 
