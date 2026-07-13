@@ -54,7 +54,7 @@ export const markdocTagAttributes = {
     description: "Render an optimized image component, allowing for further customization (e.g. width, height).",
     attributes: {
       image: {
-        type: Object,
+        type: String,
         required: true,
         description: "The image to display.",
       },
