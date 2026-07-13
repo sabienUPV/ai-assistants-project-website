@@ -1,6 +1,6 @@
 import { component, type AstroMarkdocConfig } from "@astrojs/markdoc/config";
 import type { SchemaAttribute } from "@markdoc/markdoc";
-import type { SlideSchema } from "./schemas/slide";
+import { slideAlignValues, type SlideSchema } from "./schemas/slide";
 import type { ImageSchema } from "./schemas/image";
 
 type Project = 'web' | 'admin';
@@ -38,6 +38,12 @@ export const markdocTagAttributes = {
       title: {
         type: String,
         description: "The title of the slide.",
+      },
+      align: {
+        type: String,
+        description: "The alignment of the slide.",
+        default: "center" satisfies SlideSchema['align'],
+        matches: [...slideAlignValues],
       },
     } satisfies Record<keyof SlideSchema, SchemaAttribute>,
   },

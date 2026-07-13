@@ -5,7 +5,7 @@ import { type Course, courseUnitRegex, courseUnitValidationMessage } from '@sche
 import { markdocTagAttributes } from '@markdoc-tags';
 import React from 'react';
 import { locales, type Locale } from '@languages';
-import type { SlideSchema } from '@schemas/slide';
+import { slideAlignValues, type SlideSchema } from '@schemas/slide';
 import type { ImageSchema } from '@schemas/image';
 import { calculateImageDimensionsForCrop } from '@core-utils/image';
 
@@ -95,6 +95,11 @@ const createComponents = (collectionName: string) => ({
     description: markdocTagAttributes.slide.description,
     schema: {
       title: fields.text({ label: 'Title' }),
+      align: fields.select({
+        label: 'Alignment',
+        options: slideAlignValues.map(value => ({ label: value.charAt(0).toUpperCase() + value.slice(1), value })),
+        defaultValue: 'center' satisfies SlideSchema['align'],
+      }),
     } satisfies Record<keyof SlideSchema, ComponentSchema>, // Ensure all Slide fields are present
     ContentView: (props) => {
       const { title } = props.value || {};
