@@ -148,4 +148,26 @@
     padding-inline: 1rem;
     white-space: nowrap;
   }
+
+  /* --- RESPONSIVE MOBILE --- */
+  @media (max-width: 480px) {
+    .navigation {
+      flex-direction: column;
+      gap: 1rem; /* Añade espacio entre los elementos apilados */
+      padding: 1.5rem;
+    }
+
+    .nav-btn {
+      width: 100%; /* Hace que los botones ocupen todo el ancho */
+      min-width: 0; /* Anula el tope de 130px que estaba rompiendo el grid */
+    }
+
+    /* Opcional: Forzamos al contador a irse a la primera posición arriba del todo, 
+       así los dos botones se quedan juntos abajo. */
+    .counter {
+      order: -1; 
+      padding-inline: 0;
+      margin-bottom: 0.5rem;
+    }
+  }
 </style>
