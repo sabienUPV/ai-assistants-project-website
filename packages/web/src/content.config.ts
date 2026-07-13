@@ -2,8 +2,8 @@ import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { file, glob } from 'astro/loaders';
 import { parse as parseCsv } from 'csv-parse/sync';
-import { postSchema } from '@sabien-upv-astro-cms/core/src/schemas/posts';
-import { courseSchema } from '@sabien-upv-astro-cms/core/src/schemas/courses';
+import { postSchema } from '@schemas/posts';
+import { courseSchema } from '@schemas/courses';
 
 // 1. Import the supported languages and their types
 // from a single source of truth

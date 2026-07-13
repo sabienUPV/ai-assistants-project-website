@@ -10,6 +10,7 @@
       "@constants": ["../core/src/constants.ts"],
       "@utils/*": ["./src/utils/*"],
       "@schemas/*": ["../core/src/schemas/*"],
+      "@markdoc-tags": ["../core/src/markdoc-tags.ts"],
     }
   }
 }

@@ -1,7 +1,7 @@
 import { defaultLocale, type Locale } from '@languages';
 import Markdoc from '@markdoc/markdoc';
-import type { Post } from '@sabien-upv-astro-cms/core/src/schemas/posts';
-import type { Course } from '@sabien-upv-astro-cms/core/src/schemas/courses';
+import type { Post } from '@schemas/posts';
+import type { Course } from '@schemas/courses';
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 
 type DynamicContentCollectionName = 'posts' | 'courses';
