@@ -48,9 +48,9 @@ export const markdocTagAttributes = {
   column: {
     description: "Define a single column for a columns layout component.",
   },
-  // Note: We cannot call it "image" because Keystatic already has a built-in "image" component, so we call it "advancedImage" just for Markdoc and Keystatic
+  // Note: We cannot call it "image" because Keystatic already has a built-in "image" component, so we call it "customImage" just for Markdoc and Keystatic
   // (but in the UI and Astro component we still call it "Image" for clarity)
-  advancedImage: {
+  customImage: {
     description: "Render an optimized image component, allowing for further customization (e.g. width, height).",
     attributes: {
       image: {
@@ -128,8 +128,8 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
       ...markdocTagAttributes.column,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Column.astro'),
     },
-    advancedImage: {
-      ...markdocTagAttributes.advancedImage,
+    customImage: {
+      ...markdocTagAttributes.customImage,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Image.astro'),
     },
   } satisfies AstroMarkdocConfig['tags'] & MarkdocTagsFromAttributes;

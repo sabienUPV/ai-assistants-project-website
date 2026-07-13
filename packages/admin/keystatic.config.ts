@@ -143,11 +143,11 @@ const createComponents = (collectionName: string) => ({
     description: markdocTagAttributes.column.description,
     schema: {},
   }),
-  // Note: We cannot call it "image" because Keystatic already has a built-in "image" component, so we call it "advancedImage" just for Markdoc and Keystatic
+  // Note: We cannot call it "image" because Keystatic already has a built-in "image" component, so we call it "customImage" just for Markdoc and Keystatic
   // (but in the UI and Astro component we still call it "Image" for clarity)
-  advancedImage: block({
+  customImage: block({
     label: 'Image',
-    description: markdocTagAttributes.advancedImage.description,
+    description: markdocTagAttributes.customImage.description,
     schema: {
       image: fields.image({
         label: 'Source Image',
