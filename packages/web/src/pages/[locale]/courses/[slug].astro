@@ -112,12 +112,13 @@ export async function getStaticPaths() {
   /* NOTE: We use :where() to avoid increasing specificity and allow styles from Markdoc tags to override these if needed. */
   
   /* Global resets for the first and last child elements in the course content to avoid extra spacing */
+  /* (Note: The :first-child and :last-child pseudo-classes are outside of :where() on purpose, because we want the exact same specificity that a child component would have if they do something like .my-class:first-child, so that they can override it. If we put it inside :where(), we would have too low specificity -the same as just having .my-class in a child component-, which would make it so applying a regular margin to a child would override this, which would make this useless) */
 
-  .course-content :global(:where(*:first-child)) {
+  .course-content :global(:where(*):first-child) {
     margin-top: 0; /* Removes top margin for the first element in a section to avoid extra space */
   }
 
-  .course-content :global(:where(*:last-child)) {
+  .course-content :global(:where(*):last-child) {
     margin-bottom: 0; /* Removes bottom margin for the last element in a section to avoid extra space */
   }
 
