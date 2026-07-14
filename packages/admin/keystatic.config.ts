@@ -102,7 +102,7 @@ const createComponents = (collectionName: string) => ({
       }),
     } satisfies Record<keyof SlideSchema, ComponentSchema>, // Ensure all Slide fields are present
     ContentView: (props) => {
-      const { title } = props.value || {};
+      const { title, align } = props.value || {};
       
       return React.createElement(
         'div',
@@ -121,8 +121,25 @@ const createComponents = (collectionName: string) => ({
               color: '#0284c7',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px' } }, 
-          `${title || 'New Slide'}`
+              gap: '8px',
+              lineHeight: 1.1, // Adjusted line height manually so that the title and the align metadata align vertically as centered as possible
+            } 
+          }, 
+          // Primer hijo: El título
+          React.createElement('span', {}, title || 'New Slide'),
+          // Segundo hijo: El align (solo se renderiza si existe)
+          align && React.createElement(
+            'span',
+            {
+              style: {
+                fontWeight: 'normal', // Anula el bold del padre
+                fontStyle: 'italic',  // Cursiva
+                fontSize: '0.8em',    // Más pequeño
+                color: '#64748b'    // Opcional: un tono un poco más neutro/gris para que parezca un metadato
+              }
+            },
+            `(align: ${align})`
+          )
         ),
         // 2. El contenido
         React.createElement('div', { style: { padding: '12px' } }, props.children)
