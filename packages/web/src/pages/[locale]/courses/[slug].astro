@@ -110,6 +110,19 @@ export async function getStaticPaths() {
 
   /* Styling HTML elements generated dynamically by Markdoc */
   /* NOTE: We use :where() to avoid increasing specificity and allow styles from Markdoc tags to override these if needed. */
+  
+  /* Global resets for the first and last child elements in the course content to avoid extra spacing */
+
+  .course-content :global(:where(*:first-child)) {
+    margin-top: 0; /* Removes top margin for the first element in a section to avoid extra space */
+  }
+
+  .course-content :global(:where(*:last-child)) {
+    margin-bottom: 0; /* Removes bottom margin for the last element in a section to avoid extra space */
+  }
+
+  /* Specific styling for paragraphs, headings, lists, links, and images within the course content */
+
   .course-content :global(:where(p)) {
     /* Respects your global text alignment (left) and accessibility choices */
     font-size: 1.05rem;
@@ -134,6 +147,7 @@ export async function getStaticPaths() {
   }
 
   .course-content :global(:where(ul, ol)) {
+    margin-top: 0; /* Remove the default top margin to keep lists close to the preceding text, because the text will already have a bottom margin */
     margin-bottom: 1.6rem;
     padding-left: 2rem;
   }
