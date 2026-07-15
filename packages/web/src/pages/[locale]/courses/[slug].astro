@@ -63,7 +63,9 @@ export async function getStaticPaths() {
     </article>
 
     <!-- Inside the main content column so that the TOC stays sticky -->
-    <CourseNavigation courses={allCourses} currentUnit={course.data.unit} />
+    <div class="no-print">
+      <CourseNavigation courses={allCourses} currentUnit={course.data.unit} />
+    </div> 
 </Layout>
 
 <style>
@@ -176,5 +178,58 @@ export async function getStaticPaths() {
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  /* --- STYLES FOR PDF EXPORT & PRINTING --- */
+  @media print {
+    /* 1. Ocultar elementos puramente de interfaz web */
+    .not-in-language-pill-container {
+      display: none !important;
+    }
+
+    /* 2. Forzar contrastes puros y anchos completos */
+    body {
+      background: white !important;
+      color: black !important;
+    }
+
+    .course-container {
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    .course-header {
+      border-bottom: 2px solid #000; /* Borde más nítido para impresión */
+    }
+
+    /* 3. Control de saltos de página (Evitar cortar elementos por la mitad) */
+    .course-content :global(:where(h2, h3)) {
+      /* Evita que un título se quede al final de la página y el texto en la siguiente */
+      break-after: avoid; 
+      page-break-after: avoid;
+    }
+
+    .course-content :global(:where(p, li, img, .markdoc-slide)) {
+      /* Evita que un párrafo, imagen o diapositiva se parta por la mitad entre dos páginas */
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    /* 4. Expansión de enlaces (Accesibilidad documental) */
+    .course-content :global(:where(a))::after {
+      /* Como en el papel no se puede hacer clic, revelamos la URL impresa al lado del texto */
+      content: " (" attr(href) ")";
+      font-size: 0.9em;
+      color: #333;
+      word-break: break-all; /* Evita que URLs muy largas rompan el layout */
+    }
+
+    /* 5. Limpieza visual */
+    .course-content :global(:where(img)) {
+      box-shadow: none !important; /* Las sombras de caja se ven sucias y pixeladas en los PDF impresos */
+      border: 1px solid #000;
+    }
   }
 </style>

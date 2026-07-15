@@ -105,4 +105,30 @@ const projectNameParts = PROJECT_NAME.split(projectNameSeparator, 2);
     /* Limit the width of the subtitle so it wraps nicely and it's not a super long line */
     max-width: 30ch;
   }
+
+  /* --- STYLES FOR PDF EXPORT & PRINTING --- */
+  @media print {
+    /* Smaller logo and text size for print */
+    .logo {
+      height: 85px;
+      margin-top: 0.7rem;
+    }
+    .title {
+      font-size: 1rem;
+    }
+    .subtitle {
+      font-size: 0.6rem;
+    }
+
+
+    /* Make all the title colored in medium blue for better contrast in print, since the light blue is too light to be seen in print */
+    .title * {
+      color: var(--color-logo-medium-blue) !important;
+    }
+
+    /* Make the subtitle in the text color for better contrast in print, since the grey is too light to be seen in print */
+    .subtitle {
+      color: var(--color-text) !important;
+    }
+  }
 </style>

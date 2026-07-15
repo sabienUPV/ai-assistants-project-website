@@ -131,3 +131,17 @@ a:hover {
 .flag-icon {
   border-radius: 50%;
 }
+
+/* --- STYLES FOR PDF EXPORT & PRINTING --- */
+@media print {
+  /* Hide elements marked for no printing */
+  .no-print {
+    display: none !important;
+  }
+
+  /* Make text black and white everywhere for better contrast and readability */
+  * {
+    color: black !important;
+    background: white !important;
+  }
+}

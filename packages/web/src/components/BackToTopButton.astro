@@ -1,8 +1,8 @@
-<a href="#top" aria-label="Back to top">
+<a class="back-to-top-button no-print" href="#top" aria-label="Back to top">
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
 </a>
 <style>
-  a {
+  .back-to-top-button {
     position: fixed;
     bottom: 2rem;
     right: 2rem;
@@ -20,14 +20,14 @@
     transition: transform 0.2s ease;
   }
 
-  a:hover {
+  .back-to-top-button:hover {
     transform: scale(1.1);
     background-color: var(--color-primary);
   }
 
   /* Make sure it's big enough to tap on mobile (Accessibility requirement) */
   @media (max-width: 600px) {
-    a {
+    .back-to-top-button {
       bottom: 1rem;
       right: 1rem;
       width: 3rem;

@@ -125,4 +125,16 @@ const hasSidebar = Astro.slots.has('sidebar');
 			top: 0;
 		}
   }
+
+  /* On print, we want to hide the sidebar and make the content take the full width */
+  @media print {
+    .layout-with-sidebar {
+      grid-template-columns: 1fr;
+      padding: 0;
+    }
+
+    .layout-with-sidebar .sidebar {
+      display: none;
+    }
+  }
 </style>
