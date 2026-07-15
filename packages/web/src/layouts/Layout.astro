@@ -71,7 +71,7 @@ const hasSidebar = Astro.slots.has('sidebar');
         <aside class="sidebar">
           <slot name="sidebar" />
         </aside>
-        <main id="main-content" class="main-content-area">
+        <main id="main-content">
           <slot />
         </main>
       </div>
@@ -99,7 +99,7 @@ const hasSidebar = Astro.slots.has('sidebar');
     padding: 2rem;
   }
 
-	.layout-with-sidebar .main-content-area {
+	.layout-with-sidebar #main-content {
 		width: 100%; /* Make sure the content uses all the available width */
 	}
 
@@ -129,12 +129,16 @@ const hasSidebar = Astro.slots.has('sidebar');
   /* On print, we want to hide the sidebar and make the content take the full width */
   @media print {
     .layout-with-sidebar {
-      grid-template-columns: 1fr;
+      display: block;
       padding: 0;
     }
 
     .layout-with-sidebar .sidebar {
       display: none;
+    }
+
+    #main-content {
+      display: block;
     }
   }
 </style>
