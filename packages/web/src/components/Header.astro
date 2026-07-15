@@ -172,6 +172,10 @@ const { includeLocaleSelector = true } = Astro.props;
             gap: 1rem;
         }
 
+        .branding .eu-logo {
+            display: block; /* Show the EU logo on print (overrides the mobile style, that might wrongly apply on print too) */
+        }
+
         .nav-wrapper,
         .locale {
             display: none;
