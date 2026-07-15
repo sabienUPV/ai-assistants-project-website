@@ -4,25 +4,83 @@ import { defaultLocale } from '@languages';
 
 const { t, locale } = Astro.locals;
 
-// Get the logo from the current locale (the file starts with the locale code in uppercase, e.g. "EN_")
-// (Note: our "locale" from Astro.locals already falls back to the default locale)
-const importEuLogo = async (locale: string) => (await import(`../assets/images/eu/${locale.toUpperCase()}_Co-fundedbytheEU_RGB_NEG.svg`)).default;
-let euLogo;
-try {
-  euLogo = await importEuLogo(locale);
-} catch (error) {
-  console.error(`Error loading EU logo for locale "${locale}", falling back to default locale "${defaultLocale}"`, error);
-  euLogo = await importEuLogo(defaultLocale);
-}
+type RenderMode = 'svg' | 'img';
 
 interface Props {
   showDisclaimer?: boolean;
+  renderMode: RenderMode;
   [key: string]: any;
 }
 
-const { showDisclaimer = false, ...attributes } = Astro.props;
+const { renderMode, showDisclaimer = false, ...attributes } = Astro.props;
+
+/**
+ * Utility function to patch white text to currentColor dynamically.
+ * Intelligently targets <tspan>, <text>, and curved <path> elements
+ * while ignoring the rectangular white background border.
+ */
+const patchSvgToCurrentColor = (rawSvgString: string) => {
+  return rawSvgString.replace(
+    /<(path|tspan|text)([^>]+)>/gi,
+    (match, tag, attributes) => {
+      // 1. Check if the element has a white fill
+      const isWhite = /fill:\s*#(?:fff|ffffff)\b|fill="#(?:fff|ffffff)"/i.test(attributes);
+      
+      if (!isWhite) return match;
+
+      // 2. If it is a path, check if it contains curves (text has curves, border does not)
+      if (tag.toLowerCase() === 'path') {
+        const dMatch = attributes.match(/d="([^"]+)"/i);
+        if (dMatch) {
+          const dString = dMatch[1];
+          const hasCurves = /[cqsa]/i.test(dString);
+          
+          // Straight-line shape (background border), keep it white
+          if (!hasCurves) return match; 
+        }
+      }
+
+      // 3. Safe to replace the text color!
+      return match
+        .replace(/fill:\s*#(?:fff|ffffff)\b/gi, 'fill:currentColor')
+        .replace(/fill="#(?:fff|ffffff)"/gi, 'fill="currentColor"');
+    }
+  );
+};
+
+// Get the logo from the current locale (the file starts with the locale code in uppercase, e.g. "EN_")
+// (Note: our "locale" from Astro.locals already falls back to the default locale)
+const importEuLogo = async (locale: string, renderMode: RenderMode) => {
+  const code = locale.toUpperCase();
+  
+  // NOTE: We can't use a single import statement and have the ?raw be dynamic (e.g. with the ternary operator), because Vite detects the ?raw with static analysis (so it never runs the code, and thus a conditional ?raw doesn't work). So we have to use two separate import statements, one for each renderMode, and we have the path in a variable so that we can reuse it in both import statements.
+  const modulePath = `../assets/images/eu/${code}_Co-fundedbytheEU_RGB_NEG.svg`;
+  if (renderMode === 'svg') {
+    // Vite detects the ?raw with static analysis
+    const module = await import(`${modulePath}?raw`);
+    // Patch the SVG string in-memory during the build process
+    return patchSvgToCurrentColor(module.default);
+  }
+  
+  // Normal import for the image, which will be processed by Astro's Image component
+  const module = await import(modulePath);
+  return module.default;
+};
+
+let euLogo;
+try {
+  euLogo = await importEuLogo(locale, renderMode);
+} catch (error) {
+  console.error(`Error loading EU logo for locale "${locale}", falling back to default locale "${defaultLocale}"`, error);
+  euLogo = await importEuLogo(defaultLocale, renderMode);
+}
 ---
-<Image {...attributes} src={euLogo} alt={t('alt_eu_cofunded')} height="60" />
+{renderMode === 'img' && (
+  <Image class="eu-logo" {...attributes} src={euLogo} alt={t('alt_eu_cofunded')} height="60" />
+)}
+{renderMode === 'svg' && (
+  <div class="eu-logo" {...attributes} aria-label={t('alt_eu_cofunded')} set:html={euLogo} />
+)}
 
 {
 /* Disclaimer text required by EU funding guidelines */ 
@@ -34,3 +92,21 @@ const { showDisclaimer = false, ...attributes } = Astro.props;
     {t('eu_disclaimer')}
   </p>
 )}
+
+<style>
+  .eu-logo {
+    width: auto;
+  }
+  .eu-logo :global(svg) {
+    width: auto;
+    height: 60px;
+    color: white;
+  }
+
+  /* Automatically handle print styles for the SVG mode! */
+  @media print {
+    .eu-logo :global(svg) {
+      color: black;
+    }
+  }
+</style>

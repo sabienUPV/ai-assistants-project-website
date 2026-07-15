@@ -12,8 +12,10 @@ const footerLinks : { href: string; label: string }[] = [
 ---
 
 <footer>
-  <Socials />
-  <nav class="footer-nav">
+  <div class="socials-container no-print">
+    <Socials />
+  </div> 
+  <nav class="footer-nav no-print">
     <ul>
     {footerLinks.map(link => (
       <li><a href={link.href} class="footer-link" aria-current={getAriaCurrentPage(Astro.url.pathname, link.href)}>{link.label}</a></li>
@@ -23,11 +25,14 @@ const footerLinks : { href: string; label: string }[] = [
   <div class="copyright-text">
     Copyright © {COPYRIGHT_YEARS} <Fragment set:html={t('copyright_text', false, PROJECT_NAME_HTML)} />
   </div>
-  <div class="project-number-eu">
+  <div class="project-number-eu no-print">
     {PROJECT_NUMBER_EU}
   </div>
   <div class="eu-logo-wrapper">
-    <EuLogo showDisclaimer={true} />
+    {/*
+    In the footer, we want to use renderMode="img" because we want to lazy load the EU logo (and we can only do that in img mode, not svg mode), and because we never need to style the EU logo in the footer (we only need to style it in the header for print mode, where we use renderMode="svg").
+    */}
+    <EuLogo renderMode="img" loading="lazy" showDisclaimer={true} />
   </div>
 </footer>
 <style>
@@ -62,5 +67,19 @@ const footerLinks : { href: string; label: string }[] = [
   }
   .footer-link:hover {
     text-decoration: underline;
+  }
+
+  @media print {
+    /* Remove the background color for print */
+    footer {
+      background-color: white;
+      color: black;
+    }
+
+    /* Hide the social media links and EU logo for print (but keep the EU disclaimer text) */
+    .socials-container,
+    .eu-logo-wrapper :global(.eu-logo) {
+      display: none;
+    }
   }
 </style>

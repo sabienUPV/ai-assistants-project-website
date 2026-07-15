@@ -19,7 +19,10 @@ const { includeLocaleSelector = true } = Astro.props;
              <ProjectTitle includeLogo={true} includeSubtitle={true} class="project-title" loading="eager" />
         </a>
         <div class="eu-logo-wrapper">
-             <EuLogo class="eu-logo" loading="eager" />
+            {/*
+                If we were loading it in renderMode="img", then we would need to add loading="eager" so that the Image component doesn't lazy load it (since we are in the Header). But since we are rendering the raw SVG directly, it will always be loaded immediately, so we don't need to add loading="eager" here.
+             */}
+            <EuLogo class="eu-logo" renderMode="svg" />
         </div>
     </div>
 
@@ -50,14 +53,11 @@ const { includeLocaleSelector = true } = Astro.props;
         grid-template-areas:
             "branding nav locale";
 
-        /* Redefine the text color for the header, using the on-secondary color token */
-        --color-text: var(--color-text-on-secondary);
-
         /* Set color here too so elements that inherit colors get the correct color from the header (such as img) */
-        color: var(--color-text);
+        color: var(--color-text-on-secondary);
 
         /* Also redefine the subtitle color so it doesn't use the default logo subtitle color, which is too dark for the header */
-        --color-subtitle: var(--color-text);
+        --color-subtitle: var(--color-text-on-secondary);
     }
 
     /* Assign the HTML elements to the Grid Areas */
@@ -155,4 +155,26 @@ const { includeLocaleSelector = true } = Astro.props;
             justify-self: start; /* Top Left */
         }
     }
+
+    /* On print, hide everything except for the project title and subtitle, which are the only things that matter for print */
+    @media print {
+        header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+            background-color: white; /* Ensure the header is white for print */
+        }
+        .branding {
+            display: flex;
+            justify-content: space-between; /* Move the project title to the top left and the EU logo to the top right */
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-wrapper,
+        .locale {
+            display: none;
+        }
+    }  
 </style>
