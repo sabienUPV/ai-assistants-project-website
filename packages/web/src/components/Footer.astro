@@ -70,10 +70,13 @@ const footerLinks : { href: string; label: string }[] = [
   }
 
   @media print {
-    /* Remove the background color for print */
+    /* Remove the background color for print, and add a top border to separate it from the content */
     footer {
       background-color: white;
       color: black;
+      border-top: 2px solid black;
+      margin-top: 1rem; /* Add some margin on the top to separate it from the content */
+      margin-inline: 2rem; /* Add some margin on the left and right to avoid the border spanning through the entire page */
     }
 
     /* Hide the social media links and EU logo for print (but keep the EU disclaimer text) */
