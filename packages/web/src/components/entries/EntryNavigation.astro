@@ -145,4 +145,10 @@ const { previousEntry, nextEntry} = Astro.props;
       width: 100%;
     }
   }
+
+  @media print {
+    .entry-navigation {
+      display: none; /* Hide entry navigation on print */
+    }
+  }
 </style>

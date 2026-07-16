@@ -63,4 +63,10 @@ const plainPathNoLocale = getPlainPathNoLocale(Astro.url.pathname, currentLocale
   .content a:hover {
     color: #b45309;
   }
+
+  @media print {
+    .ai-disclaimer {
+      display: none; /* Hide the AI disclaimer on print */
+    }
+  }
 </style>
