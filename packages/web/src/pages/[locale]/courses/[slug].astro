@@ -182,15 +182,9 @@ export async function getStaticPaths() {
 
   /* --- STYLES FOR PDF EXPORT & PRINTING --- */
   @media print {
-    /* 1. Ocultar elementos puramente de interfaz web */
+    /* Ocultar elementos puramente de interfaz web */
     .not-in-language-pill-container {
       display: none !important;
-    }
-
-    /* 2. Forzar contrastes puros y anchos completos */
-    body {
-      background: white !important;
-      color: black !important;
     }
 
     .course-container {
