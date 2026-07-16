@@ -134,14 +134,69 @@ a:hover {
 
 /* --- STYLES FOR PDF EXPORT & PRINTING --- */
 @media print {
-  /* Hide elements marked for no printing */
-  .no-print {
+  /* ==========================================================================
+     1. GLOBAL RESET & UTILITIES (Applies to the entire website)
+     ========================================================================== */
+  
+  /* Force white background and pure black text to save ink and ensure contrast */
+  *, *::before, *::after {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Systematically hide interactive UI elements on any printed page */
+  .no-print,
+  nav,
+  aside,
+  button,
+  .sidebar-container,
+  .not-in-language-pill-container {
     display: none !important;
   }
 
-  /* Make text black and white everywhere for better contrast and readability */
-  * {
-    color: black !important;
-    background: white !important;
+  /* Prevent headings from being orphaned at the bottom of a page */
+  h1, h2, h3, h4, h5, h6 {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+
+  /* ==========================================================================
+     2. CONTENT RULES (Specific to articles, posts, and courses)
+     ========================================================================== */
+  
+  /* Reset layout for text containers to use the full page width */
+  .course-content,
+  .post-content,
+  .rich-text {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Prevent paragraphs, list items, images, or blockquotes from splitting across pages */
+  .course-content p, .post-content p,
+  .course-content li, .post-content li,
+  .course-content img, .post-content img,
+  .course-content blockquote, .post-content blockquote {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Reveal URLs next to links for document accessibility on paper */
+  .course-content a::after,
+  .post-content a::after {
+    content: " (" attr(href) ")";
+    font-size: 0.9em;
+    color: #333;
+    word-break: break-all;
+  }
+
+  /* Remove box shadows from images to prevent dirty/pixelated printing */
+  .course-content img,
+  .post-content img {
+    box-shadow: none !important;
+    border: 1px solid #000;
   }
 }
