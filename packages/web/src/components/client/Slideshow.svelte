@@ -170,4 +170,20 @@
       margin-bottom: 0.5rem;
     }
   }
+
+  @media print {
+    .navigation {
+      display: none; /* Oculta la navegación al imprimir */
+    }
+
+    .slideshow-wrapper {
+      border: none; /* Quita el borde al imprimir */
+      box-shadow: none; /* Quita la sombra al imprimir */
+    }
+
+    .slide-content {
+      display: block;
+      gap: 0;
+    }
+  }
 </style>

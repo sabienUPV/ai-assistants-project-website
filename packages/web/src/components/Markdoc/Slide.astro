@@ -11,10 +11,12 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
 
 <!-- Svelte buscará todos los divs con la clase 'markdoc-slide' -->
 <div class="markdoc-slide" style="display: none;">
-  {title && <h2 class="slide-title">{title}</h2>}
+  <div class="slide-container">
+    {title && <h2 class="slide-title">{title}</h2>}
   
-  <div class="slide-rich-text" style={{"place-items": gridAlign}}>
-    <slot /> <!-- Aquí Astro inyecta el HTML compilado de Markdoc (negritas, listas, etc.) -->
+    <div class="slide-rich-text" style={{"place-items": gridAlign}}>
+      <slot /> <!-- Aquí Astro inyecta el HTML compilado de Markdoc (negritas, listas, etc.) -->
+    </div>
   </div>
 </div>
 
@@ -41,5 +43,39 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
 
     min-width: 0; /* Evita que el contenido se desborde del contenedor */
     overflow-wrap: break-word; /* Evita que URLs largas o palabras gigantes rompan la pantalla en móviles */
+  }
+
+  @media print {
+    .markdoc-slide {
+      /* Evita que una diapositiva se corte entre dos páginas */
+      break-inside: avoid;
+      page-break-inside: avoid;
+
+      /*
+      Since we already make the slide take up the full height of the page,
+      we need to avoid an extra page break due to break-after, so we disable it
+      */
+      break-after: avoid; 
+      page-break-after: avoid;
+
+
+      /* Cambiamos el display: block por flex para poder centrar verticalmente */
+      display: flex !important; 
+      flex-direction: column;
+      justify-content: center; /* Centrado vertical en print */
+      
+      /* Force the slide to take up the full height of the page (except a little bit to prevent overflow) */
+      height: 99vh; 
+      box-sizing: border-box; /* Evita que el padding sume altura extra y provoque desbordamientos */
+    }
+    
+    .slide-container {
+      width: 100%;
+      padding: 2rem; /* Espaciado interno para que el contenido no toque los bordes del folio */
+      box-sizing: border-box; /* Evita que el padding sume ancho extra y provoque desbordamientos */
+
+      border: 1px dashed #000; /* Show a border around each slide for clarity in print */
+      border-radius: 8px;
+    }
   }
 </style>
