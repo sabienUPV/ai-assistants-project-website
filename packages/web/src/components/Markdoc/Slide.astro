@@ -68,6 +68,16 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
       height: 99vh; 
       box-sizing: border-box; /* Evita que el padding sume altura extra y provoque desbordamientos */
     }
+
+    .markdoc-slide:first-child {
+      /* Prevent the first slide from taking up the full height of the page */
+      /* This is so that we don't have a lot of blank space after the title of the course, and so that the first slide can be printed on the same page as the title if it fits */
+      height: auto;
+      
+      /* BUT we still want it to have a page break after it, so we never have multiple slides on the same page */
+      break-after: page;
+      page-break-after: always;
+    }
     
     .slide-container {
       width: 100%;
