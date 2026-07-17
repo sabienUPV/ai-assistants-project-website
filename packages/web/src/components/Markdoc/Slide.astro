@@ -29,7 +29,13 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
     min-width: 0; /* Evita que el contenido se desborde del contenedor */
   }
 
+  .slide-container {
+    width: 100%; /* Ocupa todo el ancho disponible */
+    box-sizing: border-box; /* Evita que el padding sume ancho extra y provoque desbordamientos */
+  }
+
   .slide-title {
+    text-align: center;
     font-size: 2rem;
     color: var(--color-secondary); /* Azul oscuro corporativo */
     margin: 0;
@@ -80,9 +86,7 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
     }
     
     .slide-container {
-      width: 100%;
       padding: 2rem; /* Espaciado interno para que el contenido no toque los bordes del folio */
-      box-sizing: border-box; /* Evita que el padding sume ancho extra y provoque desbordamientos */
 
       border: 1px dashed #000; /* Show a border around each slide for clarity in print */
       border-radius: 8px;
