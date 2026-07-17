@@ -386,6 +386,13 @@ const createCourseCollection = (locale: Locale) => {
   return collection({
     label: `Courses (${locale.toUpperCase()})`,
     slugField: 'unit',
+    parseSlugForSort: (slug) => {
+      // Change the slug back to the unit replacing dashes with dots (e.g. "1-2" becomes "1.2") to get the unit number
+      const unit = slug.replace(/-/g, '.');
+      // Return the unit number as a number with decimals for sorting purposes
+      // (e.g. "1.2" will be sorted after "1" and before "2")
+      return parseFloat(unit);
+    },
     path: `src/content/${locale}/courses/*`,
     format: { contentField: 'content' },
     schema: {
@@ -400,7 +407,7 @@ const createCourseCollection = (locale: Locale) => {
           }
         },
         slug: {
-          generate: (unit) => unit.replace(/[^a-zA-Z0-9]/g, '-' ), // Clean the unit string to avoid issues with special characters
+          generate: (unit) => unit.replace(/\./g, '-'), // Replace dots with dashes for the slug (e.g. "1.2" becomes "1-2")
         }  
       }),
       title: fields.text({ label: 'Title' }),
