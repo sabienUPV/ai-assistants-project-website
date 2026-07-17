@@ -8,7 +8,8 @@ interface Props extends Question {};
 const { prompt, answers } = Astro.props;
 ---
 
-<Slide title="📝 Pregunta">
+{/* The slide starts locked until the question is answered */}
+<Slide title="📝 Pregunta" locked={true}>
   <QuestionInteractive 
     client:visible 
     prompt={prompt}

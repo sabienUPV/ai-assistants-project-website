@@ -20,6 +20,10 @@
     
     status = 'revealed';
     selectedAnswer = answer;
+
+    // Al responder, desbloqueamos la diapositiva padre
+    const slide = container.closest('.markdoc-slide') as HTMLElement;
+    if (slide) slide.dataset.locked = 'false';
     
     // Sumamos al marcador global
     // Disparamos un evento nativo que "burbujeará" hacia arriba por el DOM
@@ -27,6 +31,12 @@
       detail: { isCorrect: answer.isCorrect },
       bubbles: true, // ¡Clave! Permite que el evento suba hasta el Quiz
       composed: true
+    }));
+
+    // Disparamos evento para avisar al Slideshow de que esta slide ya no está bloqueada
+    container.dispatchEvent(new CustomEvent('slidelockchange', { 
+      bubbles: true, 
+      composed: true 
     }));
   }
 </script>

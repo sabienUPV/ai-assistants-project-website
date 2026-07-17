@@ -16,7 +16,24 @@
   // El estado interno para saber en qué diapositiva estamos (Svelte 5 usa $state)
   let currentIndex = $state(0);
   let slidesCount = $state(0);
+
+  let isCurrentSlideLocked = $state(false);
+
+  // Referencia al contenedor HTML
   let container: HTMLElement;
+
+  // Función que lee el DOM para saber si la diapositiva actual está bloqueada
+  function checkLockStatus() {
+    if (!container || slidesCount === 0) return;
+    const slides = container.querySelectorAll('.markdoc-slide');
+    const currentSlide = slides[currentIndex] as HTMLElement;
+    updateLockStatus(currentSlide);
+  }
+
+  function updateLockStatus(currentSlide: HTMLElement | null) {
+    // Solo bloqueamos si el atributo existe y es explícitamente "true"
+    isCurrentSlideLocked = currentSlide?.dataset.locked === 'true';
+  }
 
   // Se ejecuta cuando el componente se monta en el navegador
   $effect(() => {
@@ -32,10 +49,19 @@
       if (index === currentIndex) {
         el.style.display = 'block';
         el.style.animation = 'fadeIn 0.3s ease-in-out';
+        updateLockStatus(el);
       } else {
         el.style.display = 'none';
       }
     });
+
+    // Añadimos un listener para escuchar los eventos de respuesta del Quiz
+    // y actualizar el estado de bloqueo de la diapositiva actual cuando el usuario responde
+    container.addEventListener('slidelockchange', checkLockStatus);
+
+    checkLockStatus(); // Comprobamos el estado inicial al montar
+    
+    return () => container.removeEventListener('slidelockchange', checkLockStatus);
   });
 
   function next() { if (currentIndex < slidesCount - 1) currentIndex++; }
@@ -64,8 +90,8 @@
       </div>
 
       <button 
-        onclick={next} 
-        disabled={currentIndex >= slidesCount - 1} 
+        onclick={next}
+        disabled={currentIndex >= slidesCount - 1 || isCurrentSlideLocked}
         class="nav-btn"
         aria-label={localizedTexts?.nextAriaLabel || 'Next slide'}
       >

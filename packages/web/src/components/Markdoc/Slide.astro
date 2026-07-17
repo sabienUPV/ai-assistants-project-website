@@ -1,16 +1,18 @@
 ---
 import type { SlideSchema } from '@schemas/slide';
 
-interface Props extends SlideSchema {}
+interface Props extends SlideSchema {
+  locked?: boolean; // Si la diapositiva está bloqueada, el usuario no podrá avanzar hasta que se desbloquee
+}
 
-const { title, align = 'center' } = Astro.props;
+const { title, align = 'center', locked = false } = Astro.props;
 
 // Mapeamos los valores de alineación para que CSS Grid los entienda
 const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'center';
 ---
 
 {/* Svelte buscará todos los divs con la clase 'markdoc-slide' */}
-<div class="markdoc-slide" style="display: none;">
+<div class="markdoc-slide" style="display: none;" data-locked={locked ? 'true' : 'false'}>
   <div class="slide-container">
     {title && <h2 class="slide-title">{title}</h2>}
   
