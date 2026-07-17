@@ -27,14 +27,47 @@
       
       totalAnswered++;
       if (customEvent.detail.isCorrect) score++;
+
+      // Emitimos hacia abajo (a los resultados) que la puntuación ha cambiado
+      wrapper.querySelectorAll('.quiz-results-container').forEach(el => {
+        el.dispatchEvent(new CustomEvent('scorechanged', {
+          detail: { score, total: totalAnswered }
+        }));
+      });
     };
 
-    // Añadimos el listener de forma nativa
+    // Responder a la petición de nota usando el callback
+    const handleRequestScore = (event: Event) => {
+      const customEvent = event as CustomEvent<{ callback: (s: number, t: number) => void }>;
+      customEvent.detail.callback(score, totalAnswered);
+    };
+
+    // Resetear todo el cuestionario
+    const handleResetQuiz = () => {
+      score = 0;
+      totalAnswered = 0;
+      
+      // Lanzamos un evento hacia abajo a todas las preguntas para que se limpien
+      wrapper.querySelectorAll('.question-container').forEach(el => {
+        el.dispatchEvent(new Event('resetquestion'));
+      });
+      
+      // Limpiamos los resultados
+      wrapper.querySelectorAll('.quiz-results-container').forEach(el => {
+        el.dispatchEvent(new CustomEvent('scorechanged', { detail: { score: 0, total: 0 } }));
+      });
+    };
+
+    // Añadimos los listeners de forma nativa al contenedor del Quiz para los eventos que suben desde las preguntas
     wrapper.addEventListener('quizanswer', handleQuizAnswer);
+    wrapper.addEventListener('requestscore', handleRequestScore);
+    wrapper.addEventListener('resetquiz', handleResetQuiz);
 
     // Limpieza al desmontar (muy importante para evitar memory leaks)
     return () => {
       wrapper.removeEventListener('quizanswer', handleQuizAnswer);
+      wrapper.removeEventListener('requestscore', handleRequestScore);
+      wrapper.removeEventListener('resetquiz', handleResetQuiz);
     };
   });
 </script>

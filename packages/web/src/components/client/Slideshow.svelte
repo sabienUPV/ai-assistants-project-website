@@ -35,6 +35,12 @@
     isCurrentSlideLocked = currentSlide?.dataset.locked === 'true';
   }
 
+  // Escuchamos la petición de viajar a una diapositiva concreta
+  const handleGoToSlide = (e: Event) => {
+    const customEvent = e as CustomEvent<{ index: number }>;
+    currentIndex = customEvent.detail.index; // El effect de debajo debería activarse al cambiar currentIndex y actualizar la visibilidad de las slides
+  };
+
   // Se ejecuta cuando el componente se monta en el navegador
   $effect(() => {
     if (!container) return;
@@ -55,6 +61,9 @@
       }
     });
 
+    // Comprobamos el estado inicial al montar
+    checkLockStatus();
+
     // Añadimos un listener para escuchar los eventos de respuesta del Quiz
     // y actualizar el estado de bloqueo de la diapositiva actual cuando el usuario responde
     container.addEventListener('slidelockchange', checkLockStatus);
@@ -63,13 +72,16 @@
     // (nos sirve para que la portada del Quiz (QuizCover) pueda avanzar cuando el usuario pulsa "Play")
     container.addEventListener('requestnextslide', next);
 
-    checkLockStatus(); // Comprobamos el estado inicial al montar
+    // Escuchamos un evento personalizado para ir a una diapositiva concreta
+    // (nos sirve para que el QuizResults pueda volver a la portada del Quiz cuando el usuario pulsa "Jugar otra vez")
+    container.addEventListener('gotoslide', handleGoToSlide);
     
     // Limpieza de los listeners al desmontar el componente
     // (muy importante para evitar memory leaks)
     return () => {
       container.removeEventListener('slidelockchange', checkLockStatus);
       container.removeEventListener('requestnextslide', next);
+      container.removeEventListener('gotoslide', handleGoToSlide);
     };
   });
 

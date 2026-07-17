@@ -43,6 +43,25 @@
       composed: true 
     }));
   }
+
+  // Función para devolver la pregunta a su estado inicial
+  function resetQuestion() {
+    status = 'playing';
+    selectedAnswer = null;
+    
+    // Volvemos a echar el cerrojo a la diapositiva (para que el usuario no pueda avanzar sin responder)
+    const slide = container.closest('.markdoc-slide') as HTMLElement;
+    if (slide) slide.dataset.locked = 'true';
+  }
+
+  $effect(() => {
+    if (!container) return;
+    
+    // Escuchamos la orden de reinicio que viene desde arriba
+    container.addEventListener('resetquestion', resetQuestion);
+    
+    return () => container.removeEventListener('resetquestion', resetQuestion);
+  });
 </script>
 
 <div class="question-container" class:is-revealed={status === 'revealed'} bind:this={container}>
