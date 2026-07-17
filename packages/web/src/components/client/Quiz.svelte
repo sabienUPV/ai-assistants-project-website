@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { setContext, type Snippet } from 'svelte';
+  import type { Snippet } from 'svelte';
 
   interface Props {
     children?: Snippet;
@@ -10,16 +10,33 @@
   let score = $state(0);
   let totalAnswered = $state(0);
 
-  // Exponemos una función global al resto de componentes hijos
-  setContext('quiz-context', {
-    addScore: (isCorrect: boolean) => {
+  // 1. Creamos una referencia al elemento del DOM
+  let wrapper: HTMLElement;
+
+  // 2. Usamos $effect para añadir el listener cuando el componente se monta
+  $effect(() => {
+    if (!wrapper) return;
+
+    // Nuestro manejador tipado
+    const handleQuizAnswer = (event: Event) => {
+      // Casteamos el evento genérico al nuestro personalizado
+      const customEvent = event as CustomEvent<{ isCorrect: boolean }>;
+      
       totalAnswered++;
-      if (isCorrect) score++;
-    }
+      if (customEvent.detail.isCorrect) score++;
+    };
+
+    // Añadimos el listener de forma nativa
+    wrapper.addEventListener('quizanswer', handleQuizAnswer);
+
+    // Limpieza al desmontar (muy importante para evitar memory leaks)
+    return () => {
+      wrapper.removeEventListener('quizanswer', handleQuizAnswer);
+    };
   });
 </script>
 
-<div class="quiz-wrapper">
+<div class="quiz-wrapper" bind:this={wrapper}>
   <!-- Marcador superior elegante -->
   <div class="score-board">
     <span>Puntuación:</span>

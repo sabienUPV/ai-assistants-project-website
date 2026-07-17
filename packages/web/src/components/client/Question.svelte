@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { getContext } from 'svelte';
   import { fade } from 'svelte/transition';
   import type { Answer } from '@core-types/quiz';
 
@@ -13,8 +12,8 @@
   let status = $state<'playing' | 'revealed'>('playing');
   let selectedAnswer = $state<Answer | null>(null);
 
-  // Recuperamos la función para sumar puntos de Quiz.svelte
-  const quiz = getContext<{ addScore: (isCorrect: boolean) => void }>('quiz-context');
+  // Referencia al contenedor HTML
+  let container: HTMLElement;
 
   function guess(answer: Answer) {
     if (status === 'revealed') return;
@@ -23,11 +22,16 @@
     selectedAnswer = answer;
     
     // Sumamos al marcador global
-    quiz.addScore(answer.isCorrect);
+    // Disparamos un evento nativo que "burbujeará" hacia arriba por el DOM
+    container.dispatchEvent(new CustomEvent('quizanswer', {
+      detail: { isCorrect: answer.isCorrect },
+      bubbles: true, // ¡Clave! Permite que el evento suba hasta el Quiz
+      composed: true
+    }));
   }
 </script>
 
-<div class="question-container" class:is-revealed={status === 'revealed'}>
+<div class="question-container" class:is-revealed={status === 'revealed'} bind:this={container}>
   <h3 class="question-title">{prompt}</h3>
 
   <div class="buttons">
