@@ -2,14 +2,16 @@
 import Slide from './Slide.astro';
 import QuizResultsInteractive from '@components/client/QuizResults.svelte';
 
-interface Props {
-  title?: string;
-}
+const { t } = Astro.locals;
 
-const { title = "¡Resultados Finales!" } = Astro.props;
+const localizedTexts = {
+  perfectScoreLabel: t('quiz_perfect_score_label'),
+  niceTryLabel: t('quiz_nice_try_label'),
+  playAgainLabel: t('quiz_play_again_label'),
+};
 ---
 
 <!-- No la bloqueamos para que no dé problemas al llegar -->
-<Slide title={title} locked={false}>
-  <QuizResultsInteractive client:visible />
+<Slide title={t('quiz_final_score_label') || 'Final Score'} locked={false}>
+  <QuizResultsInteractive client:visible localizedTexts={localizedTexts} />
 </Slide>

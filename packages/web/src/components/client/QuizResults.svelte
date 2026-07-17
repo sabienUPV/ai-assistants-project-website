@@ -1,4 +1,13 @@
 <script lang="ts">
+  interface Props {
+    localizedTexts?: {
+      perfectScoreLabel?: string;
+      niceTryLabel?: string;
+      playAgainLabel?: string;
+    };
+  }
+  let { localizedTexts }: Props = $props();
+
   let score = $state(0);
   let total = $state(0);
   let container: HTMLElement;
@@ -42,17 +51,17 @@
 <div class="quiz-results-container" bind:this={container}>
   <div class="score-display">
     <span class="score-number">{score}</span>
-    <span class="score-divider">de</span>
+    <span class="score-divider">/</span>
     <span class="score-total">{total}</span>
   </div>
   
   <p class="score-message">
-    {score === total ? '¡Puntuación perfecta! Eres una máquina.' : '¡Buen intento! Repasa los conceptos y vuelve a probar.'}
+    {score === total ? localizedTexts?.perfectScoreLabel || 'Perfect score! You are amazing.' : localizedTexts?.niceTryLabel || 'Nice try! Review the concepts and try again.'}
   </p>
 
   <button class="restart-btn" onclick={restartGame}>
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-    Jugar otra vez
+    {localizedTexts?.playAgainLabel || 'Play Again'}
   </button>
 </div>
 

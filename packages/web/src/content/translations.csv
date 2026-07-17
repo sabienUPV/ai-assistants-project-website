@@ -79,3 +79,7 @@ quiz_score_label,Score,Puntuación,Punktzahl,Pontuação,Punteggio,Rezultat,Scor
 quiz_question_label,Question,Pregunta,Frage,Pergunta,Domanda,Pitanje,Question
 quiz_correct_answer_label,Correct Answer!,¡Respuesta Correcta!,Richtige Antwort!,Resposta Correta!,Risposta Corretta!,Točan odgovor!,Réponse correcte !
 quiz_incorrect_answer_label,Incorrect Answer,Respuesta Incorrecta,Falsche Antwort,Resposta Incorreta,Risposta Errata,Netočan odgovor,Réponse incorrecte
+quiz_final_score_label,Final Score,Puntuación Final,Endpunktzahl,Pontuação Final,Punteggio Finale,Konačni rezultat,Score final
+quiz_perfect_score_label,Perfect score! You are amazing.,¡Puntuación perfecta! Eres una máquina.,Perfekte Punktzahl! Du bist großartig.,Pontuação perfeita! Você é incrível.,Punteggio perfetto! Sei fantastico.,Savršen rezultat! Ti si nevjerojatan.,Score parfait ! Vous êtes incroyable.
+quiz_nice_try_label,Nice Try! Review the concepts and try again.,¡Buen intento! Repasa los conceptos y vuelve a probar.,Guter Versuch! Überprüfen Sie die Konzepte und versuchen Sie es erneut.,Boa tentativa! Reveja os conceitos e tente novamente.,Bel tentativo! Rivedi i concetti e riprova.,Dobar pokušaj! Pregledajte koncepte i pokušajte ponovno.,Bien essayé ! Passez en revue les concepts et réessayez.
+quiz_play_again_label,Play Again,Jugar otra vez,Nochmal spielen,Jogar novamente,Gioca di nuovo,Ponovo igrati,Jouer à nouveau
