@@ -126,7 +126,7 @@ const createComponents = (collectionName: string) => ({
             } 
           }, 
           // Primer hijo: El título
-          React.createElement('span', {}, title || 'New Slide'),
+          React.createElement('span', {}, title || '[Untitled]'),
           // Segundo hijo: El align (solo se renderiza si existe)
           align && React.createElement(
             'span',
