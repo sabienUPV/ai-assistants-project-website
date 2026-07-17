@@ -1,0 +1,12 @@
+---
+import QuizApp from '@components/client/Quiz.svelte';
+import Slideshow from './Slideshow.astro';
+---
+
+<!-- Usamos client:load para que el estado de Svelte esté listo desde el principio -->
+<QuizApp client:load>
+  <!-- Reutilizamos tu Slideshow para gestionar la navegación -->
+  <Slideshow>
+    <slot />
+  </Slideshow>
+</QuizApp>

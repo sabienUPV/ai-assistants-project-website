@@ -1,0 +1,17 @@
+---
+import Slide from './Slide.astro';
+import QuestionInteractive from '@components/client/Question.svelte';
+import type { Question } from '@core-types/quiz';
+
+interface Props extends Question {};
+
+const { prompt, answers } = Astro.props;
+---
+
+<Slide title="📝 Pregunta">
+  <QuestionInteractive 
+    client:visible 
+    prompt={prompt}
+    answers={answers}
+  />
+</Slide>

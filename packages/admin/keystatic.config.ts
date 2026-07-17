@@ -264,6 +264,50 @@ const createComponents = (collectionName: string) => ({
       );
     }
   }),
+  quiz: repeating({
+    label: 'Quiz',
+    description: markdocTagAttributes.quiz.description,
+    children: ['question'],
+    schema: {},
+  }),
+  question: block({
+    label: 'Question',
+    description: markdocTagAttributes.question.description,
+    schema: {
+      prompt: fields.text({ label: 'Prompt', validation: { isRequired: true }, multiline: true }),
+      answers: fields.array(
+        fields.object({
+          text: fields.text({ label: 'Answer Text', validation: { isRequired: true } }),
+          isCorrect: fields.checkbox({ label: 'Is Correct', defaultValue: false }),
+          explanation: fields.text({ label: 'Explanation' }),
+        }),
+        {
+          label: 'Answers',
+          itemLabel: (props) => props.fields.text.value ?? 'New Answer',
+          validation: { length: { min: 1 } },
+        }
+      ),
+    },
+    ContentView: (props) => {
+      const { prompt, answers } = props.value || {};
+
+      return React.createElement(
+        'div',
+        { style: { border: '2px solid #e0e0e0', borderRadius: '8px', padding: '12px', marginBottom: '16px', backgroundColor: '#f9fafb' } },
+        React.createElement('strong', {}, 'Question: '),
+        React.createElement('span', {}, prompt || 'New Question'),
+        React.createElement('ul', { style: { marginTop: '8px' } },
+          (answers || []).map((answer, index) => 
+            React.createElement('li', { key: index, style: { color: answer.isCorrect ? '#16a34a' : '#000' } },
+              answer.text || 'New Answer',
+              answer.isCorrect ? ' ✅' : '',
+              answer.explanation ? ` (Explanation: ${answer.explanation})` : ''
+            )
+          ) 
+        )
+      );
+    }
+  }),
 });
 
 // Select storage kind based on environment variable:

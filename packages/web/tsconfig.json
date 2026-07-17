@@ -17,6 +17,7 @@
       "@markdoc-tags": ["../core/src/markdoc-tags.ts"],
       "@admin-assets/*": ["../admin/src/assets/*"],
       "@core-utils/*": ["../core/src/utils/*"],
+      "@core-types/*": ["../core/src/types/*"],
     }
   }
 }

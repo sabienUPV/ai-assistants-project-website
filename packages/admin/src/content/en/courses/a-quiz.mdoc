@@ -1,0 +1,9 @@
+---
+unit: '3'
+title: A quiz
+---
+{% quiz %}
+{% question
+   prompt="What is the meaning of life?"
+   answers=[{text: "I don't know", isCorrect: false}, {text: "42", isCorrect: true}, {text: "23", isCorrect: false}, {text: "To sleep", isCorrect: false}] /%}
+{% /quiz %}

@@ -99,6 +99,25 @@ export const markdocTagAttributes = {
       },
     } satisfies Record<keyof ImageSchema, SchemaAttribute>,
   },
+  quiz: {
+    description: "Render a quiz component with the provided questions.",
+    children: ['question']
+  },
+  question: {
+    description: "Define a single question for a quiz component.",
+    attributes: {
+      prompt: {
+        type: String,
+        required: true,
+        description: "The question text.",
+      },
+      answers: {
+        type: Array,
+        required: true,
+        description: "The possible answers to the question.",
+      },
+    },
+  },
 } satisfies AstroMarkdocConfig['tags'];
 
 /**
@@ -137,6 +156,14 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
     customImage: {
       ...markdocTagAttributes.customImage,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Image.astro'),
+    },
+    quiz: {
+      ...markdocTagAttributes.quiz,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Quiz.astro'),
+    },
+    question: {
+      ...markdocTagAttributes.question,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Question.astro'),
     },
   } satisfies AstroMarkdocConfig['tags'] & MarkdocTagsFromAttributes;
 }
