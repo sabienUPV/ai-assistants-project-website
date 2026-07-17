@@ -385,20 +385,25 @@ const createPostCollection = (locale: Locale) => {
 const createCourseCollection = (locale: Locale) => {
   return collection({
     label: `Courses (${locale.toUpperCase()})`,
-    slugField: 'title',
+    slugField: 'unit',
     path: `src/content/${locale}/courses/*`,
     format: { contentField: 'content' },
     schema: {
-      unit: fields.text({
-        label: 'Unit',
-        validation: {
-          pattern: {
-            regex: courseUnitRegex,
-            message: courseUnitValidationMessage,
+      unit: fields.slug({
+        name: {
+          label: 'Unit',
+          validation: {
+            pattern: {
+              regex: courseUnitRegex,
+              message: courseUnitValidationMessage,
+            }
           }
-        }
+        },
+        slug: {
+          generate: (unit) => unit.replace(/[^a-zA-Z0-9]/g, '-' ), // Clean the unit string to avoid issues with special characters
+        }  
       }),
-      title: fields.slug({ name: { label: 'Title' } }),
+      title: fields.text({ label: 'Title' }),
       description: fields.text({ label: 'Description' }),
       content: fields.markdoc({
         label: 'Content',

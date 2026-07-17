@@ -4,5 +4,5 @@ import { getFirstPageRewriteUrlPath } from '@utils/url';
 
 export { getStaticPaths };
 
-return Astro.rewrite(getFirstPageRewriteUrlPath(Astro.url.pathname, "list"));
+return Astro.rewrite(getFirstPageRewriteUrlPath(Astro.url.pathname));
 ---

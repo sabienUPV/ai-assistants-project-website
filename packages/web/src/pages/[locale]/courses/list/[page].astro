@@ -1,7 +1,7 @@
 ---
 import type { GetStaticPaths, Page } from "astro";
 import Layout from '@layouts/Layout.astro';
-import { getCollectionWithFallbacks, getExcerptFromBody, getSlugFromEntryId } from '@utils/dynamicContent';
+import { getExcerptFromBody, getFirstLevelCourses, getSlugFromEntryId } from '@utils/dynamicContent';
 import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
 import PageNavigation from '@components/entries/PageNavigation.astro';
 import { locales } from "@languages";
@@ -10,11 +10,11 @@ import { getAbsoluteUrlFromRelativePathWithoutPageNumber } from "@utils/url";
 export const prerender = true;
 
 export const getStaticPaths = (async function ({ paginate }) {
-  const postsLocalesMap = Object.fromEntries(
+  const coursesLocalesMap = Object.fromEntries(
     await Promise.all(
       locales.map(async (currentLocale) => {
-        const { collection: posts } = await getCollectionWithFallbacks('posts', currentLocale);
-        return [currentLocale, posts] as const;
+        const { collection: courses } = await getFirstLevelCourses(currentLocale);
+        return [currentLocale, courses] as const;
       })
     )
   );
@@ -23,7 +23,7 @@ export const getStaticPaths = (async function ({ paginate }) {
   // Make sure that you pass `{ params: { locale }}` to `paginate()`
   // so that Astro knows which locale grouping the result is for.
   return locales.flatMap((currentLocale) => {
-    return paginate(postsLocalesMap[currentLocale], {
+    return paginate(coursesLocalesMap[currentLocale], {
       params: { locale: currentLocale },
       pageSize: 6,
     });
@@ -40,54 +40,53 @@ const { page } = Astro.props;
 // Note: Very weird Astro bug: If you place this line right after the line that defines getStaticPaths, even though it is outside of the getStaticPaths function, Astro will throw an error saying "Unavailable Astro global in getStaticPaths()" (https://docs.astro.build/en/reference/errors/unavailable-astro-global/) because it believes that we are trying to access Astro.locals inside getStaticPaths, which is not the case. So by placing the Props code in between, we are able to avoid this bug. This seems like a bug from Astro itself, so I will keep this comment here in case we run into this issue again in the future.
 const { locale, t } = Astro.locals;
 
-// 1. Fetch all entries from the posts collection
-const { collection: allPosts, fallbackIds: missingPostIds } = await getCollectionWithFallbacks('posts', locale);
+// 1. Fetch only first-level courses from the courses collection
+const { collection: firstLevelCourses, fallbackIds: missingCourseIds } = await getFirstLevelCourses(locale);
 
-// 2. Sort posts by publication date (newest first)
-const sortedPosts = allPosts.sort((a, b) => {
-  const dateA = a.data.pubDate ? new Date(a.data.pubDate).getTime() : 0;
-  const dateB = b.data.pubDate ? new Date(b.data.pubDate).getTime() : 0;
-  return dateB - dateA;
+// 2. Sort courses by unit, and finally by title for consistent ordering
+const courseUnits = firstLevelCourses.sort((a, b) => {
+    const unitComparison = a.data.unit.localeCompare(b.data.unit);
+    if (unitComparison !== 0) return unitComparison;
+
+  return a.data.title.localeCompare(b.data.title);
 });
 
-// 3. Paginate the sorted posts for the current page
-const paginatedPosts = sortedPosts.slice((page.currentPage - 1) * page.size, page.currentPage * page.size);
+// 3. Paginate the filtered and sorted courses for the current page
+const paginatedCourses = courseUnits.slice((page.currentPage - 1) * page.size, page.currentPage * page.size);
 ---
 
-<Layout title="Project News & Blog">
-  <main class="blog-directory">
-    <h1 class="directory-title">{t('blog_list_title')}</h1>
+<Layout title="Courses">
+  <main class="courses-directory">
+    <h1 class="directory-title">{t('nav_courses')}</h1>
 
-    <div class="posts-grid">
-      {paginatedPosts.map(post => {
-        const postUrl = getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro.url.pathname, getSlugFromEntryId(post.id));
+    <div class="courses-grid">
+      {paginatedCourses.map(course => {
+        // Note: We need the '../' prefix because the course URL is relative to the current page, which is /[locale]/courses/list/[page].astro, and we want to go up one level to /[locale]/courses/[slug].astro
+        const courseUrl = getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro.url.pathname, '../' + getSlugFromEntryId(course.id));
         return (
           <article class="post-card">
             <div class="card-body">
-              {missingPostIds?.includes(post.id) && (
+              {missingCourseIds?.includes(course.id) && (
                 <div class="not-in-language-pill-container">
                   <ContentNotInLanguagePill />
                 </div>
               )}
               {/* Modified header semantic spacing to match global line-height specs */}
               <h2 class="card-title">
-                <a href={postUrl}>{post.data.title}</a>
+                <a href={courseUrl}>{course.data.unit}. {course.data.title}</a>
               </h2>
-              <div class="card-date">
-                {post.data.pubDate?.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-              </div>
               <p class="card-excerpt">
-                {post.data.description
-                  || (post.body
-                      ? getExcerptFromBody(post.body, 150)
+                {course.data.description
+                  || (course.body
+                      ? getExcerptFromBody(course.body, 150)
                       : t('blog_card_click_to_read'))}
               </p>
             </div>
-            <a href={postUrl} class="read-more-btn">
+            <a href={courseUrl} class="read-more-btn">
               {t('blog_card_read_more')} &rarr;
             </a>
           </article>
-        );
+        ); 
       })}
     </div>
     <PageNavigation page={page} />
@@ -95,7 +94,7 @@ const paginatedPosts = sortedPosts.slice((page.currentPage - 1) * page.size, pag
 </Layout>
 
 <style>
-  .blog-directory {
+  .courses-directory {
     max-width: 1100px;
     margin: 0 auto;
     padding: 2rem 0; /* Adjusted since global <main> already handles side padding */
@@ -109,7 +108,7 @@ const paginatedPosts = sortedPosts.slice((page.currentPage - 1) * page.size, pag
   }
 
   /* Responsive grid using pure CSS Grid */
-  .posts-grid {
+  .courses-grid {
     display: grid;
     gap: 2rem;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -158,12 +157,6 @@ const paginatedPosts = sortedPosts.slice((page.currentPage - 1) * page.size, pag
   .card-title a:hover {
     color: var(--color-link-hover);
     text-decoration: underline;
-  }
-
-  .card-date {
-    font-size: 0.85rem;
-    color: var(--color-logo-dark-grey); /* Integration with your brand palette */
-    margin-bottom: 1rem;
   }
 
   .card-excerpt {

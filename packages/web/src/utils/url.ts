@@ -49,14 +49,21 @@ export function tryRemoveBaseUrlFromPath(path: string): string {
  * 
  * export { getStaticPaths };
  * 
- * return Astro.rewrite(getFirstPageRewriteUrl(Astro.url));
+ * return Astro.rewrite(getFirstPageRewriteUrlPath(Astro.url.pathname, "list"));
  * ---
  * 
- * @param currentUrl The current URL object or string. Typically you want to pass the value of `Astro.url` (you can access it from your Astro page or component)
+ * @param astroUrlPathname The value of `Astro.url.pathname` (you can access it from your Astro page or component)
+ * @param subpath Optional subpath to append to the URL (e.g., "list"). If provided, the function will return the URL to the first page of that subpath (e.g., for "/en/courses", "/en/courses/list/1"). If not provided, it will return the URL to the first page of the main content (e.g., "/en/courses/1").
  * @returns The URL object pointing to the first page of the main content (e.g., "/en/courses/1") for the current locale, for use with Astro.rewrite
  */
-export function getFirstPageRewriteUrl(currentUrl: URL | string): URL {
-  return new URL("./1", currentUrl);
+export function getFirstPageRewriteUrlPath(astroUrlPathname: string, subpath?: string): string {
+  // Si nos pasan un subpath, le quitamos las barras iniciales o finales por seguridad
+  const cleanSubpath = subpath ? subpath.replace(/^\/+|\/+$/g, '') : '';
+  
+  // Construimos el path relativo dependiendo de si hay subpath o no
+  const targetPath = cleanSubpath ? `./${cleanSubpath}/1` : "./1";
+  
+  return applyRelativePathToCurrentUrlPath(astroUrlPathname, targetPath, 'append');
 }
 
 /**

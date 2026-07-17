@@ -1,8 +1,8 @@
 ---
 import { getStaticPathsFromLocales as getStaticPaths } from '@utils/translation';
-import { getFirstPageRewriteUrl } from '@utils/url';
+import { getFirstPageRewriteUrlPath } from '@utils/url';
 
 export { getStaticPaths };
 
-return Astro.rewrite(getFirstPageRewriteUrl(Astro.url));
+return Astro.rewrite(getFirstPageRewriteUrlPath(Astro.url.pathname, "list"));
 ---
