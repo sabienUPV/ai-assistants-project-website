@@ -38,10 +38,10 @@ export async function getStaticPaths() {
 ---
 
 <Layout title={`${course.data.unit}. ${course.data.title}`}>
-  <!-- Table of Contents (on the left thanks to the sidebar slot from Layout.astro - except on mobile) -->
+  {/* Table of Contents (on the left thanks to the sidebar slot from Layout.astro - except on mobile) */}
   <TableOfContents slot="sidebar" courses={allCourses} currentUnit={course.data.unit} />
   
-  <!-- Main content (on the right - except on mobile) -->
+  {/* Main content (on the right - except on mobile) */}
   <article class="course-container">
       <header class="course-header">
         {isFallback && (
@@ -62,7 +62,7 @@ export async function getStaticPaths() {
       </div>
     </article>
 
-    <!-- Inside the main content column so that the TOC stays sticky -->
+    {/* Inside the main content column so that the TOC stays sticky */}
     <div class="no-print">
       <CourseNavigation courses={allCourses} currentUnit={course.data.unit} />
     </div> 
