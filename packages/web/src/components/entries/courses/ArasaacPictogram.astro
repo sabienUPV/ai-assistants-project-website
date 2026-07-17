@@ -9,8 +9,10 @@ interface Props {
 
 const { id, alt, size = 150 } = Astro.props;
 
-// Endpoint directo al PNG del pictograma
-const imageUrl = `https://api.arasaac.org/api/pictograms/${id}`;
+// ARASAAC API endpoint to fetch pictograms: https://api.arasaac.org/api/pictograms/:id
+// (see API documentation here: https://arasaac.org/developers/api)
+// (Note: The resolution is 500px by default, but we can request a higher resolution (2500px) by adding the query parameter `?resolution=2500` to the URL. However, we should only do this for sizes greater than 500px to avoid unnecessary bandwidth usage.)
+const imageUrl = `https://api.arasaac.org/api/pictograms/${id}${size > 500 ? '?resolution=2500' : ''}`;
 ---
 
 <Image 

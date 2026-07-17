@@ -309,7 +309,7 @@ const createComponents = (collectionName: string) => ({
     }
   }),
   arasaac: block({
-    label: 'Arasaac Pictogram',
+    label: 'ARASAAC Pictogram',
     description: markdocTagAttributes.arasaac.description,
     schema: {
       id: fields.text(
@@ -319,7 +319,7 @@ const createComponents = (collectionName: string) => ({
           description: markdocTagAttributes.arasaac.attributes.id.description,
         }),
       alt: fields.text({ label: 'Alternative Text', validation: { isRequired: true } }),
-      size: fields.number({ label: 'Size (px)' }),
+      size: fields.number({ label: 'Size (px)', validation: { min: 1, max: 2500 } }),
     },
     ContentView: (props) => {
       const { id, alt, size } = props.value || {};
@@ -328,7 +328,10 @@ const createComponents = (collectionName: string) => ({
         'div',
         { style: { textAlign: 'center', margin: '1rem 0' } },
         React.createElement('img', {
-          src: `https://api.arasaac.org/api/pictograms/${id}`,
+          // ARASAAC API endpoint to fetch pictograms: https://api.arasaac.org/api/pictograms/:id
+          // (see API documentation here: https://arasaac.org/developers/api)
+          // (Note: The resolution is 500px by default, but we can request a higher resolution (2500px) by adding the query parameter `?resolution=2500` to the URL. However, we should only do this for sizes greater than 500px to avoid unnecessary bandwidth usage.)
+          src: `https://api.arasaac.org/api/pictograms/${id}${size && size > 500 ? '?resolution=2500' : ''}`,
           alt: alt || '',
           style: {
             width: size ? `${size}px` : '150px',

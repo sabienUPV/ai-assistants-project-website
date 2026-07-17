@@ -133,7 +133,18 @@ export const markdocTagAttributes = {
       },
       size: { 
         type: Number, 
-        description: "The width and height of the pictogram in pixels (defaults to 150)." 
+        description: "The width and height of the pictogram in pixels (defaults to 150).",
+        default: 150,
+        validate: (value: number) => {
+          if (value <= 0 || value > 2500) {
+            return [{
+              id: 'invalid-arasaac-size',
+              level: 'error',
+              message: 'Size must be between 1 and 2500 pixels.'
+            }];
+          }
+          return []; // An empty array means no validation errors
+        }
       }
     }
   },
