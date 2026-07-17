@@ -3,8 +3,11 @@
 
   interface Props {
     children?: Snippet;
+    localizedTexts?: {
+      scoreLabel?: string;
+    };
   }
-  let { children }: Props = $props();
+  let { children, localizedTexts }: Props = $props();
 
   // Estado del juego con Svelte 5
   let score = $state(0);
@@ -39,7 +42,7 @@
 <div class="quiz-wrapper" bind:this={wrapper}>
   <!-- Marcador superior elegante -->
   <div class="score-board">
-    <span>Puntuación:</span>
+    <span>{localizedTexts?.scoreLabel || 'Score'}:</span>
     <span class="score-numbers">
       <strong>{score}</strong> / {totalAnswered}
     </span>

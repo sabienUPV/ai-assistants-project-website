@@ -5,8 +5,12 @@
   interface Props {
     prompt: string;
     answers: Answer[];
+    localizedTexts?: {
+      correctAnswerLabel?: string;
+      incorrectAnswerLabel?: string;
+    };
   }
-  let { prompt, answers }: Props = $props();
+  let { prompt, answers, localizedTexts }: Props = $props();
 
   // Estados locales con Svelte 5
   let status = $state<'playing' | 'revealed'>('playing');
@@ -62,7 +66,7 @@
   {#if status === 'revealed'}
     <div class="result-box" in:fade={{ duration: 300 }}>
       <h4 class="result-heading" class:success={selectedAnswer?.isCorrect} class:error={!selectedAnswer?.isCorrect}>
-        {selectedAnswer?.isCorrect ? '✅ ¡Respuesta Correcta!' : '❌ Respuesta Incorrecta'}
+        {selectedAnswer?.isCorrect ? ('✅ ' + (localizedTexts?.correctAnswerLabel || 'Correct Answer!')) : ('❌ ' + (localizedTexts?.incorrectAnswerLabel || 'Incorrect Answer'))}
       </h4>
       
       {#if selectedAnswer?.explanation}

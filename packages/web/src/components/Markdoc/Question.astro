@@ -3,16 +3,24 @@ import Slide from './Slide.astro';
 import QuestionInteractive from '@components/client/Question.svelte';
 import type { Question } from '@core-types/quiz';
 
+const { t } = Astro.locals;
+
+const localizedTexts = {
+  correctAnswerLabel: t('quiz_correct_answer_label'),
+  incorrectAnswerLabel: t('quiz_incorrect_answer_label'),
+}
+
 interface Props extends Question {};
 
 const { prompt, answers } = Astro.props;
 ---
 
 {/* The slide starts locked until the question is answered */}
-<Slide title="📝 Pregunta" locked={true}>
+<Slide title={"📝 " + t('quiz_question_label')} locked={true}>
   <QuestionInteractive 
     client:visible 
     prompt={prompt}
     answers={answers}
+    localizedTexts={localizedTexts}
   />
 </Slide>
