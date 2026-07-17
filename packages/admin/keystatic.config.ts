@@ -308,6 +308,37 @@ const createComponents = (collectionName: string) => ({
       );
     }
   }),
+  arasaac: block({
+    label: 'Arasaac Pictogram',
+    description: markdocTagAttributes.arasaac.description,
+    schema: {
+      id: fields.text(
+        {
+          label: 'ID',
+          validation: { isRequired: true },
+          description: markdocTagAttributes.arasaac.attributes.id.description,
+        }),
+      alt: fields.text({ label: 'Alternative Text', validation: { isRequired: true } }),
+      size: fields.number({ label: 'Size (px)' }),
+    },
+    ContentView: (props) => {
+      const { id, alt, size } = props.value || {};
+
+      return React.createElement(
+        'div',
+        { style: { textAlign: 'center', margin: '1rem 0' } },
+        React.createElement('img', {
+          src: `https://api.arasaac.org/api/pictograms/${id}`,
+          alt: alt || '',
+          style: {
+            width: size ? `${size}px` : '150px',
+            height: 'auto',
+            objectFit: 'contain',
+          }
+        })
+      );
+    }
+  })
 });
 
 // Select storage kind based on environment variable:

@@ -5,7 +5,7 @@ title: Second Unit!
 This is a second unit
 
 {% slideshow %}
-{% slide title="Test Slide" %}
+{% slide title="Test Slide" align="center" %}
 {% columns %}
 {% column %}
 ### Testing
@@ -33,9 +33,15 @@ This is a second unit
 {% /columns %}
 {% /slide %}
 
-{% slide title="Test Slide 2" %}
-- Now testing slide 2
+{% slide align="center" %}
+Now testing slide 2
 
-  ![](@admin-assets/images/courses/second-unit/prueba-b.png)
+![](@admin-assets/images/courses/second-unit/prueba-b.png)
+{% /slide %}
+
+{% slide title="Test Slide 3" align="center" %}
+- Now testing slide 3
+
+  {% arasaac #38462 alt="Exam" /%}
 {% /slide %}
 {% /slideshow %}

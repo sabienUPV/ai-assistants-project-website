@@ -118,6 +118,25 @@ export const markdocTagAttributes = {
       },
     },
   },
+  arasaac: {
+    description: "Render an ARASAAC pictogram dynamically directly from their API.",
+    attributes: {
+      id: { 
+        type: String, 
+        required: true, 
+        description: "The ID of the pictogram from the ARASAAC website URL (e.g., '39705'). [How to find the ID: Go to https://arasaac.org/pictograms/search, search for the pictogram you want, click on it, and look at the URL in your browser. Example: For https://arasaac.org/pictograms/en/39705/AI, '39705' is the ID you need to use]"
+      },
+      alt: { 
+        type: String, 
+        required: true, 
+        description: "Alternative text for accessibility (e.g., 'AI brain pictogram')." 
+      },
+      size: { 
+        type: Number, 
+        description: "The width and height of the pictogram in pixels (defaults to 150)." 
+      }
+    }
+  },
 } satisfies AstroMarkdocConfig['tags'];
 
 /**
@@ -165,6 +184,10 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
       ...markdocTagAttributes.question,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Question.astro'),
     },
+    arasaac: {
+      ...markdocTagAttributes.arasaac,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/entries/courses/ArasaacPictogram.astro'),
+    }
   } satisfies AstroMarkdocConfig['tags'] & MarkdocTagsFromAttributes;
 }
 
