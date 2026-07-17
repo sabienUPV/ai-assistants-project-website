@@ -61,7 +61,7 @@ export function getFirstPageRewriteUrlPath(astroUrlPathname: string, subpath?: s
   const cleanSubpath = subpath ? subpath.replace(/^\/+|\/+$/g, '') : '';
   
   // Construimos el path relativo dependiendo de si hay subpath o no
-  const targetPath = cleanSubpath ? `./${cleanSubpath}/1` : "./1";
+  const targetPath = cleanSubpath ? `${cleanSubpath}/1` : "1";
   
   return applyRelativePathToCurrentUrlPath(astroUrlPathname, targetPath, 'append');
 }
