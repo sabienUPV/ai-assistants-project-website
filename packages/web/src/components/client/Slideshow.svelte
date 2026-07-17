@@ -59,9 +59,18 @@
     // y actualizar el estado de bloqueo de la diapositiva actual cuando el usuario responde
     container.addEventListener('slidelockchange', checkLockStatus);
 
+    // También escuchamos un evento personalizado para avanzar a la siguiente diapositiva
+    // (nos sirve para que la portada del Quiz (QuizCover) pueda avanzar cuando el usuario pulsa "Play")
+    container.addEventListener('requestnextslide', next);
+
     checkLockStatus(); // Comprobamos el estado inicial al montar
     
-    return () => container.removeEventListener('slidelockchange', checkLockStatus);
+    // Limpieza de los listeners al desmontar el componente
+    // (muy importante para evitar memory leaks)
+    return () => {
+      container.removeEventListener('slidelockchange', checkLockStatus);
+      container.removeEventListener('requestnextslide', next);
+    };
   });
 
   function next() { if (currentIndex < slidesCount - 1) currentIndex++; }

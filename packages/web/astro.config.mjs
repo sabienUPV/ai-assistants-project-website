@@ -31,6 +31,18 @@ export default defineConfig({
     }
   },
 
+  image: {
+    remotePatterns: [
+      // We allow loading images from the ARASAAC API, which provides pictograms for our courses
+      {
+        protocol: 'https',
+        hostname: 'api.arasaac.org',
+        port: '',
+        pathname: '/api/pictograms/**',
+      },
+    ],
+  },
+
   integrations: [icon({
     // We use the "astro-icon" integration to easily use icons from various icon libraries in our components
     iconDir: 'src/assets/icons',

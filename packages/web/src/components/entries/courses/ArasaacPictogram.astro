@@ -1,0 +1,30 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+  id: string | number;
+  alt: string;
+  size?: number;
+}
+
+const { id, alt, size = 150 } = Astro.props;
+
+// Endpoint directo al PNG del pictograma
+const imageUrl = `https://api.arasaac.org/api/pictograms/${id}`;
+---
+
+<Image 
+  src={imageUrl} 
+  alt={alt} 
+  width={size} 
+  height={size} 
+  class="arasaac-picto"
+/>
+
+<style>
+  .arasaac-picto {
+    object-fit: contain;
+    /* Un ligero filtro para que los pictogramas queden perfectos sobre el fondo */
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  }
+</style>

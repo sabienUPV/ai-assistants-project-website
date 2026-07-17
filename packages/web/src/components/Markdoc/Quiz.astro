@@ -1,6 +1,7 @@
 ---
 import QuizApp from '@components/client/Quiz.svelte';
 import Slideshow from './Slideshow.astro';
+import QuizCover from './QuizCover.astro';
 
 const { t } = Astro.locals;
 
@@ -11,6 +12,10 @@ const localizedTexts = {
 
 <QuizApp client:load localizedTexts={localizedTexts}>
   <Slideshow>
+    {/* The cover of the quiz (the first slide) */}
+    <QuizCover />
+
+    {/* The questions that come from Markdoc */}
     <slot />
   </Slideshow>
 </QuizApp>
