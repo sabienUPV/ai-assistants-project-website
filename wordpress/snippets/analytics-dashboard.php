@@ -70,10 +70,11 @@ function ai4pid_analytics_admin_page() {
         echo '<h2>Total Unique Visitors (Platform-wide): <strong>' . intval($total_visits) . '</strong></h2>';
 
         // Fetch unique global visitors per domain (NOT path nor protocol, just the domain, e.g., ai4pid.eu vs community.ai4pid.eu)
-        // DEV NOTE: Apparently in MySQL indexes start at 1, NOT 0. This is why we use SUBSTRING_INDEX(..., '/', 1) to get the domain part of the URL.
+        // NOTE: SUBSTRING_INDEX(s, del, n) takes the first n segments left of the delimiter for n>0 or right for n<0 (Reference: https://www.w3schools.com/SQL/func_mysql_substring_index.asp)
+        // Here we use -1 to get the last segment after '://', which removes the protocol (e.g., https://), and then we use 1 to get the first segment before '/', which gives us just the domain.
         $unique_domains = $wpdb->get_results("
             SELECT 
-                SUBSTRING_INDEX(REPLACE(REPLACE(url, 'https://', ''), 'http://', ''), '/', 1) AS domain, 
+                SUBSTRING_INDEX(SUBSTRING_INDEX(url, '://', -1), '/', 1) AS domain, 
                 COUNT(DISTINCT visitor_hash) AS visits
             FROM $table_name
             GROUP BY domain
