@@ -1,34 +1,39 @@
 ---
 import { Icon } from "astro-icon/components";
 
-// Get all PDFs in a specific folder
-const pdfFiles = import.meta.glob<string>('@assets/docs/*.pdf', {
-  // Eagerly import the files so we can use their URLs immediately
-  eager: true,
-  // query and import properties allow us to get the URL directly
-  // instead of the module object with the URL under the `default` property
-  // (so 'url' instead of { default: 'url' })
-  query: '?url',
-  import: 'default'
-});
+import fs from 'node:fs';
+import path from 'node:path';
 
-// Transform the object into an array we can map over
-const pdfs = Object.entries(pdfFiles).map(([path, url]) => {
-  // Get filename "my-file.pdf"
-  const filename = path.split('/').pop() || path;
+const docsDirectory = path.join(process.cwd(), 'public/docs');
+let pdfs : { name: string, url: string }[] = [];
+
+try {
+  const files = fs.readdirSync(docsDirectory);
   
-  // Remove extension and replace underscores with spaces
-  // "my_file.pdf" -> "my file"
-  const cleanName = filename.replace(/\.pdf$/i, '').replace(/[_]/g, ' ');
+  pdfs = files
+    .filter(file => file.toLowerCase().endsWith('.pdf'))
+    .map(file => {
+      const cleanName = file.replace(/\.pdf$/i, '').replace(/[_]/g, ' ');
+      const formattedName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
 
-  // Optional: Capitalize first letter
-  const formattedName = cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+      // Read the file stats to get the last modified time
+      const filePath = path.join(docsDirectory, file);
+      const stats = fs.statSync(filePath);
+      
+      // stats.mtimeMs gives us the last modified time in milliseconds
+      // We convert it to a string in base 36 to make it shorter
+      const fileVersion = Math.floor(stats.mtimeMs).toString(36);
 
-  return {
-    name: formattedName,
-    url: url, // The processed URL of the PDF
-  };
-});
+      return {
+        name: formattedName,
+        // We add the version as a "query string" to help with cache busting
+        // (so that if the file changes, the URL will change and the browser will fetch the new version)
+        url: `/docs/${file}?v=${fileVersion}`, 
+      };
+    });
+} catch (error) {
+  console.warn("⚠️ Folder 'public/docs' was not found or is empty.");
+}
 ---
 
 <ul>
