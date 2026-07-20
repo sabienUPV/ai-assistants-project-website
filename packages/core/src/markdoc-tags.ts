@@ -148,6 +148,20 @@ export const markdocTagAttributes = {
       }
     }
   },
+  youtubeVideo: {
+    description: "Insert a YouTube video into the content.",
+    attributes: {
+      videoId: {
+        type: String,
+        required: true,
+        description: "The unique identifier for the YouTube video (e.g., 'dQw4w9WgXcQ'). The ID can be found at the end of the URL of the video.",
+      },
+      title: {
+        type: String,
+        description: "The title of the YouTube video for accessibility purposes.",
+      },
+    }
+  },
 } satisfies AstroMarkdocConfig['tags'];
 
 /**
@@ -198,7 +212,11 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
     arasaac: {
       ...markdocTagAttributes.arasaac,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/entries/courses/ArasaacPictogram.astro'),
-    }
+    },
+    youtubeVideo: {
+      ...markdocTagAttributes.youtubeVideo,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/YouTubeVideo.astro'),
+    },
   } satisfies AstroMarkdocConfig['tags'] & MarkdocTagsFromAttributes;
 }
 

@@ -341,6 +341,39 @@ const createComponents = (collectionName: string) => ({
         })
       );
     }
+  }),
+  youtubeVideo: block({
+    label: 'YouTube Video',
+    description: markdocTagAttributes.youtubeVideo.description,
+    schema: {
+      videoId: fields.text({
+        label: 'Video ID',
+        description: markdocTagAttributes.youtubeVideo.attributes.videoId.description,
+        validation: { length: { min: 11, max: 11 } }
+      }),
+      title: fields.text({
+        label: 'Title (for accessibility)',
+        description: markdocTagAttributes.youtubeVideo.attributes.title.description,
+      }),
+    },
+    ContentView: (props) => {
+      const { videoId, title } = props.value || {};
+
+      // Since Keystatic is an admin-only tool, we can just use youtube's embed directly without worrying about GDPR or privacy concerns, since the final website will be using lite-youtube-embed for a GDPR compliant solution.
+      return React.createElement(
+        'div',
+        { style: { textAlign: 'center', margin: '1rem 0' } },
+        React.createElement('iframe', {
+          width: 560,
+          height: 315,
+          src: `https://www.youtube-nocookie.com/embed/${videoId}`,
+          title: title || 'YouTube video player',
+          frameBorder: '0',
+          allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
+          allowFullScreen: true,
+        })
+      );
+    }
   })
 });
 

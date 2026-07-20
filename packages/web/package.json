@@ -20,6 +20,7 @@
     "astro": "^6.0.4",
     "astro-icon": "^1.1.5",
     "csv-parse": "^6.1.0",
+    "lite-youtube-embed": "^0.3.4",
     "svelte": "^5.56.4",
     "typescript": "^6.0.3"
   },

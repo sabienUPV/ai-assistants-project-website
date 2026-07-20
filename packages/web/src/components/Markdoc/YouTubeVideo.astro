@@ -1,0 +1,46 @@
+---
+// NPM Library: lite-youtube-embed (https://www.npmjs.com/package/lite-youtube-embed)
+import 'lite-youtube-embed/src/lite-yt-embed.css';
+
+interface Props {
+  videoId: string;
+  title?: string;
+}
+
+const { videoId, title = "Reproducir vídeo del curso" } = Astro.props;
+
+// 1. Fetch the YouTube thumbnail image at build time
+// (the end user is not involved, and the final image will be embedded in the HTML, so no external requests are made at runtime)
+const ytPosterUrl = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+const response = await fetch(ytPosterUrl);
+const buffer = await response.arrayBuffer();
+
+// 2. Convert the image to Base64 format
+const base64 = Buffer.from(buffer).toString('base64');
+const localPosterUrl = `data:image/jpeg;base64,${base64}`;
+---
+
+<script>
+  import 'lite-youtube-embed';
+</script>
+
+<div class="youtube-wrapper">
+  {/* We use !important just in case to prevent the library's JS from overwriting the background with the YouTube URL (the library says it won't, but it doesn't hurt) */}
+  <lite-youtube 
+    videoid={videoId} 
+    playlabel={title}
+    style={`background-image: url('${localPosterUrl}') !important;`}
+  ></lite-youtube>
+</div>
+
+<style>
+  .youtube-wrapper {
+    width: 100%;
+    max-width: 800px;
+    margin: 2rem auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: #000;
+  }
+</style>
