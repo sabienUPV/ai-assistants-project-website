@@ -40,6 +40,11 @@ export default defineConfig({
         port: '',
         pathname: '/api/pictograms/**',
       },
+      // We allow loading images from YouTube, which provides thumbnails for our YouTube videos
+      {
+        protocol: 'https',
+        hostname: 'i.ytimg.com', 
+      },
     ],
   },
 
