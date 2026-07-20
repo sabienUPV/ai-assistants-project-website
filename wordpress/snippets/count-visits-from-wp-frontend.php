@@ -7,29 +7,14 @@ function ai4pid_inject_analytics_script() {
     if ( is_admin() ) {
         return;
     }
+    // --- JS DOCUMENTATION (Hidden from frontend) ---
+    // 1. window.addEventListener('load'): Waits for full page load to avoid blocking rendering.
+    // 2. fetch: POST request to our custom endpoint.
+    // 3. Content-Type: application/x-www-form-urlencoded is strictly required for PHP $_POST.
+    // 4. catch: Fails silently in the background (e.g., if blocked by an adblocker).
     ?>
     <script>
-        (function() {
-            // Wait for the page to fully load so it doesn't block rendering or slow down metrics
-            window.addEventListener('load', function() {
-                const currentUrl = window.location.href;
-                
-                // Fetch request to our custom analytics endpoint
-                fetch('/api-visits.php', {
-                    method: 'POST',
-                    headers: {
-                        // This exact header is required for PHP to read it via $_POST['url']
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        'url': currentUrl
-                    })
-                }).catch(function(e) {
-                    // Fail silently in the background (e.g., if blocked by an adblocker)
-                    console.debug('Analytics fetch blocked or failed');
-                });
-            });
-        })();
+        (function(){window.addEventListener('load',function(){fetch('/api-visits.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({'url':window.location.href})}).catch(function(){})})})();
     </script>
     <?php
 }
