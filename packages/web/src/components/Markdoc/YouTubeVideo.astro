@@ -28,10 +28,10 @@ const optimizedBackground = await getImage({
   import 'lite-youtube-embed';
 </script>
 
-<div class="youtube-wrapper">
+<div class="youtube-wrapper" data-video-id={videoId} data-title={title}>
   {/* We use !important just in case to prevent the library's JS from overwriting the background with the YouTube URL (the library says it won't, but it doesn't hurt) */}
-  <lite-youtube 
-    videoid={videoId} 
+  <lite-youtube
+    videoid={videoId}
     playlabel={title}
     style={`background-image: url('${optimizedBackground.src}') !important;`}
   ></lite-youtube>
@@ -46,5 +46,28 @@ const optimizedBackground = await getImage({
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     background-color: #000;
+  }
+
+  @media print {
+    .youtube-wrapper {
+      display: block;
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .youtube-wrapper > * {
+      display: none;
+    }
+    .youtube-wrapper::after {
+      content: '["' attr(data-title) '": https://www.youtube.com/watch?v=' attr(data-video-id) ']';
+      display: block;
+      text-align: center;
+      padding: 1rem;
+      font-style: italic;
+      color: #666;
+    }
   }
 </style>
