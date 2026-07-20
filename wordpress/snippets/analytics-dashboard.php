@@ -1,0 +1,135 @@
+<?php
+// Configuration Constants
+define( 'AI4PID_ANALYTICS_TABLE_NAME', 'ai4pid_analytics_daily_visits' );
+define( 'AI4PID_ANALYTICS_SETUP_ACTION', 'ai4pid_analytics_setup_action' );
+define( 'AI4PID_ANALYTICS_SETUP_NONCE', 'ai4pid_analytics_setup_nonce' );
+
+// Hook to add the admin menu
+add_action( 'admin_menu', 'ai4pid_analytics_admin_menu' );
+
+function ai4pid_analytics_admin_menu() {
+    add_menu_page(
+        'AI4PID Analytics',            // Page title
+        'AI4PID Analytics',            // Menu title
+        'manage_options',             // Capability (admins only)
+        'ai4pid-analytics',            // Menu slug
+        'ai4pid_analytics_admin_page', // Callback function to render page
+        'dashicons-chart-area',       // Icon
+        30                            // Position
+    );
+}
+
+// Render the page and handle the button logic
+function ai4pid_analytics_admin_page() {
+    // Security check
+    if ( ! current_user_can( 'manage_options' ) ) {
+        return;
+    }
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . AI4PID_ANALYTICS_TABLE_NAME;
+    $message = '';
+
+    // 1. Handle INIT button press securely via nonces
+    if ( isset( $_POST['ai4pid_analytics_setup_submit'] ) && check_admin_referer( AI4PID_ANALYTICS_SETUP_ACTION, AI4PID_ANALYTICS_SETUP_NONCE ) ) {
+
+        $sql_table = "CREATE TABLE IF NOT EXISTS $table_name (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            visitor_hash varchar(64) NOT NULL,
+            url varchar(255) NOT NULL,
+            visit_date date NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY unique_daily_visit (visitor_hash, url, visit_date)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+
+        $wpdb->query($sql_table);
+        $message = '<div class="notice notice-success is-dismissible"><p>✅ Table verified/created successfully.</p></div>';
+    }
+
+    // 2. Check if the table exists to prevent SQL errors on fresh installs
+    $table_exists = ( $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" ) === $table_name );
+
+    // 3. Render the UI
+    echo '<div class="wrap">';
+    echo '<h1>AI4PID Unique Visits Analytics</h1>';
+
+    echo $message;
+
+    // Initialization button form
+    echo '<form method="post" style="margin: 20px 0; background: #fff; padding: 15px; border: 1px solid #ccd0d4;">';
+    echo '<p>Use this button to set up the database table for the first time. It is safe to click it multiple times; it will not delete existing data.</p>';
+    wp_nonce_field( AI4PID_ANALYTICS_SETUP_ACTION, AI4PID_ANALYTICS_SETUP_NONCE );
+    submit_button( 'Initialize System', 'primary', 'ai4pid_analytics_setup_submit', false );
+    echo '</form>';
+
+    // Show the analytics data only if the table has been created
+    if ( $table_exists ) {
+        // Fetch unique global visitors (counting unique hashes regardless of URL)
+        $total_visits = $wpdb->get_var("SELECT COUNT(DISTINCT visitor_hash) FROM $table_name");
+
+        echo '<h2>Total Unique Visitors (Platform-wide): <strong>' . intval($total_visits) . '</strong></h2>';
+
+        // Fetch unique global visitors per domain (NOT path nor protocol, just the domain, e.g., ai4pid.eu vs community.ai4pid.eu)
+        // DEV NOTE: Apparently in MySQL indexes start at 1, NOT 0. This is why we use SUBSTRING_INDEX(..., '/', 1) to get the domain part of the URL.
+        $unique_domains = $wpdb->get_results("
+            SELECT 
+                SUBSTRING_INDEX(REPLACE(REPLACE(url, 'https://', ''), 'http://', ''), '/', 1) AS domain, 
+                COUNT(DISTINCT visitor_hash) AS visits
+            FROM $table_name
+            GROUP BY domain
+            ORDER BY visits DESC
+            LIMIT 10
+        ");
+
+        echo '<h3>Top Domains (all time)</h3>';
+        echo '<table class="wp-list-table widefat fixed striped">';
+        echo '<thead><tr><th>Domain</th><th>Unique Visits</th></tr></thead>';
+        echo '<tbody>';
+
+        if ( $unique_domains ) {
+            foreach ( $unique_domains as $row ) {
+                echo '<tr>';
+                echo '<td><code>' . esc_html( $row->domain ) . '</code></td>';
+                echo '<td>' . esc_html( $row->visits ) . '</td>';
+                echo '</tr>';
+            }
+        } else {
+            echo '<tr><td colspan="2">No data available yet.</td></tr>';
+        }
+
+        echo '</tbody></table>';
+
+        // Fetch top URLs from the last 30 days
+        $top_urls = $wpdb->get_results("
+            SELECT url, COUNT(DISTINCT visitor_hash) as visits
+            FROM $table_name
+            WHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            GROUP BY url
+            ORDER BY visits DESC
+            LIMIT 10
+        ");
+
+        echo '<h3>Top URLs (Last 30 Days)</h3>';
+        echo '<table class="wp-list-table widefat fixed striped">';
+        echo '<thead><tr><th>URL</th><th>Unique Visits</th></tr></thead>';
+        echo '<tbody>';
+
+        if ( $top_urls ) {
+            foreach ( $top_urls as $row ) {
+                echo '<tr>';
+                echo '<td><code>' . esc_html( $row->url ) . '</code></td>';
+                echo '<td>' . esc_html( $row->visits ) . '</td>';
+                echo '</tr>';
+            }
+        } else {
+            echo '<tr><td colspan="2">No data available yet.</td></tr>';
+        }
+
+        echo '</tbody></table>';
+
+    } else {
+        echo '<div class="notice notice-warning inline"><p>⚠️ The data table does not exist yet. Click the "Initialize System" button to begin.</p></div>';
+    }
+
+    echo '</div>'; // End of .wrap
+}
