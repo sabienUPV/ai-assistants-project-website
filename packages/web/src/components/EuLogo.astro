@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets';
 import { defaultLocale } from '@languages';
 
 const { t, locale } = Astro.locals;
@@ -13,6 +12,31 @@ interface Props {
 }
 
 const { renderMode, showDisclaimer = false, ...attributes } = Astro.props;
+
+// Import ALL logos at build time, so that Vite cannot mess up the imports with dynamic paths (Vite does static analysis and doesn't allow dynamic imports with ?raw, so we have to import all of them at build time)
+// We use eager: true so that they are available immediately and without await
+// (in this case eager: true is better than lazy loading because we are just adding the SVGs or URLs directly to the page, so the lazy loading would actually make it slower because it requires running an extra JS file just to load them, and since this import only happens once during the build, and we need to load all logos anyway, this is actually faster than lazy loading them)
+const rawLogos = import.meta.glob<string>('@assets/images/eu/*.svg', {
+  query: '?raw',
+  import: 'default',
+  eager: true
+});
+const urlLogos = import.meta.glob<string>('@assets/images/eu/*.svg', {
+  query: '?url',
+  import: 'default',
+  eager: true
+});
+
+// Make the logos object more manageable by converting the keys to just the locale code (e.g. "EN") instead of the full path (e.g. "/src/assets/images/eu/EN_Co-fundedbytheEU_RGB_NEG.svg") and merging the raw and url logos into a single object for easier access (e.g. logos['EN'] = { raw: '...', url: '...' })
+const logosMap = new Map<string, { raw: string, url: string }>();
+// Note: Since the file names should be the same for both the raw and url imports, we can just use the rawLogos keys to extract the file path and then get the corresponding url from urlLogos.
+for (const filePath in rawLogos) {
+  const match = filePath.match(/\/([A-Z]{2})_Co-fundedbytheEU_RGB_NEG\.svg$/);
+  if (match) {
+    const code = match[1];
+    logosMap.set(code, { raw: rawLogos[filePath], url: urlLogos[filePath] });
+  }
+}
 
 /**
  * Utility function to patch white text to currentColor dynamically.
@@ -52,19 +76,20 @@ const patchSvgToCurrentColor = (rawSvgString: string) => {
 // (Note: our "locale" from Astro.locals already falls back to the default locale)
 const importEuLogo = async (locale: string, renderMode: RenderMode) => {
   const code = locale.toUpperCase();
-  
-  // NOTE: We can't use a single import statement and have the ?raw be dynamic (e.g. with the ternary operator), because Vite detects the ?raw with static analysis (so it never runs the code, and thus a conditional ?raw doesn't work). So we have to use two separate import statements, one for each renderMode, and we have the path in a variable so that we can reuse it in both import statements.
-  const modulePath = `../assets/images/eu/${code}_Co-fundedbytheEU_RGB_NEG.svg`;
+
+  if (!logosMap.has(code)) {
+    throw new Error(`No logo found for locale "${locale}"`);
+  }
+
+  const logo = logosMap.get(code)!; // Non-null assertion because we already checked that the logo exists
+
   if (renderMode === 'svg') {
-    // Vite detects the ?raw with static analysis
-    const module = await import(`${modulePath}?raw`);
     // Patch the SVG string in-memory during the build process
-    return patchSvgToCurrentColor(module.default);
+    return patchSvgToCurrentColor(logo.raw);
   }
   
-  // Normal import for the image, which will be processed by Astro's Image component
-  const module = await import(modulePath);
-  return module.default;
+  // URL import for the image, which will be processed by Astro's Image component
+  return logo.url;
 };
 
 let euLogo;
@@ -75,18 +100,22 @@ try {
   euLogo = await importEuLogo(defaultLocale, renderMode);
 }
 ---
+{/*
+  NOTE: Here we use directly HTML's img instead of Astro's Image component because for SVGs Astro does not make any optimizations,
+  so it's just an extra layer of complexity for no benefit.
+*/}
 {renderMode === 'img' && (
-  <Image class="eu-logo" {...attributes} src={euLogo} alt={t('alt_eu_cofunded')} height="60" />
+  <img class="eu-logo" {...attributes} src={euLogo} alt={t('alt_eu_cofunded')} height="60" />
 )}
 {renderMode === 'svg' && (
   <div class="eu-logo" {...attributes} aria-label={t('alt_eu_cofunded')} set:html={euLogo} />
 )}
 
-{
-/* Disclaimer text required by EU funding guidelines */ 
-/* https://www.eacea.ec.europa.eu/grants/visual-identity/visual-identity-programming-period-2021-2027/european-flag-emblem-and-multilingual-disclaimer_en#ref-2-disclaimer-to-use-in-all-communication-materials*/
-/* (We control it with a flag so that we only show it in the footer, not the header) */
-}
+{/*
+ Disclaimer text required by EU funding guidelines
+ https://www.eacea.ec.europa.eu/grants/visual-identity/visual-identity-programming-period-2021-2027/european-flag-emblem-and-multilingual-disclaimer_en#ref-2-disclaimer-to-use-in-all-communication-materials
+ (We control it with a flag so that we only show it in the footer, not the header)
+*/}
 {showDisclaimer && (
   <p class="eu-disclaimer">
     {t('eu_disclaimer')}

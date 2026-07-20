@@ -32,7 +32,7 @@ const footerLinks : { href: string; label: string }[] = [
     {/*
     In the footer, we want to use renderMode="img" because we want to lazy load the EU logo (and we can only do that in img mode, not svg mode), and because we never need to style the EU logo in the footer (we only need to style it in the header for print mode, where we use renderMode="svg").
     */}
-    <EuLogo renderMode="img" loading="lazy" showDisclaimer={true} />
+    <EuLogo renderMode="img" loading="lazy" decoding="async" showDisclaimer={true} />
   </div>
 </footer>
 <style>
