@@ -72,6 +72,7 @@ if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
 }
 
 $today_date = date('Y-m-d');
+$today_time = date('H:i:s');
 
 // Fetch the salt data directly from wp_options
 $option_row = $wpdb->get_row(
@@ -118,10 +119,11 @@ $table_name = $wpdb->prefix . AI4PID_ANALYTICS_TABLE_NAME;
 
 // Insert the visit. INSERT IGNORE prevents duplicates for the same hash + url + date
 $wpdb->query( $wpdb->prepare(
-    "INSERT IGNORE INTO $table_name (visitor_hash, url, visit_date) VALUES (%s, %s, %s)",
+    "INSERT IGNORE INTO $table_name (visitor_hash, url, visit_date, visit_time) VALUES (%s, %s, %s, %s)",
     $visitor_hash,
     $visited_url,
-    $today_date
+    $today_date,
+    $today_time
 ));
 
 // Fast response to the client

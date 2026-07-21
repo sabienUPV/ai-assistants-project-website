@@ -1,8 +1,13 @@
 <?php
 // Configuration Constants
 define( 'AI4PID_ANALYTICS_TABLE_NAME', 'ai4pid_analytics_daily_visits' );
+
 define( 'AI4PID_ANALYTICS_SETUP_ACTION', 'ai4pid_analytics_setup_action' );
 define( 'AI4PID_ANALYTICS_SETUP_NONCE', 'ai4pid_analytics_setup_nonce' );
+define( 'AI4PID_ANALYTICS_CLEAR_ACTION', 'ai4pid_analytics_clear_action' );
+define( 'AI4PID_ANALYTICS_CLEAR_NONCE', 'ai4pid_analytics_clear_nonce' );
+define( 'AI4PID_ANALYTICS_DESTROY_ACTION', 'ai4pid_analytics_destroy_action' );
+define( 'AI4PID_ANALYTICS_DESTROY_NONCE', 'ai4pid_analytics_destroy_nonce' );
 
 // Hook to add the admin menu
 add_action( 'admin_menu', 'ai4pid_analytics_admin_menu' );
@@ -38,12 +43,25 @@ function ai4pid_analytics_admin_page() {
             visitor_hash varchar(64) NOT NULL,
             url varchar(255) NOT NULL,
             visit_date date NOT NULL,
+            visit_time time NOT NULL,
             PRIMARY KEY (id),
             UNIQUE KEY unique_daily_visit (visitor_hash, url, visit_date)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
 
         $wpdb->query($sql_table);
         $message = '<div class="notice notice-success is-dismissible"><p>✅ Table verified/created successfully.</p></div>';
+    }
+
+    // 1.1 Handle CLEAR button press securely via nonces
+    if ( isset( $_POST['ai4pid_analytics_clear_submit'] ) && check_admin_referer( AI4PID_ANALYTICS_CLEAR_ACTION, AI4PID_ANALYTICS_CLEAR_NONCE ) ) {
+        $wpdb->query("TRUNCATE TABLE $table_name");
+        $message = '<div class="notice notice-success is-dismissible"><p>🧹 All analytics data cleared successfully.</p></div>';
+    }
+
+    // 1.2 Handle DESTROY button press securely via nonces
+    if ( isset( $_POST['ai4pid_analytics_destroy_submit'] ) && check_admin_referer( AI4PID_ANALYTICS_DESTROY_ACTION, AI4PID_ANALYTICS_DESTROY_NONCE ) ) {
+        $wpdb->query("DROP TABLE IF EXISTS $table_name");
+        $message = '<div class="notice notice-success is-dismissible"><p>💥 Analytics table destroyed successfully.</p></div>';
     }
 
     // 2. Check if the table exists to prevent SQL errors on fresh installs
@@ -60,6 +78,32 @@ function ai4pid_analytics_admin_page() {
     echo '<p style="margin-top:0">Use this button to set up the database table for the first time. It is safe to click it multiple times; it will not delete existing data.</p>';
     wp_nonce_field( AI4PID_ANALYTICS_SETUP_ACTION, AI4PID_ANALYTICS_SETUP_NONCE );
     submit_button( 'Initialize System', 'primary', 'ai4pid_analytics_setup_submit', false );
+    echo '</form>';
+
+    // Clear data button form (with confirmation prompt)
+    echo '<form method="post" style="margin: 20px 0; background: #fff; padding: 15px; border: 1px solid #ccd0d4;" onsubmit="return confirm(\'Are you sure you want to clear all analytics data? This action cannot be undone.\');">';
+    echo '<p style="margin-top:0">Use this button to clear all analytics data. This action cannot be undone.</p>';
+    wp_nonce_field( AI4PID_ANALYTICS_CLEAR_ACTION, AI4PID_ANALYTICS_CLEAR_NONCE );
+    submit_button( 
+        'Clear All Data', 
+        'secondary', 
+        'ai4pid_analytics_clear_submit', 
+        false, 
+        array( 'style' => 'background: #f0b849; border-color: #cc911c; color: #1d2327; text-shadow: none;' ) 
+    );
+    echo '</form>';
+
+    // Destroy table button form (with confirmation prompt)
+    echo '<form method="post" style="margin: 20px 0; background: #fff; padding: 15px; border: 1px solid #ccd0d4;" onsubmit="return confirm(\'Are you sure you want to destroy the analytics table? This action cannot be undone.\');">';
+    echo '<p style="margin-top:0">Use this button to destroy the analytics table. This action cannot be undone and will remove all data and the table itself.</p>';
+    wp_nonce_field( AI4PID_ANALYTICS_DESTROY_ACTION, AI4PID_ANALYTICS_DESTROY_NONCE );
+    submit_button( 
+        'Destroy Table', 
+        'secondary', 
+        'ai4pid_analytics_destroy_submit', 
+        false, 
+        array( 'style' => 'background: #d63638; border-color: #b32d2e; color: #fff; text-shadow: none;' ) 
+    );
     echo '</form>';
 
     // Show the analytics data only if the table has been created
