@@ -14,12 +14,24 @@ const localizedTexts = {
 <QuizApp client:load localizedTexts={localizedTexts}>
   <Slideshow>
     {/* The cover of the quiz (the first slide) */}
-    <QuizCover />
+    <div class="quiz-cover-slide">
+      <QuizCover />
+    </div>
 
     {/* The questions that come from Markdoc */}
     <slot />
 
     {/* The results of the quiz (the last slide) */}
-    <QuizResults />
+    <div class="quiz-results-slide">
+      <QuizResults />
+    </div>
   </Slideshow>
 </QuizApp>
+
+<style>
+  @media print {
+    .quiz-results-slide {
+      display: none;
+    }
+  }
+</style>

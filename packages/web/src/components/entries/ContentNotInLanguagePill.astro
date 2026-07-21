@@ -42,4 +42,10 @@ const { t } = Astro.locals;
     margin: 0;
     padding: 0;
   }
+
+  @media print {
+    .not-in-language-pill {
+      display: none;
+    }
+  }
 </style>

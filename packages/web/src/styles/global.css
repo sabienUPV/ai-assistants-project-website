@@ -144,13 +144,8 @@ a:hover {
     color: black !important;
   }
 
-  /* Systematically hide interactive UI elements on any printed page */
-  .no-print,
-  nav,
-  aside,
-  button,
-  .sidebar-container,
-  .not-in-language-pill-container {
+  /* Hide any elements with the 'no-print' class */
+  .no-print {
     display: none !important;
   }
 
