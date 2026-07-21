@@ -25,7 +25,9 @@ const {
         {/* El botón lanza un evento nativo que burbujea hasta el Slideshow */}
         <button 
           class="play-btn" 
-          onclick="this.dispatchEvent(new CustomEvent('requestnextslide', { bubbles: true, composed: true }))"
+          onclick="
+            this.dispatchEvent(new CustomEvent('resetquiz', { bubbles: true, composed: true }));
+            this.dispatchEvent(new CustomEvent('requestnextslide', { bubbles: true, composed: true }))"
         >
           {/* Icono de Play en SVG */}
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
