@@ -1,5 +1,6 @@
 ---
 import ArasaacPictogram from '@components/entries/courses/ArasaacPictogram.astro';
+import Slide from './Slide.astro';
 
 interface Props {
   title?: string;
@@ -14,36 +15,37 @@ const {
 } = Astro.props;
 ---
 
-<div class="markdoc-slide cover-slide" style="display: none;" data-locked="false">
-  <div class="cover-layout">
-    
-    <div class="text-column">
-      <h1 class="cover-title">{title}</h1>
-      <p class="cover-subtitle">{description}</p>
-      
-      <!-- El botón lanza un evento nativo que burbujea hasta el Slideshow -->
-      <button 
-        class="play-btn" 
-        onclick="this.dispatchEvent(new CustomEvent('requestnextslide', { bubbles: true, composed: true }))"
-      >
-        <!-- Icono de Play en SVG -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="5 3 19 12 5 21 5 3"></polygon>
-        </svg>
-        {buttonText}
-      </button>
-    </div>
+<div class="cover-slide">
+  <Slide>
+    <div class="cover-layout">
+      <div class="text-column">
+        <h1 class="cover-title">{title}</h1>
+        <p class="cover-subtitle">{description}</p>
+        
+        {/* El botón lanza un evento nativo que burbujea hasta el Slideshow */}
+        <button 
+          class="play-btn" 
+          onclick="this.dispatchEvent(new CustomEvent('requestnextslide', { bubbles: true, composed: true }))"
+        >
+          {/* Icono de Play en SVG */}
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          {buttonText}
+        </button>
+      </div>
 
-    <div class="image-column">
-      {/* ID 39705 = AI pictogram from ARASAAC */}
-      <ArasaacPictogram id="39705" alt="AI pictogram from ARASAAC" size={300} />
+      <div class="image-column">
+        {/* ID 39705 = AI pictogram from ARASAAC */}
+        <ArasaacPictogram id="39705" alt="AI pictogram from ARASAAC" size={300} />
+      </div>
     </div>
-  </div>
+  </Slide>
 </div>
 
 <style>
   /* Sobrescribimos el comportamiento por defecto de la slide para que ocupe todo y tenga fondo azul */
-  .cover-slide {
+  .cover-slide :global(.slide-container) {
     width: 100%;
     height: 100%;
     background-color: #1e60d0; /* El azul de AMICA */
