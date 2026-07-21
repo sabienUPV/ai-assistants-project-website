@@ -169,27 +169,14 @@
   </div>
 
   {#if status === 'revealed'}
-    <ResultBox selectedAnswer={selectedAnswer} localizedTexts={localizedTexts} />
-  {/if}
-
-  <!-- If no answer has been revealed, or the correct answer is not selected, we keep a copy of the correct answer's result box for printing -->
-  {#if !selectedAnswer?.isCorrect}
-    <div class="print-correct-result-box">
-      <div class="result-box">
-        <h4 class="result-heading success">
-          {selectedAnswer?.isCorrect ? ('✅ ' + (localizedTexts?.correctAnswerLabel || 'Correct Answer!')) : ('❌ ' + (localizedTexts?.incorrectAnswerLabel || 'Incorrect Answer'))}
-        </h4>
-        
-        {#if selectedAnswer?.explanation}
-          <p class="explanation">{selectedAnswer.explanation}</p>
-        {/if}
-      </div>
+    <div class="selected-result-box">
+      <ResultBox selectedAnswer={selectedAnswer} localizedTexts={localizedTexts} />
     </div>
   {/if}
 
-  <!-- If no answer has been revealed, or the correct answer is not selected, we keep a copy of the correct answer's result box for printing -->
-  {#if !selectedAnswer?.isCorrect}
-    <div class="selected-result-box">
+  <!-- We keep a copy of the correct answer's result box for printing (only if the correct answer has an explanation to show) -->
+  {#if answers.find(ans => ans.isCorrect)?.explanation}
+    <div class="print-correct-result-box">
       <ResultBox selectedAnswer={answers.find(ans => ans.isCorrect)} localizedTexts={localizedTexts} />
     </div>
   {/if}
@@ -290,11 +277,11 @@
   }
 
   @media print {
-    /* If we need to show a different result box for printing the correct answer, hide the selected result box */
-    .print-correct-result-box ~ .selected-result-box {
+    /* Never show the selected result box on print */
+    .selected-result-box {
       display: none;
     }
-
+    /* Instead, show the print result box that always contains the correct answer */
     .print-correct-result-box {
       display: block;
     }
