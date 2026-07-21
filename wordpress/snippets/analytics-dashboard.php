@@ -57,7 +57,7 @@ function ai4pid_analytics_admin_page() {
 
     // Initialization button form
     echo '<form method="post" style="margin: 20px 0; background: #fff; padding: 15px; border: 1px solid #ccd0d4;">';
-    echo '<p>Use this button to set up the database table for the first time. It is safe to click it multiple times; it will not delete existing data.</p>';
+    echo '<p style="margin-top:0">Use this button to set up the database table for the first time. It is safe to click it multiple times; it will not delete existing data.</p>';
     wp_nonce_field( AI4PID_ANALYTICS_SETUP_ACTION, AI4PID_ANALYTICS_SETUP_NONCE );
     submit_button( 'Initialize System', 'primary', 'ai4pid_analytics_setup_submit', false );
     echo '</form>';
@@ -68,6 +68,33 @@ function ai4pid_analytics_admin_page() {
         $total_visits = $wpdb->get_var("SELECT COUNT(DISTINCT visitor_hash) FROM $table_name");
 
         echo '<h2>Total Unique Visitors (Platform-wide): <strong>' . intval($total_visits) . '</strong></h2>';
+
+        // Fetch daily unique visitors per day for the last 30 days
+        $daily_visits = $wpdb->get_results("
+            SELECT visit_date, COUNT(DISTINCT visitor_hash) as unique_visits
+            FROM $table_name
+            WHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            GROUP BY visit_date
+            ORDER BY visit_date DESC
+        ");
+
+        echo '<h3>Daily Unique Visitors (Last 30 Days)</h3>';
+        echo '<table class="wp-list-table widefat fixed striped">';
+        echo '<thead><tr><th>Date</th><th>Unique Visits</th></tr></thead>';
+        echo '<tbody>';
+
+        if ( $daily_visits ) {
+            foreach ( $daily_visits as $row ) {
+                echo '<tr>';
+                echo '<td>' . esc_html( $row->visit_date ) . '</td>';
+                echo '<td>' . esc_html( $row->unique_visits ) . '</td>';
+                echo '</tr>';
+            }
+        } else {
+            echo '<tr><td colspan="2">No data available yet.</td></tr>';
+        }
+
+        echo '</tbody></table>';
 
         // Fetch unique global visitors per domain (NOT path nor protocol, just the domain, e.g., ai4pid.eu vs community.ai4pid.eu)
         // NOTE: SUBSTRING_INDEX(s, del, n) takes the first n segments left of the delimiter for n>0 or right for n<0 (Reference: https://www.w3schools.com/SQL/func_mysql_substring_index.asp)
