@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { fade } from 'svelte/transition';
   import type { Answer } from '@core-types/quiz';
 
   interface Props {
@@ -177,15 +176,17 @@
     {/each}
   </div>
 
-  <div class="result-box" in:fade={{ duration: 300 }}>
+  <div class="result-box">
     {#if status === 'revealed' && selectedAnswer}
-      <h4 class="result-selected-heading" class:success={selectedAnswer.isCorrect} class:error={!selectedAnswer.isCorrect}>
-        {selectedAnswer.isCorrect ? ('✅ ' + (localizedTexts?.correctAnswerLabel || 'Correct Answer!')) : ('❌ ' + (localizedTexts?.incorrectAnswerLabel || 'Incorrect Answer'))}
-      </h4>
-      
-      {#if selectedAnswer.explanation}
-        <p class="explanation">{selectedAnswer.explanation}</p>
-      {/if}
+      <div class="result-selected-box">
+        <h4 class="result-selected-heading" class:success={selectedAnswer.isCorrect} class:error={!selectedAnswer.isCorrect}>
+          {selectedAnswer.isCorrect ? ('✅ ' + (localizedTexts?.correctAnswerLabel || 'Correct Answer!')) : ('❌ ' + (localizedTexts?.incorrectAnswerLabel || 'Incorrect Answer'))}
+        </h4>
+        
+        {#if selectedAnswer.explanation}
+          <p class="explanation">{selectedAnswer.explanation}</p>
+        {/if}
+      </div>
     {/if}
 
     <!-- Note: We know that you can check the explanations if you check the CSS or print version, which could give away the answers. But since our courses are public, for educational purposes, and don't give any qualifications, we don't need anti-cheat measures. So if you cheat, it's your responsibility -->
@@ -296,12 +297,17 @@
   /* Result box styles */
 
   /* NOTE: We handle the visibility of the result box with CSS, because we want the explanations to be displayed on print, regardless of whether the question is revealed or not. However, its title and correct answer explanation are controlled by Svelte instead because we never want to display that on print */
+
+  /* CSS fade animation for the result box on revealed */
   .result-box {
-    display: none; /* Hidden by default, shown when revealed */
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
   }
 
   .question-container.is-revealed .result-box {
-    display: block;
+    opacity: 1;
+    transform: translateY(0);
   }
 
   .result-box {
