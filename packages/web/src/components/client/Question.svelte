@@ -1,6 +1,6 @@
 <script lang="ts">
+  import { fade } from 'svelte/transition';
   import type { Answer } from '@core-types/quiz';
-  import ResultBox from './ResultBox.svelte';
 
   interface Props {
     prompt: string;
@@ -8,6 +8,8 @@
     localizedTexts?: {
       correctAnswerLabel?: string;
       incorrectAnswerLabel?: string;
+      printAnswerExplanationsLabel?: string;
+      printAnswerNoExplanationLabel?: string;
     };
   }
   const { prompt, answers, localizedTexts }: Props = $props();
@@ -61,26 +63,64 @@
     if (slide) slide.dataset.locked = 'true';
   }
 
-  function cloneNodeForAnswerKeyBeforePrint(container: HTMLElement, slide: HTMLElement | null) {
+  function cloneNodeForAnswerKeyBeforePrint(slide: HTMLElement | null) {
     if (!slide) return;
+    
+    // Clonamos el nodo entero de la slide con sus hijos (deep clone)
+    clonedSlide = slide.cloneNode(true) as HTMLElement;
 
-    // Para no tener que buscar .question-container de nuevo en el nodo clonado, temporalmente le añadimos las siguientes clases CSS:
+    // Buscamos el contenedor de la pregunta dentro del clon
+    const clonedContainer = clonedSlide.querySelector<HTMLElement>('.question-container');
+    if (!clonedContainer) return;
+
+    // Añadimos las siguientes clases CSS al container clonado para que se vea correctamente en el print:
     // 1. print-answer-key: para que no muestre los otros nodos dimmed en el print
     // 2. is-revealed: para que muestre la respuesta correcta en el nodo clonado
-    // y luego se lo quitamos al original para que cuando clone se lleve la clase
-    container.classList.add('print-answer-key', 'is-revealed');
-    
-    // Clonamos el nodo entero (deep clone)
-    clonedSlide = slide.cloneNode(true) as HTMLElement;
-    
-    // Le quitamos las clases especiales a la original (solo eran para que las cogiera el clonado sin tener que buscar otra vez en el DOM, que es costoso)
-    container.classList.remove('print-answer-key', 'is-revealed');
+    clonedContainer.classList.add('print-answer-key', 'is-revealed');
 
-    // Inyectamos el clon justo debajo de la original
+    // En el clon, buscamos cada botón de respuesta y al texto de la respuesta la ponemos delante un número de orden (1, 2, 3...) para que se vea en el print y se sepa qué explicación corresponde a cada respuesta.
+    const clonedAnswerButtons = clonedContainer.querySelectorAll<HTMLButtonElement>('.answer-btn');
+    clonedAnswerButtons.forEach((btn, index) => {
+      // Añadimos un span delante del texto de la respuesta con el número de orden
+      const orderSpan = document.createElement('span');
+      orderSpan.textContent = `${index + 1}) `;
+      orderSpan.style.fontWeight = 'bold';
+      btn.insertBefore(orderSpan, btn.firstChild);
+    });
+
+    // Añadimos una result-box custom al clon para que muestre las explicaciones de TODAS las respuestas en el print (correctas e incorrectas)
+    const printResultBox = document.createElement('div');
+    printResultBox.classList.add('result-box');
+
+    // Añadimos un título al result-box
+    const printResultHeading = document.createElement('h4');
+    printResultHeading.textContent = localizedTexts?.printAnswerExplanationsLabel || 'Explanation of each answer';
+    printResultHeading.classList.add('result-heading');
+    printResultBox.appendChild(printResultHeading);
+
+    // Añadimos un párrafo por cada respuesta con su explicación (si la tiene)
+    answers.forEach((ans, index) => {
+      const printExplanation = document.createElement('p');
+      printExplanation.classList.add('explanation');
+      printExplanation.textContent = `${index + 1}) ${ans.explanation || `[${localizedTexts?.printAnswerNoExplanationLabel || 'No explanation available for this answer.'}]`}`;
+      if (!ans.explanation) {
+        // Si no hay explicación, ponemos el mensaje en cursiva para que se vea claro que no hay explicación disponible sin tener que leer el texto completo cada vez
+        printExplanation.style.fontStyle = 'italic';
+      }
+      printResultBox.appendChild(printExplanation);
+    });
+
+    clonedContainer.appendChild(printResultBox);
+    
+    // Nos aseguramos de que el contenedor original no tenga la clase is-revealed para que no se vea revelado en el print
+    // (ya que el clon es el que se mostrará revelado)
+    container.classList.remove('is-revealed');
+
+    // Inyectamos la slide clonada justo debajo de la original
     slide.parentNode?.insertBefore(clonedSlide, slide.nextSibling);
   }
 
-  function removeAnswerKeyNodeAfterPrint(container: HTMLElement, slide: HTMLElement | null) {
+  function removeAnswerKeyNodeAfterPrint(slide: HTMLElement | null) {
     if (!slide) return;
 
     // 1. Borramos el clon del DOM
@@ -89,7 +129,7 @@
       clonedSlide = null;
     }
     
-    // 2. Si la pregunta estaba en estado "revealed", volvemos a poner la clase CSS is-revealed en el question-container original (ya que se la habíamos quitado para el print para que fuera el clon el que mostraba la pregunta revelada con su estilo propio para evitar el dimmed)
+    // 2. Si la pregunta estaba en estado "revealed", volvemos a poner la clase CSS is-revealed en el question-container original (ya que se la habíamos quitado para el print para que fuera el clon el que mostraba la pregunta revelada con su estilo propio)
     if (status === 'revealed') {
       container.classList.add('is-revealed');
     }
@@ -100,8 +140,8 @@
 
     // Create closured functions for each event to keep the slide reference in all handlers
     const slide = findSlideElement();
-    const beforePrintHandler = () => cloneNodeForAnswerKeyBeforePrint(container, slide);
-    const afterPrintHandler = () => removeAnswerKeyNodeAfterPrint(container, slide);
+    const beforePrintHandler = () => cloneNodeForAnswerKeyBeforePrint(slide);
+    const afterPrintHandler = () => removeAnswerKeyNodeAfterPrint(slide);
     const resetQuestionHandler = () => resetQuestion(slide);
 
     window.addEventListener('beforeprint', beforePrintHandler);
@@ -168,16 +208,15 @@
     {/each}
   </div>
 
-  {#if status === 'revealed'}
-    <div class="selected-result-box">
-      <ResultBox selectedAnswer={selectedAnswer} localizedTexts={localizedTexts} />
-    </div>
-  {/if}
-
-  <!-- We keep a copy of the correct answer's result box for printing (only if the correct answer has an explanation to show) -->
-  {#if answers.find(ans => ans.isCorrect)?.explanation}
-    <div class="print-correct-result-box">
-      <ResultBox selectedAnswer={answers.find(ans => ans.isCorrect)} localizedTexts={localizedTexts} />
+  {#if status === 'revealed' && selectedAnswer}
+    <div class="result-box" in:fade={{ duration: 300 }}>
+      <h4 class="result-heading" class:success={selectedAnswer.isCorrect} class:error={!selectedAnswer.isCorrect}>
+        {selectedAnswer.isCorrect ? ('✅ ' + (localizedTexts?.correctAnswerLabel || 'Correct Answer!')) : ('❌ ' + (localizedTexts?.incorrectAnswerLabel || 'Incorrect Answer'))}
+      </h4>
+      
+      {#if selectedAnswer.explanation}
+        <p class="explanation">{selectedAnswer.explanation}</p>
+      {/if}
     </div>
   {/if}
 </div>
@@ -262,33 +301,36 @@
     color: #166534;
   }
 
-  /* Don't show the result box by default */
-  .selected-result-box {
-    display: none;
-  }
-  /* Only show the result box when the question is revealed */
-  .question-container.is-revealed .selected-result-box {
-    display: block;
+  /* Result box styles */
+  .result-box {
+    background: #f8fafc;
+    border-left: 4px solid #3b82f6;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    width: 100%;
+    text-align: left;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 
-  /* Don't show the print-correct-result-box by default */
-  .print-correct-result-box {
-    display: none;
+  .result-heading {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+  }
+
+  .result-heading.success { color: #166534; }
+  .result-heading.error { color: #991b1b; }
+
+  .explanation {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #475569;
+    line-height: 1.5;
   }
 
   @media print {
-    /* Never show the selected result box on print */
-    .selected-result-box {
-      display: none;
-    }
-    /* Instead, show the print result box that always contains the correct answer */
-    .print-correct-result-box {
-      display: block;
-    }
-
     /* Como en print se fuerza el fondo blanco en el global para ahorrar tinta, le ponemos un emoji de check verde delante a la respuesta correcta para que se vea bien */
-    .question-container.is-revealed .answer-btn.is-correct::before {
-      content: '✅ ';
+    .question-container.is-revealed .answer-btn.is-correct::after {
+      content: ' ✅';
     }
   }
 </style>
