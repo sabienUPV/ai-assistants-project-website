@@ -53,11 +53,12 @@
     slides.forEach((slide, index) => {
       const el = slide as HTMLElement;
       if (index === currentIndex) {
-        el.style.display = 'block';
-        el.style.animation = 'fadeIn 0.3s ease-in-out';
+        el.classList.add('slide-visible');
+        el.classList.remove('slide-hidden');
         updateLockStatus(el);
       } else {
-        el.style.display = 'none';
+        el.classList.add('slide-hidden');
+        el.classList.remove('slide-visible');
       }
     });
 
@@ -127,6 +128,18 @@
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* NOTE: We are using CSS classes instead of injecting inline styles so that child components can override them
+  (e.g., Question.svelte needs to show hidden slides in print, so if we had inline styles, those would override the child's styles and keep them hidden) */
+  /* Note 2: The :global keyword here tells Svelte to trust us that .slide-hidden and .slide-visible will be there even if it can't notice because we are injecting that class via JS */
+  /* Reference: https://svelte.dev/docs/svelte/compiler-warnings#css_unused_selector */
+  :global(.slide-hidden) {
+    display: none;
+  }
+  :global(.slide-visible) {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
   }
 
   /* Integrado con tu sistema de diseño y las reglas de accesibilidad */

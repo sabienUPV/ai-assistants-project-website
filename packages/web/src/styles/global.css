@@ -133,6 +133,13 @@ a:hover {
 }
 
 /* --- STYLES FOR PDF EXPORT & PRINTING --- */
+@media screen {
+  /* Hide any elements with the 'print-only' class on screen (screen = not print) */
+  .print-only {
+    display: none !important;
+  }
+}
+
 @media print {
   /* ==========================================================================
      1. GLOBAL RESET & UTILITIES (Applies to the entire website)

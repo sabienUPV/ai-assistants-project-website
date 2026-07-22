@@ -64,10 +64,12 @@
 
   function cloneNodeBeforePrint(slide: HTMLElement | null) {
     if (!slide) return;
+
+    // Nos aseguramos de que la slide original no tenga la clase no-print aún para que los clones no la copien sin querer (ya que los clones no deben tener la clase no-print, sino la clase print-only)
+    slide.classList.remove('no-print');
     
     // Clonamos el nodo entero de la slide con sus hijos (deep clone)
     const clonedUnrevealedSlide = slide.cloneNode(true) as HTMLElement;
-    clonedSlides = [clonedUnrevealedSlide];
 
     const clonedUnrevealedSlideContainer = clonedUnrevealedSlide.querySelector<HTMLElement>('.question-container');
     if (!clonedUnrevealedSlideContainer) return;
@@ -79,7 +81,6 @@
     clonedUnrevealedSlideContainer.classList.add('print-question-clone', 'is-revealed');
 
     const clonedRevealedSlide = clonedUnrevealedSlide.cloneNode(true) as HTMLElement;
-    clonedSlides.push(clonedRevealedSlide);
 
     // Nos aseguramos de que el contenedor del primer clon no tenga la clase is-revealed para que no se vea revelado en el print
     // (ya que el segundo clon es el que se mostrará revelado)
@@ -89,12 +90,22 @@
     const detailsElement = clonedRevealedSlide.querySelector<HTMLDetailsElement>('details.explanations');
     if (detailsElement) detailsElement.open = true;
 
+    // Usamos una clase CSS global especial para que solo se vean los clones en print y no en pantalla
+    clonedUnrevealedSlide.classList.add('print-only'); 
+    clonedRevealedSlide.classList.add('print-only');
+
+    // En la slide original, inyectamos la clase CSS global especial no-print para que no se vea en print y solo se vea en pantalla
+    slide.classList.add('no-print');
+
     // Inyectamos las slides clonadas justo debajo de la original
     // IMPORTANTE: Como usamos insertBefore, se van a inyectar en orden inverso, así que primero inyectamos la slide revelada y luego la no revelada para que se vea primero la no revelada y luego la revelada en el print
     if (slide.parentNode) {
       slide.parentNode.insertBefore(clonedRevealedSlide, slide.nextSibling);
       slide.parentNode.insertBefore(clonedUnrevealedSlide, slide.nextSibling);
     }
+
+    // Nos guardamos las referencias de los clones para poder borrarlos después del print
+    clonedSlides = [clonedUnrevealedSlide, clonedRevealedSlide];
   }
 
   function removeClonedNodesAfterPrint(slide: HTMLElement | null) {
@@ -366,21 +377,8 @@
     margin: 0.5rem 0 0 1rem;
   }
 
-  /* Note: We need to use :global(.markdoc-slide):has() because in print we need to select the entire slides, not just the questions inside */
-  /* Note 2: The :global keyword here tells Svelte to trust us that .print-question-clone will be there even if it can't notice because we are injecting that class via JS */
-  /* Reference: https://svelte.dev/docs/svelte/compiler-warnings#css_unused_selector */
-  @media screen {
-    /* Nos aseguramos de que nunca se vean las slides clonadas en pantalla, solo se verán en print */
-    :global(.markdoc-slide):has(.question-container:global(.print-question-clone)) {
-      display: none !important;
-    }
-  }
-
+  /* NOTE: We don't control the visibility of the original and cloned slides from CSS here because, since the slides are parent elements, we would need to use the :has() pseudo-class, which is not supported in all browsers yet. Instead, we inject global CSS classes "print-only" and "no-print" via JS to the original and cloned slide elements, so that the CSS style is apply from the top and works on all browsers */
   @media print {
-    :global(.markdoc-slide):has(.question-container:not(:global(.print-question-clone))) {
-      display: none !important; /* Ocultamos todas las slides originales en print para que se vean solo los clones */
-    }
-
     /* Como en print se fuerza el fondo blanco en el global para ahorrar tinta, le ponemos un emoji de check verde detrás de la respuesta correcta para que se vea bien */
     .question-container.is-revealed .answer-btn.is-correct::after {
       content: ' ✅';
