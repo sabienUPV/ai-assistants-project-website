@@ -297,17 +297,11 @@
   /* Result box styles */
 
   /* NOTE: We handle the visibility of the result box with CSS, because we want the explanations to be displayed on print, regardless of whether the question is revealed or not. However, its title and correct answer explanation are controlled by Svelte instead because we never want to display that on print */
-
-  /* CSS fade animation for the result box on revealed */
   .result-box {
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    display: none; /* Hidden by default */
   }
-
   .question-container.is-revealed .result-box {
-    opacity: 1;
-    transform: translateY(0);
+    display: block; /* Show when the question is revealed */
   }
 
   .result-box {
