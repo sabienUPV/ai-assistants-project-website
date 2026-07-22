@@ -24,7 +24,8 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
 
 <style>
   /* Only show the slide if it is not hidden by the Slideshow component (which controls which slide is visible) */
-  .markdoc-slide:not(.slide-hidden) {
+  /* (Note: we use :where() so that the print style below can override this style) */
+  .markdoc-slide:where(:not(.slide-hidden)) {
     display: grid; /* Usamos grid para poder centrar el contenido fácilmente */
   }
 

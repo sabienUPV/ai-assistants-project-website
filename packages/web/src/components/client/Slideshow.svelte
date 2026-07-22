@@ -134,12 +134,14 @@
   (e.g., Question.svelte needs to show hidden slides in print, so if we had inline styles, those would override the child's styles and keep them hidden) */
   /* Note 2: The :global keyword here tells Svelte to trust us that .slide-hidden and .slide-visible will be there even if it can't notice because we are injecting that class via JS */
   /* Reference: https://svelte.dev/docs/svelte/compiler-warnings#css_unused_selector */
-  :global(.slide-hidden) {
-    display: none;
-  }
-  :global(.slide-visible) {
-    display: block;
-    animation: fadeIn 0.3s ease-in-out;
+  @media screen {
+    :global(.slide-hidden) {
+      display: none;
+    }
+    :global(.slide-visible) {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
   }
 
   /* Integrado con tu sistema de diseño y las reglas de accesibilidad */
