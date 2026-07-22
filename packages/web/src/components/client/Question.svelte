@@ -220,9 +220,12 @@
       <summary class="explanations-summary">{localizedTexts?.printAnswerExplanationsLabel || 'Explanation of each answer'}</summary>
       {#each answers as ans, index}
         <p class="explanation" style={!ans.explanation ? "font-style: italic;" : ""}>
-          <span class="answer-number">{index + 1})</span> {ans.explanation || `[${localizedTexts?.printAnswerNoExplanationLabel || 'No explanation available for this answer.'}]`}
+          <span class="answer-number">{index + 1})</span>{ans.explanation || "*"}
         </p>
       {/each}
+      {#if answers.some(ans => !ans.explanation)}
+        <p class="explanation-non-available-note">(*) {localizedTexts?.printAnswerNoExplanationLabel || 'No explanation available for this answer'}</p>
+      {/if}
     </details>
   </div>
 </div>
@@ -375,6 +378,12 @@
 
   .explanations .explanation {
     margin: 0.5rem 0 0 1rem;
+  }
+
+  .explanation-non-available-note {
+    font-style: italic;
+    color: #64748b;
+    margin-top: 0.5rem;
   }
 
   /* NOTE: We don't control the visibility of the original and cloned slides from CSS here because, since the slides are parent elements, we would need to use the :has() pseudo-class, which is not supported in all browsers yet. Instead, we inject global CSS classes "print-only" and "no-print" via JS to the original and cloned slide elements, so that the CSS style is apply from the top and works on all browsers */
