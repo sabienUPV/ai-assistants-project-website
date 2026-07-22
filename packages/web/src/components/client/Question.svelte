@@ -172,7 +172,7 @@
         onclick={() => guess(ans)}
         disabled={status === 'revealed'}
       >
-        {status === 'revealed' ? ((index + 1) + ') ') : ''}{ans.text}
+        <span class="answer-number">{index + 1})</span>{ans.text}
       </button>
     {/each}
   </div>
@@ -193,7 +193,7 @@
       <summary class="explanations-summary">{localizedTexts?.printAnswerExplanationsLabel || 'Explanation of each answer'}</summary>
       {#each answers as ans, index}
         <p class="explanation" style={!ans.explanation ? "font-style: italic;" : ""}>
-          {index + 1}) {ans.explanation || `[${localizedTexts?.printAnswerNoExplanationLabel || 'No explanation available for this answer.'}]`}
+          <span class="answer-number">{index + 1})</span> {ans.explanation || `[${localizedTexts?.printAnswerNoExplanationLabel || 'No explanation available for this answer.'}]`}
         </p>
       {/each}
     </details>
@@ -252,6 +252,19 @@
     background-color: #e2e8f0;
     border-color: #94a3b8;
     transform: translateY(-2px);
+  }
+
+  .answer-number {
+    font-weight: bold;
+    margin-right: 0.5rem;
+  }
+
+  .answer-number {
+    display: none; /* Ocultamos el número de respuesta por defecto */
+  }
+
+  .question-container.is-revealed .answer-number {
+    display: inline; /* Mostramos el número de respuesta si la pregunta está revelada */
   }
 
   /* Estados revelados (Estilos semánticos) */
@@ -342,6 +355,12 @@
     /* Como en print se fuerza el fondo blanco en el global para ahorrar tinta, le ponemos un emoji de check verde detrás de la respuesta correcta para que se vea bien */
     .question-container.is-revealed .answer-btn.is-correct::after {
       content: ' ✅';
+    }
+
+    /* NOTE: The :global keyword here tells Svelte to trust us that .print-answer-key will be there even if it can't notice because we are injecting that class via JS */
+    /* Reference: https://svelte.dev/docs/svelte/compiler-warnings#css_unused_selector */
+    .question-container:where(:global(.print-answer-key)) .answer-number {
+      display: inline; /* Mostramos el número de respuesta siempre en print */
     }
 
     /* Ocultamos el icono del details de explicaciones en print para que no se vea el triángulo (ya que no aporta nada en print) */
