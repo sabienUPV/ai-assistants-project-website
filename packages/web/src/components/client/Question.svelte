@@ -219,12 +219,12 @@
     <details class="explanations">
       <summary class="explanations-summary">{localizedTexts?.printAnswerExplanationsLabel || 'Explanation of each answer'}</summary>
       {#each answers as ans, index}
-        <p class="explanation" style={!ans.explanation ? "font-style: italic;" : ""}>
+        <p class="explanation" class:not-available={!ans.explanation}>
           <span class="answer-number">{index + 1})</span>{ans.explanation || "*"}
         </p>
       {/each}
       {#if answers.some(ans => !ans.explanation)}
-        <p class="explanation-non-available-note">(*) {localizedTexts?.printAnswerNoExplanationLabel || 'No explanation available for this answer'}</p>
+        <p class="explanations-non-available-note not-available">(*) {localizedTexts?.printAnswerNoExplanationLabel || 'No explanation available for this answer'}</p>
       {/if}
     </details>
   </div>
@@ -380,9 +380,16 @@
     margin: 0.5rem 0 0 1rem;
   }
 
-  .explanation-non-available-note {
-    font-style: italic;
+  .explanations .not-available {
     color: #64748b;
+  }
+
+  /* If the explanation is not available, we remove the bold from the answer number to make it less prominent */
+  .explanations .explanation.not-available .answer-number {
+    font-weight: normal;
+  }
+
+  .explanations-non-available-note {
     margin-top: 0.5rem;
   }
 
