@@ -19,8 +19,8 @@ const { prompt, answers } = Astro.props;
 
 {/* The slide starts locked until the question is answered */}
 <Slide title={"📝 " + t('quiz_question_label')} locked={true}>
-  <QuestionInteractive 
-    client:visible 
+  <QuestionInteractive
+    client:load
     prompt={prompt}
     answers={answers}
     localizedTexts={localizedTexts}
