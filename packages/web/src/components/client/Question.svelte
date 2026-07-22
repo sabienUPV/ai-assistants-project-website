@@ -65,56 +65,25 @@
 
   function cloneNodeForAnswerKeyBeforePrint(slide: HTMLElement | null) {
     if (!slide) return;
+
+    // Añadimos las siguientes clases CSS al container original
+    // (para que lo clone y no tengamos que buscar otra vez en el DOM el container clonado, que es más costoso)
+    // para que se vea correctamente en el print:
+    // 1. print-answer-key: para que no muestre los otros nodos dimmed en el print
+    // 2. is-revealed: para que muestre la respuesta correcta en el nodo clonado
+    container.classList.add('print-answer-key', 'is-revealed');
     
     // Clonamos el nodo entero de la slide con sus hijos (deep clone)
     clonedSlide = slide.cloneNode(true) as HTMLElement;
-
-    // Buscamos el contenedor de la pregunta dentro del clon
-    const clonedContainer = clonedSlide.querySelector<HTMLElement>('.question-container');
-    if (!clonedContainer) return;
-
-    // Añadimos las siguientes clases CSS al container clonado para que se vea correctamente en el print:
-    // 1. print-answer-key: para que no muestre los otros nodos dimmed en el print
-    // 2. is-revealed: para que muestre la respuesta correcta en el nodo clonado
-    clonedContainer.classList.add('print-answer-key', 'is-revealed');
-
-    // En el clon, buscamos cada botón de respuesta y al texto de la respuesta la ponemos delante un número de orden (1, 2, 3...) para que se vea en el print y se sepa qué explicación corresponde a cada respuesta.
-    const clonedAnswerButtons = clonedContainer.querySelectorAll<HTMLButtonElement>('.answer-btn');
-    clonedAnswerButtons.forEach((btn, index) => {
-      // Añadimos un span delante del texto de la respuesta con el número de orden
-      const orderSpan = document.createElement('span');
-      orderSpan.textContent = `${index + 1}) `;
-      orderSpan.style.fontWeight = 'bold';
-      btn.insertBefore(orderSpan, btn.firstChild);
-    });
-
-    // Añadimos una result-box custom al clon para que muestre las explicaciones de TODAS las respuestas en el print (correctas e incorrectas)
-    const printResultBox = document.createElement('div');
-    printResultBox.classList.add('result-box');
-
-    // Añadimos un título al result-box
-    const printResultHeading = document.createElement('h4');
-    printResultHeading.textContent = localizedTexts?.printAnswerExplanationsLabel || 'Explanation of each answer';
-    printResultHeading.classList.add('result-heading');
-    printResultBox.appendChild(printResultHeading);
-
-    // Añadimos un párrafo por cada respuesta con su explicación (si la tiene)
-    answers.forEach((ans, index) => {
-      const printExplanation = document.createElement('p');
-      printExplanation.classList.add('explanation');
-      printExplanation.textContent = `${index + 1}) ${ans.explanation || `[${localizedTexts?.printAnswerNoExplanationLabel || 'No explanation available for this answer.'}]`}`;
-      if (!ans.explanation) {
-        // Si no hay explicación, ponemos el mensaje en cursiva para que se vea claro que no hay explicación disponible sin tener que leer el texto completo cada vez
-        printExplanation.style.fontStyle = 'italic';
-      }
-      printResultBox.appendChild(printExplanation);
-    });
-
-    clonedContainer.appendChild(printResultBox);
     
     // Nos aseguramos de que el contenedor original no tenga la clase is-revealed para que no se vea revelado en el print
     // (ya que el clon es el que se mostrará revelado)
-    container.classList.remove('is-revealed');
+    // Además, quitamos la clase temporal print-answer-key que era solo para el clon
+    container.classList.remove('print-answer-key', 'is-revealed');
+
+    // Nos aseguramos de que el details de explicaciones esté abierto en el clon para que se vea en el print
+    const detailsElement = clonedSlide.querySelector<HTMLDetailsElement>('details.explanations');
+    if (detailsElement) detailsElement.open = true;
 
     // Inyectamos la slide clonada justo debajo de la original
     slide.parentNode?.insertBefore(clonedSlide, slide.nextSibling);
@@ -194,7 +163,7 @@
   <h3 class="question-title">{prompt}</h3>
 
   <div class="buttons">
-    {#each answers as ans}
+    {#each answers as ans, index}
       <button 
         class="answer-btn"
         // Note: We know this reveals the answer if you check the CSS. If you found this, good for you. But since our courses are public, for educational purposes, and don't give any qualifications, we don't need anti-cheat measures.
@@ -203,22 +172,32 @@
         onclick={() => guess(ans)}
         disabled={status === 'revealed'}
       >
-        {ans.text}
+        {status === 'revealed' ? ((index + 1) + ') ') : ''}{ans.text}
       </button>
     {/each}
   </div>
 
-  {#if status === 'revealed' && selectedAnswer}
-    <div class="result-box" in:fade={{ duration: 300 }}>
-      <h4 class="result-heading" class:success={selectedAnswer.isCorrect} class:error={!selectedAnswer.isCorrect}>
+  <div class="result-box" in:fade={{ duration: 300 }}>
+    {#if status === 'revealed' && selectedAnswer}
+      <h4 class="result-selected-heading" class:success={selectedAnswer.isCorrect} class:error={!selectedAnswer.isCorrect}>
         {selectedAnswer.isCorrect ? ('✅ ' + (localizedTexts?.correctAnswerLabel || 'Correct Answer!')) : ('❌ ' + (localizedTexts?.incorrectAnswerLabel || 'Incorrect Answer'))}
       </h4>
       
       {#if selectedAnswer.explanation}
         <p class="explanation">{selectedAnswer.explanation}</p>
       {/if}
-    </div>
-  {/if}
+    {/if}
+
+    <!-- Note: We know that you can check the explanations if you check the CSS or print version, which could give away the answers. But since our courses are public, for educational purposes, and don't give any qualifications, we don't need anti-cheat measures. So if you cheat, it's your responsibility -->
+    <details class="explanations">
+      <summary class="explanations-summary">{localizedTexts?.printAnswerExplanationsLabel || 'Explanation of each answer'}</summary>
+      {#each answers as ans, index}
+        <p class="explanation" style={!ans.explanation ? "font-style: italic;" : ""}>
+          {index + 1}) {ans.explanation || `[${localizedTexts?.printAnswerNoExplanationLabel || 'No explanation available for this answer.'}]`}
+        </p>
+      {/each}
+    </details>
+  </div>
 </div>
 
 <style>
@@ -302,6 +281,16 @@
   }
 
   /* Result box styles */
+
+  /* NOTE: We handle the visibility of the result box with CSS, because we want the explanations to be displayed on print, regardless of whether the question is revealed or not. However, its title and correct answer explanation are controlled by Svelte instead because we never want to display that on print */
+  .result-box {
+    display: none; /* Hidden by default, shown when revealed */
+  }
+
+  .question-container.is-revealed .result-box {
+    display: block;
+  }
+
   .result-box {
     background: #f8fafc;
     border-left: 4px solid #3b82f6;
@@ -312,13 +301,13 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
 
-  .result-heading {
+  .result-selected-heading {
     margin: 0 0 0.5rem 0;
     font-size: 1.2rem;
   }
 
-  .result-heading.success { color: #166534; }
-  .result-heading.error { color: #991b1b; }
+  .result-selected-heading.success { color: #166534; }
+  .result-selected-heading.error { color: #991b1b; }
 
   .explanation {
     margin: 0;
@@ -327,10 +316,37 @@
     line-height: 1.5;
   }
 
+  .explanations {
+    margin: 0;
+    margin-top: 1rem;
+    font-size: 1.05rem;
+    color: #475569;
+    line-height: 1.5;
+  }
+
+  .explanations .explanations-summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #1e3a8a;
+  }
+
+  .explanations[open] .explanations-summary {
+    color: #1e40af;
+  }
+
+  .explanations .explanation {
+    margin: 0.5rem 0 0 1rem;
+  }
+
   @media print {
-    /* Como en print se fuerza el fondo blanco en el global para ahorrar tinta, le ponemos un emoji de check verde delante a la respuesta correcta para que se vea bien */
+    /* Como en print se fuerza el fondo blanco en el global para ahorrar tinta, le ponemos un emoji de check verde detrás de la respuesta correcta para que se vea bien */
     .question-container.is-revealed .answer-btn.is-correct::after {
       content: ' ✅';
+    }
+
+    /* Ocultamos el icono del details de explicaciones en print para que no se vea el triángulo (ya que no aporta nada en print) */
+    .explanations .explanations-summary::marker {
+      content: '';
     }
   }
 </style>
