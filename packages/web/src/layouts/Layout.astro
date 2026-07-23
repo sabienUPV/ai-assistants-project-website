@@ -93,7 +93,8 @@ const hasSidebar = Astro.slots.has('sidebar');
   .layout-with-sidebar {
     display: grid;
     /* Columna 1: Sidebar, Columna 2: Contenido, Columna 3: Espejo vacío para centrar */
-    grid-template-columns: 280px minmax(0, 1000px) 280px;
+    /* Note: We make the right empty column a bit shorter than the left sidebar so that it feels like the content takes some needed space for itself and doesn't look like it's not making use of available space, while keeping it looking visually centered */
+    grid-template-columns: 280px minmax(0, 1000px) 200px;
     gap: 2rem;
     justify-content: center;
     align-items: start;
