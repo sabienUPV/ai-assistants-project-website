@@ -37,7 +37,7 @@ export async function getStaticPaths() {
 }
 ---
 
-<Layout title={`${course.data.unit}. ${course.data.title}`}>
+<Layout title={`${course.data.unit}. ${course.data.title}`} description={course.data.description} includeAccessibleFonts={true}>
   {/* Table of Contents (on the left thanks to the sidebar slot from Layout.astro - except on mobile) */}
   <TableOfContents slot="sidebar" courses={allCourses} currentUnit={course.data.unit} />
   
@@ -69,9 +69,13 @@ export async function getStaticPaths() {
 </Layout>
 
 <style>
+  :global(#main-content), :global(.sidebar) {
+    /* Protocol 3.1: Accessible fonts for course content: Atkinson Hyperlegible, then Arial, Helvetica, Verdana and Calibri as fallbacks, then Roboto and sans-serif as last resort */
+    font-family: var(--font-atkinson), Arial, Helvetica, Verdana, Calibri, var(--font-roboto), sans-serif;
+  }
+
   .course-container {
     padding: 0 1rem;
-    /* Font-family, font-size, and background are inherited cleanly from global body */
     color: var(--color-text);
     width: 100%;
   }

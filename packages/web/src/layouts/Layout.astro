@@ -25,9 +25,10 @@ interface Props {
 	title: string;
 	description?: string;
 	includeLocaleSelector?: boolean;
+  includeAccessibleFonts?: boolean; // Whether to include accessible fonts (Atkinson Hyperlegible) in the layout. Defaults to false.
 }
 
-const { title, description, includeLocaleSelector = true } = Astro.props;
+const { title, description, includeLocaleSelector = true, includeAccessibleFonts = false } = Astro.props;
 
 // Comprobamos si nos han pasado un slot llamado "sidebar"
 const hasSidebar = Astro.slots.has('sidebar');
@@ -39,6 +40,7 @@ const hasSidebar = Astro.slots.has('sidebar');
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
+		{includeAccessibleFonts && <Font cssVariable="--font-atkinson" preload />}
 		<Font cssVariable="--font-roboto" preload />
 
 		<HeadMeta title={title} description={description} />

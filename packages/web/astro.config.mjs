@@ -18,6 +18,15 @@ export default defineConfig({
       styles: ['normal'], // Only normal style, no italics for better accessibility
       subsets: ['latin', 'latin-ext'] // Only the Latin subset and latin-ext for Croatian characters, which is sufficient for our languages and helps reduce font file size
     },
+    {
+      // Atkinson Hyperlegible: Recommended font for accessibility (see protocol 3.1). Used for course content.
+      name: 'Atkinson Hyperlegible',
+      cssVariable: '--font-atkinson',
+      provider: fontProviders.fontsource(),
+      weights: [400, 700], // Regular and Bold weights
+      styles: ['normal'], // Atkinson Hyperlegible is only available in normal style, NOT italic
+      subsets: ['latin'] // Atkinson Hyperlegible ONLY has a Latin subset. Luckily, it seems to support Croatian characters as well according to the Google Fonts test website (https://fonts.google.com/specimen/Atkinson+Hyperlegible?preview.script=Latn&preview.lang=hr_Latn), so we don't need to include latin-ext for this font
+    }
   ],
 
   i18n: {
