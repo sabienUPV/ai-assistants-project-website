@@ -9,6 +9,7 @@
       nextText?: string;
       prevAriaLabel?: string;
       nextAriaLabel?: string;
+      numberInputLabel?: string;
     };
   }
   const { children, localizedTexts } : Props = $props();
@@ -21,6 +22,25 @@
 
   // Referencia al contenedor HTML
   let container: HTMLElement;
+
+  // Flag para no volver a leer la URL en cada recálculo del $effect
+  let isUrlInitialized = false; 
+
+  // Función centralizada para cambiar de diapositiva de forma segura
+  function jumpToSlide(index: number, updateUrl: boolean = true) {
+    if (slidesCount === 0) return;
+    
+    // Clamp entre 0 y slidesCount - 1
+    currentIndex = Math.max(0, Math.min(index, slidesCount - 1));
+
+    // Actualizamos la URL silenciosamente (usamos índice basado en 1 para que la URL sea más humana, ej: ?slide=2)
+    if (updateUrl && typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('slide', (currentIndex + 1).toString());
+      // replaceState no llena el historial, así no rompemos el botón de "Atrás" del navegador
+      window.history.replaceState(null, '', url);
+    }
+  }
 
   // Función que lee el DOM para saber si la diapositiva actual está bloqueada
   function checkLockStatus() {
@@ -38,7 +58,20 @@
   // Escuchamos la petición de viajar a una diapositiva concreta
   const handleGoToSlide = (e: Event) => {
     const customEvent = e as CustomEvent<{ index: number }>;
-    currentIndex = customEvent.detail.index; // El effect de debajo debería activarse al cambiar currentIndex y actualizar la visibilidad de las slides
+    jumpToSlide(customEvent.detail.index); // El effect de debajo debería activarse al cambiar currentIndex y actualizar la visibilidad de las slides
+  };
+
+  // Manejador para el input numérico manual
+  const handleManualInput = (e: Event) => {
+    const target = e.currentTarget as HTMLInputElement;
+    const parsed = parseInt(target.value, 10);
+    
+    if (!isNaN(parsed)) {
+      jumpToSlide(parsed - 1); // Restamos 1 porque el usuario inserta un número [1..n] y currentIndex es [0..n-1]
+    }
+    
+    // Forzamos que el input se actualice visualmente si el usuario intentó poner un número fuera de los límites
+    target.value = (currentIndex + 1).toString();
   };
 
   // Se ejecuta cuando el componente se monta en el navegador
@@ -48,6 +81,21 @@
     // Buscamos todas las diapositivas estáticas generadas por Astro
     const slides = container.querySelectorAll('.markdoc-slide');
     slidesCount = slides.length;
+
+    // Leemos la URL solo la primera vez que se monta el componente
+    if (!isUrlInitialized) {
+      const params = new URLSearchParams(window.location.search);
+      const slideParam = params.get('slide');
+      if (slideParam) {
+        const parsed = parseInt(slideParam, 10);
+        if (!isNaN(parsed)) {
+          // Restamos 1 porque el usuario inserta un número [1..n] y currentIndex es [0..n-1]
+          // Pasamos updateUrl=false para no hacer un replaceState redundante en la carga inicial
+          jumpToSlide(parsed - 1, false);
+        }
+      }
+      isUrlInitialized = true;
+    }
 
     // Lógica de visibilidad puramente DOM
     slides.forEach((slide, index) => {
@@ -86,8 +134,8 @@
     };
   });
 
-  function next() { if (currentIndex < slidesCount - 1) currentIndex++; }
-  function prev() { if (currentIndex > 0) currentIndex--; }
+  function next() { jumpToSlide(currentIndex + 1); }
+  function prev() { jumpToSlide(currentIndex - 1); }
 </script>
 
 <div class="slideshow-wrapper">
@@ -108,7 +156,16 @@
       </button>
 
       <div class="counter" aria-live="polite">
-        {slidesCount > 0 ? currentIndex + 1 : 0} / {slidesCount}
+        <input 
+          type="number" 
+          class="slide-input" 
+          value={currentIndex + 1} 
+          min="1" 
+          max={slidesCount} 
+          onchange={handleManualInput}
+          aria-label={localizedTexts?.numberInputLabel || 'Jump to slide number'}
+        /> 
+        / {slidesCount}
       </div>
 
       <button 
@@ -204,11 +261,36 @@
   }
 
   .counter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
     font-size: 1.2rem;
     font-weight: bold;
     color: var(--color-logo-dark-grey);
     padding-inline: 1rem;
     white-space: nowrap;
+  }
+
+  /* Estilos para que el input parezca texto normal hasta que interactúas con él */
+  .slide-input {
+    font-family: inherit;
+    width: 4ch;
+    text-align: right;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--color-logo-dark-grey);
+    background-color: transparent;
+    border: 2px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 0.2rem;
+    transition: all 0.2s ease;
+  }
+
+  .slide-input:hover, .slide-input:focus {
+    
+    background-color: white;
+    outline: none;
   }
 
   /* --- RESPONSIVE MOBILE --- */
