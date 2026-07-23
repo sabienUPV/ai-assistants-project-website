@@ -14,7 +14,7 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
 {/* Svelte buscará todos los divs con la clase 'markdoc-slide' */}
 <div class="markdoc-slide" data-locked={locked ? 'true' : 'false'}>
   <div class="slide-container">
-    {title && <h2 class="slide-title">{title}</h2>}
+    {title && <h1 class="slide-title">{title}</h1>}
   
     <div class="slide-rich-text" style={{"place-items": gridAlign}}>
       <slot /> {/* Aquí Astro inyecta el HTML compilado de Markdoc (negritas, listas, etc.) */}
@@ -34,6 +34,9 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
     place-items: center; /* Centra el contenido horizontal y verticalmente */
 
     min-width: 0; /* Evita que el contenido se desborde del contenedor */
+
+    /* We use Arial as the main font for slides following protocol 3.1, falling back to Roboto and sans-serif if Arial is not available */
+    font-family: Arial, var(--font-roboto), sans-serif;
   }
 
   .slide-container {
@@ -43,10 +46,23 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
 
   .slide-title {
     text-align: center;
-    font-size: 2rem;
     color: var(--color-secondary); /* Azul oscuro corporativo */
     margin: 0;
     margin-bottom: 2rem;
+  }
+
+
+
+  /* Note: We convert pt to rem for font sizes so that they scale with the user's font size settings, following accessibility best practices */
+  .slide-title, .slide-rich-text :global(h1) {
+    /* Protocol 3.1: Main Titles: 60pt, bold */
+    font-size: 5rem; /* 60pt */
+    font-weight: bold; /* 700/bold */
+  }
+  .slide-rich-text :global(h2) {
+    /* Protocol 3.1: Subtitles: 50pt, bold */
+    font-size: 4.167rem; /* 50pt */
+    font-weight: bold; /* 700/bold */
   }
 
   .slide-rich-text {
@@ -56,6 +72,21 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
 
     min-width: 0; /* Evita que el contenido se desborde del contenedor */
     overflow-wrap: break-word; /* Evita que URLs largas o palabras gigantes rompan la pantalla en móviles */
+  }
+
+  /* Note: We NEED to use :global(*) here because Markdoc generates HTML elements dynamically, so the component data-attribute that Astro applies if we don't use :global() gets ignored by the Markdoc elements. So the only way to make it apply properly is to use :global(*) here */
+  .slide-rich-text, .slide-rich-text :global(*) {
+    /* Protocol 3.1: Body Text/Bullets: 45pt, regular */
+    font-size: 3.75rem; /* 45pt */
+    font-weight: normal; /* 400/regular */
+  }
+
+  .slide-rich-text :global(h3),
+  .slide-rich-text :global(h4),
+  .slide-rich-text :global(h5),
+  .slide-rich-text :global(h6),
+  .slide-rich-text :global(strong) {
+    font-weight: bold; /* Revert to bold for headings and strong text (previous selector applied normal weight to almost everything) */
   }
 
   @media print {
