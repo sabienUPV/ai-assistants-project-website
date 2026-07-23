@@ -42,7 +42,7 @@ export const markdocTagAttributes = {
       align: {
         type: String,
         description: "The alignment of the slide.",
-        default: "center" satisfies SlideSchema['align'],
+        default: "left" satisfies SlideSchema['align'],
         matches: [...slideAlignValues],
       },
     } satisfies Record<keyof SlideSchema, SchemaAttribute>,

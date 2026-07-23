@@ -5,7 +5,7 @@ interface Props extends SlideSchema {
   locked?: boolean; // Si la diapositiva está bloqueada, el usuario no podrá avanzar hasta que se desbloquee
 }
 
-const { title, align = 'center', locked = false } = Astro.props;
+const { title, align = 'left', locked = false } = Astro.props;
 
 // Mapeamos los valores de alineación para que CSS Grid los entienda
 const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'center';
