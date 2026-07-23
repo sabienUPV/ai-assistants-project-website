@@ -132,14 +132,14 @@ export async function getStaticPaths() {
 
   .course-content :global(:where(p)) {
     /* Respects your global text alignment (left) and accessibility choices */
-    font-size: 1.05rem;
+    font-size: 1.34rem; /* 16pt size for better readability */
     margin-bottom: 1.6rem;
   }
 
   .course-content :global(:where(h2)) {
     /* Overrides the global h2 centered text inside the reading area for better accessibility */
     text-align: left;
-    font-size: 1.75rem;
+    font-size: 2.25rem;
     color: var(--color-secondary); /* Dark blue corporate identity */
     margin-top: 2.5rem;
     margin-bottom: 1rem;
@@ -147,7 +147,7 @@ export async function getStaticPaths() {
 
   .course-content :global(:where(h3)) {
     text-align: left;
-    font-size: 1.3rem;
+    font-size: 1.75rem;
     color: var(--color-dark-blue);
     margin-top: 2rem;
     margin-bottom: 0.75rem;

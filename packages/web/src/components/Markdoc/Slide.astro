@@ -62,6 +62,12 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
     font-weight: bold; /* 700/bold */
   }
 
+  .slide-rich-text :global(h3) {
+    /* The protocol only covers "titles" and "subtitles", so we make h3 a bit bigger than the body text */
+    font-size: 3.5rem; /* 42pt */
+    font-weight: bold; /* 700/bold */
+  }
+
   .slide-rich-text {
     width: 100%; /* Ocupa todo el ancho disponible */
     display: grid; /* Usamos grid para poder centrar el contenido fácilmente */
@@ -74,7 +80,8 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
   /* Note: We NEED to use :global(*) here because Markdoc generates HTML elements dynamically, so the component data-attribute that Astro applies if we don't use :global() gets ignored by the Markdoc elements. So the only way to make it apply properly is to use :global(*) here */
   .slide-rich-text, .slide-rich-text :global(*) {
     /* Protocol 3.1: Body Text/Bullets: 45pt, regular */
-    font-size: 3.75rem; /* 45pt */
+    /* NOTE: 45pt is 3.75rem. For a PPT presentation it looks good, but for a web page it is too big, so we reduce it to 36pt (3rem) for better readability on the web */
+    font-size: 3rem; /* 36pt */
     font-weight: normal; /* 400/regular */
   }
 
