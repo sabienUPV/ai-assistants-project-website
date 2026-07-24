@@ -6,7 +6,7 @@ import { markdocTagAttributes } from '@markdoc-tags';
 import React from 'react';
 import { locales, type Locale } from '@languages';
 import { slideAlignValues, type SlideSchema } from '@schemas/slide';
-import type { ImageSchema } from '@schemas/image';
+import type { ImageContainerSchema } from '@schemas/image';
 import { calculateImageDimensionsForCrop } from '@core-utils/image';
 
 // 1. CREAMOS EL TIPO MAPEADO
@@ -167,16 +167,10 @@ const createComponents = (collectionName: string) => ({
   }),
   // Note: We cannot call it "image" because Keystatic already has a built-in "image" component, so we call it "customImage" just for Markdoc and Keystatic
   // (but in the UI and Astro component we still call it "Image" for clarity)
-  customImage: block({
-    label: 'Image',
-    description: markdocTagAttributes.customImage.description,
+  imageContainer: wrapper({
+    label: 'Image Container',
+    description: markdocTagAttributes.imageContainer.description,
     schema: {
-      image: fields.image({
-        label: 'Source Image',
-        validation: { isRequired: true },
-        ...getImageSchemaOptions(collectionName)
-      }),
-      alt: fields.text({ label: 'Alternative Text', validation: { isRequired: true } }),
       title: fields.text({ label: 'Title' }),
       width: fields.number({ label: 'Width (px)' }),
       height: fields.number({ label: 'Height (px)' }),
@@ -197,72 +191,99 @@ const createComponents = (collectionName: string) => ({
         label: 'Left Crop (%)',
         validation: { min: 0, max: 100 },
       }),
-    } satisfies Record<keyof ImageSchema, ComponentSchema>,
+    } satisfies Record<keyof ImageContainerSchema, ComponentSchema>,
     ContentView: (props) => {
-      const { image, alt, title, width, height, cropTop, cropRight, cropBottom, cropLeft } = props.value || {};
+      // Get the NodeViewContentDOM element that contains the children of this component (which includes the image HTML node) from node.children
+      const contentNode = React.isValidElement<{node: ParentNode}>(props.children) ? props.children?.props?.node : null;
+      // Find if there is only one <img> child node that has a src attribute
+      // (looking at the values while debugging, Keystatic also has an internal <img> node that is used for the editor, but it does not have a src attribute, so we can safely ignore it)
+      const imageChildren = contentNode?.querySelectorAll('img[src]');
+      const hasMoreThanOneImageChild = imageChildren && imageChildren.length > 1;
+      const hasAnyText = contentNode?.textContent && contentNode.textContent.length > 0;
 
-      // Determinamos qué src usar de forma segura
-      let imageSrc;
-      if (image) {
-        if (typeof image === 'string') {
-          // 1. La imagen ya estaba guardada, es una ruta normal
-          imageSrc = image;
-        } else if (image.data) {
-          // 2. La imagen está recién subida al editor, creamos el Blob dinámico
-          imageSrc = URL.createObjectURL(
-            new Blob([new Uint8Array(image.data)], { type: 'image/' + image.extension })
-          );
-        }
-      }
-
-      const { aspectRatio : aspectRatioFromCrop, scaleX, scaleY, shiftX, shiftY } = calculateImageDimensionsForCrop(
-        width || 800, // Default width if not provided
-        height || 600, // Default height if not provided
-        cropTop ?? 0,
-        cropRight ?? 0,   
-        cropBottom ?? 0,
-        cropLeft ?? 0
-      );
-      
-      // Creamos el contenedor (Wrapper)
       return React.createElement(
         'div',
         {
           style: {
-            position: 'relative',
-            overflow: 'hidden', // Las tijeras mágicas
-            // For the aspect ratio, if the user has provided both a width and height,
-            // we don't want to use the calculated aspect ratio from the crop, because that would distort the image,
-            // we want to use the user-provided width and height to determine the aspect ratio.
-            // If the user has not provided both a width and height, we fall back to the calculated aspect ratio from the crop.
-            aspectRatio: width && height ? (width / height) : aspectRatioFromCrop,
-            width: width ? `${width}px` : '100%',
-            maxWidth: '100%',
-            border: '1px solid #e0e0e0', // El borde ahora se queda a salvo
-            borderRadius: '4px',
-            display: imageSrc ? 'block' : 'none',
-            margin: '1rem auto'
-          }
+            border: '2px dashed #cbd5e1',
+            padding: '1rem',
+            borderRadius: '8px',
+            backgroundColor: '#f8fafc',
+          },
         },
-        // Creamos la imagen por dentro
-        React.createElement('img', {
-          src: imageSrc,
-          alt: alt || '',
-          title: title || '',
-          style: {
-            position: 'absolute',
-            maxWidth: 'none', // Vital para que crezca más del 100%
-            objectFit: 'fill',
-            
-            // Aplicamos el tamaño gigante y el desplazamiento
-            width: `${scaleX}%`,
-            height: `${scaleY}%`,
-            left: `-${shiftX}%`,
-            top: `-${shiftY}%`
-          }
-        })
+        // The warning banner
+        // (only show it if either there are no children, or if there are children but none of them is an image)
+        hasMoreThanOneImageChild || hasAnyText
+          ? React.createElement(
+            'div',
+            {
+              contentEditable: false, // Evita que el usuario edite el título directamente en la cabecera
+              style: {
+                userSelect: 'none', // Evita que el usuario seleccione el texto por error
+                marginBottom: '1rem',
+                padding: '0.75rem',
+                backgroundColor: '#fef2f2',
+                color: '#991b1b',
+                borderLeft: '4px solid #ef4444',
+                borderRadius: '4px',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+              },
+            },
+            '⚠️ ',
+            React.createElement('strong', null, 'Warning! '),
+            'Place ONLY ONE IMAGE here. Anything other than a single image will be completely ignored and not rendered on the website.'
+          )
+          : undefined,
+        // The "magic" editable area where the editor pastes the image
+        React.createElement(
+          'div',
+          { 
+            style: { 
+              position: 'relative', // Required to anchor the absolute watermark
+              minHeight: '150px', 
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '4px',
+            } 
+          },
+          // 1. The Background Watermark
+          React.createElement(
+            'span',
+            {
+              style: {
+                position: 'absolute',
+                color: '#cbd5e1', // Light slate gray
+                fontSize: '1.5rem',
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                pointerEvents: 'none', // Vital: Lets the user click and paste *through* the text
+                userSelect: 'none', // Prevents accidentally highlighting the watermark
+                zIndex: 0,
+              }
+            },
+            'Drop Image Here'
+          ),
+          // 2. The Editable Children Area
+          React.createElement(
+            'div',
+            {
+              style: {
+                position: 'relative',
+                zIndex: 1, // Ensures the pasted image stays on top of the watermark
+                width: '100%',
+                height: '100%',
+              }
+            },
+            props.children
+          )
+        )
       );
-    }
+    },
   }),
   quiz: repeating({
     label: 'Quiz',

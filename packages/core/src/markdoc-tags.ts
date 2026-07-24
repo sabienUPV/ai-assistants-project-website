@@ -1,7 +1,8 @@
-import { component, type AstroMarkdocConfig } from "@astrojs/markdoc/config";
+import { component, Markdoc, type AstroMarkdocConfig } from "@astrojs/markdoc/config";
 import type { SchemaAttribute } from "@markdoc/markdoc";
 import { slideAlignValues, type SlideSchema } from "./schemas/slide";
-import type { ImageSchema } from "./schemas/image";
+import type { ImageContainerSchema } from "./schemas/image";
+import Image from "./components/Markdoc/Image.astro";
 
 type Project = 'web' | 'admin';
 type AstroTagConfig = NonNullable<AstroMarkdocConfig['tags']>[string];
@@ -54,24 +55,12 @@ export const markdocTagAttributes = {
   column: {
     description: "Define a single column for a columns layout component.",
   },
-  // Note: We cannot call it "image" because Keystatic already has a built-in "image" component, so we call it "customImage" just for Markdoc and Keystatic
-  // (but in the UI and Astro component we still call it "Image" for clarity)
-  customImage: {
-    description: "Render an optimized image component, allowing for further customization (e.g. width, height).",
+  imageContainer: {
+    description: "Set an image container to be able to customize the given image (e.g. width, height, crop). Important: You must ONLY provide a SINGLE image inside this container. Anything else will be ignored and not rendered on the website.",
     attributes: {
-      image: {
-        type: String,
-        required: true,
-        description: "The image to display.",
-      },
-      alt: {
-        type: String,
-        required: true,
-        description: "The alternative text for the image.",
-      },
       title: {
         type: String,
-        description: "The title of the image.",
+        description: "The title of the image, for accessibility purposes (e.g. 'A beautiful landscape').",
       },
       width: {
         type: Number,
@@ -97,7 +86,7 @@ export const markdocTagAttributes = {
         type: Number,
         description: "Percentage to crop from the left side of the image (0-100).",
       },
-    } satisfies Record<keyof ImageSchema, SchemaAttribute>,
+    } satisfies Record<keyof ImageContainerSchema, SchemaAttribute>,
   },
   quiz: {
     description: "Render a quiz component with the provided questions.",
@@ -197,9 +186,57 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
       ...markdocTagAttributes.column,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Column.astro'),
     },
-    customImage: {
-      ...markdocTagAttributes.customImage,
-      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Image.astro'),
+    imageContainer: {
+      ...markdocTagAttributes.imageContainer,
+      transform(node, config) {
+        // Obtain the attributes that the user configured in Keystatic (width, cropTop, etc.)
+        const attributes = node.transformAttributes(config);
+
+        // console.log('imageContainer node:', node);
+        // console.log('imageContainer attributes:', attributes);
+        
+        let childImageSrc = null;
+        let childImageAlt = null;
+
+        // Recursive function to find the first markdown image inside the container and extract its src and alt attributes.
+        // Any other elements inside, including other images, will be ignored.
+        function findImage(n : typeof node) {
+          // console.log('findImage node:', n);
+          if (n.type === 'image') {
+            childImageSrc = n.attributes.src;
+            childImageAlt = n.attributes.alt;
+            return true;
+          }
+          if (n.children) {
+            for (const child of n.children) {
+              if (findImage(child)) return true;
+            }
+          }
+          return false;
+        }
+
+        findImage(node);
+
+        // console.log('childImageSrc:', childImageSrc);
+        // console.log('childImageAlt:', childImageAlt);
+
+        // Return a new Tag node for Astro,
+        // merging the crop attributes with the src of the image.
+        const newTag = new Markdoc.Tag(
+          // NOTE: Even though TypeScript complains because the Image component is an Astro component and Markdoc's Tag constructor expects a string for the tag name, we can cast it to 'any' to bypass the type check. This is safe because we know that the Image component will be correctly resolved by Astro's Markdoc integration at runtime.
+          // We found a code reference in Astro's Markdoc integration's own source code that does the same thing, which shows that this is possible:
+          // (Reference: https://github.com/withastro/astro/blob/b01a6921cd8be574db2d82a6d2bbde7c7d319295/packages/integrations/markdoc/src/runtime-assets-config.ts#L19)
+          Image as any,
+          {
+            ...attributes,
+            imageSrc: childImageSrc,
+            alt: childImageAlt,
+          },
+          [] // By returning an empty array, we ensure that the original children of the imageContainer are not rendered, effectively ignoring any other content inside the container. And because we are adding the image src and alt as attributes to the imageContainer tag, the Image.astro component can then render the image with the specified attributes.
+        );
+        // console.log('New tag:', newTag);
+        return newTag;
+      }
     },
     quiz: {
       ...markdocTagAttributes.quiz,
