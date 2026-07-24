@@ -5,7 +5,7 @@ import { Image } from 'astro:assets';
 
 interface Props extends ImageSchema {}
 
-const { image: imageSrc, alt, title, width, height, cropTop = 0, cropRight = 0, cropBottom = 0, cropLeft = 0 } = Astro.props;
+const { imageSrc, alt, title, width, height, cropTop = 0, cropRight = 0, cropBottom = 0, cropLeft = 0 } = Astro.props;
 
 // Astro's <Image /> component requires the actual imported file object for local files in the `src` directory, not just a string path.
 // We use import.meta.glob to dynamically find the image object based on the string path Keystatic gives us.

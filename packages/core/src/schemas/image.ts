@@ -1,6 +1,4 @@
-export type ImageSchema = {
-  image: string;
-  alt: string;
+export interface ImageContainerSchema {
   title?: string;
   width?: number;
   height?: number;
@@ -9,4 +7,9 @@ export type ImageSchema = {
   cropRight?: number;
   cropBottom?: number;
   cropLeft?: number;
+};
+
+export interface ImageSchema extends ImageContainerSchema {
+  imageSrc: string;
+  alt?: string;
 };
