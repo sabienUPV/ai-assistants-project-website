@@ -225,7 +225,8 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
         const newTag = new Markdoc.Tag(
           // NOTE: We cannot use this.render directly here because of is a known issue in @astrojs/markdoc that has been fixed but not yet released.
           // This is the workaround, as indicated by the issue OP, until the fix is released and we can use this.render directly.
-          // See: https://github.com/withastro/astro/issues/17458 
+          // (See: https://github.com/withastro/astro/issues/17458)
+          // (also see a test case from the Astro repo that demonstrates this issue: https://github.com/withastro/astro/blob/b01a6921cd8be574db2d82a6d2bbde7c7d319295/packages/integrations/markdoc/test/fixtures/render-this-context/markdoc.config.ts)
           config.tags?.imageContainer?.render,
           {
             ...attributes,
