@@ -2,7 +2,6 @@ import { component, Markdoc, type AstroMarkdocConfig } from "@astrojs/markdoc/co
 import type { SchemaAttribute } from "@markdoc/markdoc";
 import { slideAlignValues, type SlideSchema } from "./schemas/slide";
 import type { ImageContainerSchema } from "./schemas/image";
-import Image from "./components/Markdoc/Image.astro";
 
 type Project = 'web' | 'admin';
 type AstroTagConfig = NonNullable<AstroMarkdocConfig['tags']>[string];
@@ -188,6 +187,7 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
     },
     imageContainer: {
       ...markdocTagAttributes.imageContainer,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Image.astro'),
       transform(node, config) {
         // Obtain the attributes that the user configured in Keystatic (width, cropTop, etc.)
         const attributes = node.transformAttributes(config);
@@ -223,10 +223,10 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
         // Return a new Tag node for Astro,
         // merging the crop attributes with the src of the image.
         const newTag = new Markdoc.Tag(
-          // NOTE: Even though TypeScript complains because the Image component is an Astro component and Markdoc's Tag constructor expects a string for the tag name, we can cast it to 'any' to bypass the type check. This is safe because we know that the Image component will be correctly resolved by Astro's Markdoc integration at runtime.
-          // We found a code reference in Astro's Markdoc integration's own source code that does the same thing, which shows that this is possible:
-          // (Reference: https://github.com/withastro/astro/blob/b01a6921cd8be574db2d82a6d2bbde7c7d319295/packages/integrations/markdoc/src/runtime-assets-config.ts#L19)
-          Image as any,
+          // NOTE: We cannot use this.render directly here because of is a known issue in @astrojs/markdoc that has been fixed but not yet released.
+          // This is the workaround, as indicated by the issue OP, until the fix is released and we can use this.render directly.
+          // See: https://github.com/withastro/astro/issues/17458 
+          config.tags?.imageContainer?.render,
           {
             ...attributes,
             imageSrc: childImageSrc,
