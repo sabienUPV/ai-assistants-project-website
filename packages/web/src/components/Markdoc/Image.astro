@@ -11,16 +11,18 @@ const { imageSrc, alt, title, width, height, cropTop = 0, cropRight = 0, cropBot
 
 // Astro's <Image /> component requires the actual imported file object for local files in the `src` directory, not just a string path.
 // We use import.meta.glob to dynamically find the image object based on the string path Keystatic gives us.
-const images = import.meta.glob<{ default: ImageMetadata }>('../../../../admin/src/assets/images/**/*.{jpeg,jpg,png,gif,webp}');
-
-// Make sure the path matches what Keystatic outputs (you might need to adjust this depending on how publicPath is resolving)
-// If Keystatic outputs "@admin-assets/images/...", you'll map that to the actual file path.
 let imagePromise;
-for (const path in images) {
-  // Simple check: if the path from Keystatic (from "/assets" or "@admin-assets" onward) is the end of the actual file path
-  if (path.endsWith(imageSrc.substring(imageSrc.lastIndexOf('assets') + 1))) {
-    imagePromise = images[path]();
-    break;
+if (imageSrc) {
+  const images = import.meta.glob<{ default: ImageMetadata }>('../../../../admin/src/assets/images/**/*.{jpeg,jpg,png,gif,webp}');
+
+  // Make sure the path matches what Keystatic outputs (you might need to adjust this depending on how publicPath is resolving)
+  // If Keystatic outputs "@admin-assets/images/...", you'll map that to the actual file path.
+  for (const path in images) {
+    // Simple check: if the path from Keystatic (from "/assets" or "@admin-assets" onward) is the end of the actual file path
+    if (path.endsWith(imageSrc.substring(imageSrc.lastIndexOf('assets') + 1))) {
+      imagePromise = images[path]();
+      break;
+    }
   }
 }
 
@@ -54,7 +56,9 @@ if (resolvedImage) {
 // (e.g. if the original image is 800px wide, and we scale it to 200%, we need Astro to give us 1600px wide, not 800px wide)
 const astroRequiredWidth = imgScaleX ? Math.round(finalWidth * (imgScaleX / 100)) : finalWidth;
 
-if (!resolvedImage) {
+if (!imageSrc) {
+  console.warn('No imageSrc provided to Image.astro (this can happen if the user added an ImageContainer but did not include an image inside it).');
+} else if (!resolvedImage) {
   console.warn(`Image not found for path: ${imageSrc}`);
 }
 ---

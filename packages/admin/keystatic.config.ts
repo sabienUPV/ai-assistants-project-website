@@ -198,6 +198,7 @@ const createComponents = (collectionName: string) => ({
       // Find if there is only one <img> child node that has a src attribute
       // (looking at the values while debugging, Keystatic also has an internal <img> node that is used for the editor, but it does not have a src attribute, so we can safely ignore it)
       const imageChildren = contentNode?.querySelectorAll('img[src]');
+      const hasNoImageChild = !imageChildren || imageChildren.length === 0;
       const hasMoreThanOneImageChild = imageChildren && imageChildren.length > 1;
       const hasAnyText = contentNode?.textContent && contentNode.textContent.length > 0;
 
@@ -251,23 +252,25 @@ const createComponents = (collectionName: string) => ({
             } 
           },
           // 1. The Background Watermark
-          React.createElement(
-            'span',
-            {
-              style: {
-                position: 'absolute',
-                color: '#cbd5e1', // Light slate gray
-                fontSize: '1.5rem',
-                fontWeight: '700',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                pointerEvents: 'none', // Vital: Lets the user click and paste *through* the text
-                userSelect: 'none', // Prevents accidentally highlighting the watermark
-                zIndex: 0,
-              }
-            },
-            'Drop Image Here'
-          ),
+          hasNoImageChild
+            ? React.createElement(
+              'span',
+              {
+                style: {
+                  position: 'absolute',
+                  color: '#cbd5e1', // Light slate gray
+                  fontSize: '1.5rem',
+                  fontWeight: '700',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  pointerEvents: 'none', // Vital: Lets the user click and paste *through* the text
+                  userSelect: 'none', // Prevents accidentally highlighting the watermark
+                  zIndex: 0,
+                }
+              },
+              'Drop Image Here'
+            )
+          : undefined,
           // 2. The Editable Children Area
           React.createElement(
             'div',
@@ -275,8 +278,6 @@ const createComponents = (collectionName: string) => ({
               style: {
                 position: 'relative',
                 zIndex: 1, // Ensures the pasted image stays on top of the watermark
-                width: '100%',
-                height: '100%',
               }
             },
             props.children
