@@ -71,21 +71,10 @@ export const markdocTagAttributes = {
         description: "The height of the image in pixels.",
         default: 300,
       },
-      cropTop: {
-        type: Number,
-        description: "Percentage to crop from the top side of the image (0-100).",
-      },
-      cropRight: {
-        type: Number,
-        description: "Percentage to crop from the right side of the image (0-100).",
-      },
-      cropBottom: {
-        type: Number,
-        description: "Percentage to crop from the bottom side of the image (0-100).",
-      },
-      cropLeft: {
-        type: Number,
-        description: "Percentage to crop from the left side of the image (0-100).",
+      crop: {
+        type: Object, // Note: Markdoc does not support nested objects in attributes, so we define it as an Object type here, but the actual structure is defined in the ImageContainerSchema interface, and validation is made by both Keystatic and the Image.astro component.
+        description: "Cropping options for the image.",
+        default: {},
       },
     } satisfies Record<keyof ImageContainerSchema, SchemaAttribute>,
   },

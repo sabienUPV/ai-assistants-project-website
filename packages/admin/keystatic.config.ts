@@ -174,26 +174,36 @@ const createComponents = (collectionName: string) => ({
       title: fields.text({ label: 'Title' }),
       width: fields.number({ label: 'Width (px)', defaultValue: markdocTagAttributes.imageContainer.attributes.width.default }),
       height: fields.number({ label: 'Height (px)', defaultValue: markdocTagAttributes.imageContainer.attributes.height.default }),
-      cropTop: fields.integer({
-        label: 'Top Crop (%)',
-        // The field is optional (returns null if empty), but strictly validates 0-100 if a value is provided
-        validation: { min: 0, max: 100 },
-      }),
-      cropRight: fields.integer({
-        label: 'Right Crop (%)',
-        validation: { min: 0, max: 100 },
-      }),
-      cropBottom: fields.integer({
-        label: 'Bottom Crop (%)',
-        validation: { min: 0, max: 100 },
-      }),
-      cropLeft: fields.integer({
-        label: 'Left Crop (%)',
-        validation: { min: 0, max: 100 },
-      }),
+      crop: fields.conditional( // https://keystatic.com/docs/fields/conditional
+        // First, we define a checkbox to drive the yes/no condition
+        fields.checkbox({ label: 'Enable Crop', defaultValue: false }),
+        // Then, we provide a set of fields for both the `true` and `false` scenarios
+        {
+          true: fields.object({
+            cropTop: fields.integer({
+              label: 'Top Crop (%)',
+              validation: { min: 0, max: 100 },
+            }),
+            cropRight: fields.integer({
+              label: 'Right Crop (%)',
+              validation: { min: 0, max: 100 },
+            }),
+            cropBottom: fields.integer({
+              label: 'Bottom Crop (%)',
+              validation: { min: 0, max: 100 },
+            }),
+            cropLeft: fields.integer({
+              label: 'Left Crop (%)',
+              validation: { min: 0, max: 100 },
+            }),
+          }),
+          // Empty fields are useful to show... no fields!
+          false: fields.empty(),
+        }
+      )
     } satisfies Record<keyof ImageContainerSchema, ComponentSchema>,
     ContentView: (props) => {
-      const { title, width, height, cropTop, cropRight, cropBottom, cropLeft } = props.value || {};
+      const { title, width, height, crop } = props.value || {};
 
       // Get the NodeViewContentDOM element that contains the children of this component (which includes the image HTML node) from node.children
       const contentNode = React.isValidElement<{node: ParentNode}>(props.children) ? props.children?.props?.node : null;
@@ -226,8 +236,8 @@ const createComponents = (collectionName: string) => ({
             },
           },
           `Image: ${title || '[Untitled]'} (${width || 300}x${height || 300}px)` + (
-            cropTop || cropRight || cropBottom || cropLeft
-              ? ` (Crop: ${cropTop || 0}% top, ${cropRight || 0}% right, ${cropBottom || 0}% bottom, ${cropLeft || 0}% left)`
+            crop && crop.discriminant && crop.value
+              ? ` (Crop: ${crop.value?.cropTop || 0}% top, ${crop.value?.cropRight || 0}% right, ${crop.value?.cropBottom || 0}% bottom, ${crop.value?. cropLeft || 0}% left)`
               : ''
           )
         ),

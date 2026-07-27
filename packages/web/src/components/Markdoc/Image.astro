@@ -5,7 +5,8 @@ import { Image } from 'astro:assets';
 
 interface Props extends ImageSchema {}
 
-const { imageSrc, alt, title, width, height, cropTop = 0, cropRight = 0, cropBottom = 0, cropLeft = 0 } = Astro.props;
+const { imageSrc, alt, title, width, height, crop } = Astro.props;
+const { cropTop = 0, cropRight = 0, cropBottom = 0, cropLeft = 0 } = crop && crop.discriminant && crop.value ? crop.value : {};
 
 // console.log('Image.astro props:', Astro.props);
 
