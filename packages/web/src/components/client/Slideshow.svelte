@@ -215,7 +215,7 @@
 
   .slideshow-content {
     /* Altura mínima para que los botones de navegación no salten al cambiar de slide */
-    min-height: 400px; 
+    min-height: 400px;
     padding: 2rem;
     position: relative;
     display: grid;
@@ -294,7 +294,11 @@
   }
 
   /* --- RESPONSIVE MOBILE --- */
-  @media (max-width: 480px) {
+  @media (max-width: 550px) {
+    .slideshow-content {
+      padding: 1rem;
+    }
+
     .navigation {
       flex-direction: column;
       gap: 1rem; /* Añade espacio entre los elementos apilados */

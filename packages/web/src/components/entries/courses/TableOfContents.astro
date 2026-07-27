@@ -40,7 +40,7 @@ const sortedCourses = courses.sort((a, b) => {
 });
 ---
 
-<aside class="toc-sidebar" aria-label="Table of contents">
+<div class="toc-sidebar" aria-label="Table of contents">
   <details class="toc-details" open>
     <summary class="toc-header">{t('course_toc_label')}</summary>
     <ul class="toc-list">
@@ -68,7 +68,7 @@ const sortedCourses = courses.sort((a, b) => {
       })}
     </ul>
   </details>
-</aside>
+</div>
 
 <style>
   .toc-sidebar {
@@ -78,8 +78,13 @@ const sortedCourses = courses.sort((a, b) => {
     background-color: var(--color-background);
     border: 1px solid var(--color-logo-light-blue);
     border-radius: 8px;
-    padding: 1.5rem 0;
-    width: 100%;
+    padding: 1rem 0;
+
+    /* Responsive width */
+    width: fit-content; /* Se encoge para abrazar el texto, evitando ocupar espacio vacío */
+    min-width: min(50px, 100%); /* Asegura un ancho mínimo para que sea cómodo de leer, pero usa el 100% si la pantalla es enana */
+    max-width: 100%; /* Tope de seguridad para que un título larguísimo no rompa el diseño */
+
     max-height: calc(100vh - 4rem);
     overflow-y: auto; /* Allow scrolling within the TOC if it gets too long */
     z-index: 10; /* Ensure it stays above other content */
@@ -119,10 +124,11 @@ const sortedCourses = courses.sort((a, b) => {
     gap: 0.75rem;
     padding: 0.6rem 1.5rem;
     /* Use the CSS variable calculated in the HTML to create visual hierarchy */
-    padding-left: calc(1.5rem + (var(--depth) * 1.5rem));
+    --padding-between-depths: 1.5rem; /* Base padding for each depth level */
+    padding-left: calc(var(--padding-between-depths) + (var(--depth) * var(--padding-between-depths)));
     color: var(--color-text);
     text-decoration: none;
-    line-height: 1.4;
+    line-height: 1.3;
     transition: all 0.2s ease-in-out;
     border-left: 4px solid transparent;
   }
@@ -130,11 +136,14 @@ const sortedCourses = courses.sort((a, b) => {
   .toc-unit-number {
     font-weight: 700;
     color: var(--color-logo-dark-grey);
-    min-width: max-content;
+    white-space: nowrap; /* Evita que el número de unidad se parta en dos líneas */
   }
 
   .toc-unit-title {
     flex: 1;
+    /* Evita que un título sin espacios o larguísimo estire la barra lateral a la fuerza */
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   /* Hover state */
@@ -174,6 +183,20 @@ const sortedCourses = courses.sort((a, b) => {
       position: static;
       max-height: none;
       margin-bottom: 2rem;
+      
+      /* En vista móvil (cuando se apila arriba o abajo del contenido) 
+         sí nos interesa que recupere todo el ancho disponible */
+      width: 100%;
+    }
+
+    .toc-header, .toc-link {
+      padding-right: 0;
+    }
+  }
+
+  @media (max-width: 450px) {
+    .toc-link {
+      --padding-between-depths: 0.5rem; /* Reduce padding for very small screens */
     }
   }
 </style>
