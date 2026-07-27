@@ -140,7 +140,7 @@
 
 <div class="slideshow-wrapper">
   <!-- Contenedor estático: Astro vuelca el HTML aquí -->
-  <div class="slide-content" bind:this={container}>
+  <div class="slideshow-content" bind:this={container}>
     {@render children?.()}
   </div>
 
@@ -213,7 +213,7 @@
     flex-direction: column;
   }
 
-  .slide-content {
+  .slideshow-content {
     /* Altura mínima para que los botones de navegación no salten al cambiar de slide */
     min-height: 400px; 
     padding: 2rem;
@@ -325,7 +325,7 @@
       box-shadow: none; /* Quita la sombra al imprimir */
     }
 
-    .slide-content {
+    .slideshow-content {
       display: block;
       gap: 0;
     }
