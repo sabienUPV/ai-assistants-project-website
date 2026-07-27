@@ -127,6 +127,11 @@ const hasSidebar = Astro.slots.has('sidebar');
 			position: relative;
 			top: 0;
 		}
+
+    .layout-with-sidebar #main-content {
+      /* Remove the padding from the main content because layout-with-sidebar already has padding */
+      padding: 0;
+    }
   }
 
   /* On print, we want to hide the sidebar and make the content take the full width */
