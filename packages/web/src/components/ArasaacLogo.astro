@@ -1,0 +1,61 @@
+---
+import logo from '@assets/images/logo_ARASAAC.png';
+import type { HTMLAttributes } from 'astro/types';
+import { Image } from 'astro:assets';
+
+interface Props {
+  height?: number;
+  loading?: HTMLAttributes<'img'>['loading'];
+}
+
+const { loading } = Astro.props;
+
+const { t } = Astro.locals;
+---
+
+<div class="arasaac-logo-container">
+  <div class="arasaac-logo-image-container">
+    <Image 
+      src={logo} 
+      alt={t('alt_logo_template', false, 'ARASAAC')} 
+      height={120}
+      class="logo"
+      loading={loading || "lazy"}
+      decoding={loading === "eager" ? "sync" : "async"}
+      aria-hidden="true"
+    />
+    <span class="sr-only">{t('alt_logo_template', false, 'ARASAAC')}</span>
+  </div>
+  <div class="arasaac-logo-copyright-notice">
+    <p class="copyright-notice">
+      {t('arasaac_copyright_notice')}
+    </p>
+  </div>
+</div>
+
+<style>
+  .arasaac-logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 0.5rem;
+  }
+
+  .arasaac-logo-image-container {
+    display: flex;
+    max-width: 100%;
+  }
+
+  .logo {
+    /* Permitimos que se encoja la altura si el ancho lo necesita */
+    height: auto; 
+    /* Tope máximo de altura */
+    max-height: var(--arasaac-logo-height, 120px);
+    /* Evita que se desborde en pantallas móviles pequeñas */
+    max-width: 100%; 
+    /* Si sobra espacio, se adapta a su proporción original */
+    width: auto; 
+    /* Mantiene las proporciones sin deformarse */
+    object-fit: contain; 
+  }
+</style>
