@@ -74,6 +74,15 @@ export async function getStaticPaths() {
     font-family: var(--font-atkinson), Arial, Helvetica, Verdana, Calibri, var(--font-roboto), sans-serif;
   }
 
+  /* Exception for Croatian (hr): 
+    Since Atkinson Hyperlegible doesn't support latin-ext characters (č, ć, đ, š, ž),
+    we skip directly to the high-legibility native fonts from the protocol
+    to avoid mixed letters (ransom-note effect). */
+  :global(:lang(hr) #main-content), 
+  :global(:lang(hr) .sidebar) {
+    font-family: Arial, Helvetica, Verdana, Calibri, var(--font-roboto), sans-serif;
+  }
+
   .course-container {
     padding: 0 1rem;
     color: var(--color-text);

@@ -25,7 +25,7 @@ export default defineConfig({
       provider: fontProviders.fontsource(),
       weights: [400, 700], // Regular and Bold weights
       styles: ['normal'], // Atkinson Hyperlegible is only available in normal style, NOT italic
-      subsets: ['latin'] // Atkinson Hyperlegible ONLY has a Latin subset. Luckily, it seems to support Croatian characters as well according to the Google Fonts test website (https://fonts.google.com/specimen/Atkinson+Hyperlegible?preview.script=Latn&preview.lang=hr_Latn), so we don't need to include latin-ext for this font
+      subsets: ['latin'] // Atkinson Hyperlegible ONLY has a Latin subset. It seems to support Croatian characters as well according to the Google Fonts test website (https://fonts.google.com/specimen/Atkinson+Hyperlegible?preview.script=Latn&preview.lang=hr_Latn). However, in practice it seems to have issues with Croatian characters (č, ć, đ, š, ž), so we will use the native system fonts for Croatian instead of Atkinson Hyperlegible to avoid mixed letters (ransom-note effect).
     }
   ],
 
