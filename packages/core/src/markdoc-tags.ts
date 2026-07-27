@@ -64,10 +64,12 @@ export const markdocTagAttributes = {
       width: {
         type: Number,
         description: "The width of the image in pixels.",
+        default: 300,
       },
       height: {
         type: Number,
         description: "The height of the image in pixels.",
+        default: 300,
       },
       cropTop: {
         type: Number,

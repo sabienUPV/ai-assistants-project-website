@@ -172,8 +172,8 @@ const createComponents = (collectionName: string) => ({
     description: markdocTagAttributes.imageContainer.description,
     schema: {
       title: fields.text({ label: 'Title' }),
-      width: fields.number({ label: 'Width (px)' }),
-      height: fields.number({ label: 'Height (px)' }),
+      width: fields.number({ label: 'Width (px)', defaultValue: markdocTagAttributes.imageContainer.attributes.width.default }),
+      height: fields.number({ label: 'Height (px)', defaultValue: markdocTagAttributes.imageContainer.attributes.height.default }),
       cropTop: fields.integer({
         label: 'Top Crop (%)',
         // The field is optional (returns null if empty), but strictly validates 0-100 if a value is provided
@@ -193,6 +193,8 @@ const createComponents = (collectionName: string) => ({
       }),
     } satisfies Record<keyof ImageContainerSchema, ComponentSchema>,
     ContentView: (props) => {
+      const { title, width, height, cropTop, cropRight, cropBottom, cropLeft } = props.value || {};
+
       // Get the NodeViewContentDOM element that contains the children of this component (which includes the image HTML node) from node.children
       const contentNode = React.isValidElement<{node: ParentNode}>(props.children) ? props.children?.props?.node : null;
       // Find if there is only one <img> child node that has a src attribute
@@ -212,6 +214,23 @@ const createComponents = (collectionName: string) => ({
             backgroundColor: '#f8fafc',
           },
         },
+        // Small text showing the title and dimensions of the image container
+        React.createElement(
+          'div',
+          {
+            style: {
+              color: '#0f172a',
+              fontSize: '0.875rem',
+              fontWeight: '500',
+              marginBottom: '0.5rem',
+            },
+          },
+          `Image: ${title || '[Untitled]'} (${width || 300}x${height || 300}px)` + (
+            cropTop || cropRight || cropBottom || cropLeft
+              ? ` (Crop: ${cropTop || 0}% top, ${cropRight || 0}% right, ${cropBottom || 0}% bottom, ${cropLeft || 0}% left)`
+              : ''
+          )
+        ),
         // The warning banner
         // (only show it if either there are no children, or if there are children but none of them is an image)
         hasMoreThanOneImageChild || hasAnyText
