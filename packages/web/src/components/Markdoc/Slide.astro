@@ -68,6 +68,11 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
     font-weight: bold; /* 700/bold */
   }
 
+  .slide-content :global(img),
+  .slide-content :global(.crop-wrapper) {
+    margin: 2rem auto; /* Centra la imagen y añade espacio arriba y abajo */
+  }
+
   .slide-content {
     width: 100%; /* Ocupa todo el ancho disponible */
     display: grid; /* Usamos grid para poder centrar el contenido fácilmente */
