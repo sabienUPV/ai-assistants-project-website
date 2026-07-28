@@ -51,21 +51,23 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
 
 
   /* Note: We convert pt to rem for font sizes so that they scale with the user's font size settings, following accessibility best practices */
-  .slide-title, .slide-content :global(h1) {
-    /* Protocol 3.1: Main Titles: 60pt, bold */
-    font-size: 5rem; /* 60pt */
-    font-weight: bold; /* 700/bold */
-  }
-  .slide-content :global(h2) {
-    /* Protocol 3.1: Subtitles: 50pt, bold */
-    font-size: 4.167rem; /* 50pt */
-    font-weight: bold; /* 700/bold */
-  }
+  @media screen {
+    .slide-title, .slide-content :global(h1) {
+      /* Protocol 3.1: Main Titles: 60pt, bold */
+      font-size: 5rem; /* 60pt */
+      font-weight: bold; /* 700/bold */
+    }
+    .slide-content :global(h2) {
+      /* Protocol 3.1: Subtitles: 50pt, bold */
+      font-size: 4.167rem; /* 50pt */
+      font-weight: bold; /* 700/bold */
+    }
 
-  .slide-content :global(h3) {
-    /* The protocol only covers "titles" and "subtitles", so we make h3 a bit bigger than the body text */
-    font-size: 3.5rem; /* 42pt */
-    font-weight: bold; /* 700/bold */
+    .slide-content :global(h3) {
+      /* The protocol only covers "titles" and "subtitles", so we make h3 a bit bigger than the body text */
+      font-size: 3.5rem; /* 42pt */
+      font-weight: bold; /* 700/bold */
+    }
   }
 
   .slide-content :global(img),
