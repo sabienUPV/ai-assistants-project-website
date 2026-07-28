@@ -8,7 +8,7 @@ interface Props {
   loading?: HTMLAttributes<'img'>['loading'];
 }
 
-const { loading } = Astro.props;
+const { loading, height = 60 } = Astro.props;
 
 const { t } = Astro.locals;
 ---
@@ -18,7 +18,7 @@ const { t } = Astro.locals;
     <Image 
       src={logo} 
       alt={t('alt_logo_template', false, 'ARASAAC')} 
-      height={120}
+      height={height}
       class="logo"
       loading={loading || "lazy"}
       decoding={loading === "eager" ? "sync" : "async"}
@@ -50,7 +50,7 @@ const { t } = Astro.locals;
     /* Permitimos que se encoja la altura si el ancho lo necesita */
     height: auto; 
     /* Tope máximo de altura */
-    max-height: var(--arasaac-logo-height, 120px);
+    max-height: var(--arasaac-logo-height, 60px);
     /* Evita que se desborde en pantallas móviles pequeñas */
     max-width: 100%; 
     /* Si sobra espacio, se adapta a su proporción original */

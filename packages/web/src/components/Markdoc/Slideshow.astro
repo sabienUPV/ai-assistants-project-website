@@ -1,6 +1,5 @@
 ---
 import SlideshowSvelte from '@components/client/Slideshow.svelte';
-import CopyrightSlide from '@components/entries/courses/CopyrightSlide.astro';
 
 const { t } = Astro.locals;
 
@@ -11,16 +10,9 @@ const localizedTexts = {
   nextAriaLabel: t('slideshow_next_label'),
   numberInputLabel: t('slideshow_number_input_label'),
 };
-
-interface Props {
-  includeCopyrightSlide?: boolean; // If true, the slideshow will include a "copyright" slide with the ARASAAC and EU logos at the start of the presentation. If false, it will not include that slide. Default: true.
-}
-
-const { includeCopyrightSlide = true } = Astro.props;
 ---
 
 {/* Pasamos el contenido de Markdoc dentro de las etiquetas de Svelte */}
 <SlideshowSvelte client:load localizedTexts={localizedTexts}>
-  {includeCopyrightSlide && <CopyrightSlide />}
   <slot />
 </SlideshowSvelte>

@@ -1,5 +1,6 @@
 ---
 import EuLogo from "@components/EuLogo.astro";
+import ArasaacLogo from "@components/ArasaacLogo.astro";
 import Socials from "@components/Socials.astro";
 import { COPYRIGHT_YEARS, PROJECT_NUMBER_EU } from "@constants";
 import { getAriaCurrentPage, PROJECT_NAME_HTML } from "@utils/a11y";
@@ -28,11 +29,16 @@ const footerLinks : { href: string; label: string }[] = [
   <div class="project-number-eu no-print">
     {PROJECT_NUMBER_EU}
   </div>
-  <div class="eu-logo-wrapper">
-    {/*
-    In the footer, we want to use renderMode="img" because we want to lazy load the EU logo (and we can only do that in img mode, not svg mode), and because we never need to style the EU logo in the footer (we only need to style it in the header for print mode, where we use renderMode="svg").
-    */}
-    <EuLogo renderMode="img" loading="lazy" decoding="async" showDisclaimer={true} />
+  <div class="logos-disclaimers-wrapper">
+    <div class="eu-logo-wrapper">
+      {/*
+      In the footer, we want to use renderMode="img" because we want to lazy load the EU logo (and we can only do that in img mode, not svg mode), and because we never need to style the EU logo in the footer (we only need to style it in the header for print mode, where we use renderMode="svg").
+      */}
+      <EuLogo renderMode="img" loading="lazy" decoding="async" showDisclaimer={true} />
+    </div>
+    <div class="arasaac-logo-wrapper">
+      <ArasaacLogo />
+    </div>
   </div>
 </footer>
 <style>
@@ -52,11 +58,21 @@ const footerLinks : { href: string; label: string }[] = [
     margin: 0;
     padding: 0;
   }
+  .logos-disclaimers-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    max-width: 50vw;
+  }
+  .logos-disclaimers-wrapper :global(.eu-logo),
+  .logos-disclaimers-wrapper :global(.arasaac-logo-image-container) {
+    margin: 0 auto;
+  }
   .eu-logo-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    max-width: 50vw;
     gap: 0.5rem;
   }
   .footer-link {
