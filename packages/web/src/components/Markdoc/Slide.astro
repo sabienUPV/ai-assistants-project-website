@@ -43,13 +43,26 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
 
   .slide-title {
     text-align: center;
-    color: var(--color-secondary); /* Azul oscuro corporativo */
+    color: var(--color-secondary);
     margin: 0;
     margin-bottom: 2rem;
   }
 
+  .slide-content :global(img),
+  .slide-content :global(.crop-wrapper) {
+    margin: 2rem auto; /* Centra la imagen y añade espacio arriba y abajo */
+  }
 
+  .slide-content {
+    width: 100%; /* Ocupa todo el ancho disponible */
+    display: grid; /* Usamos grid para poder centrar el contenido fácilmente */
+    /* (place-items está en style inline para poder cambiarlo dinámicamente según el atributo 'align') */
 
+    min-width: 0; /* Evita que el contenido se desborde del contenedor */
+    overflow-wrap: break-word; /* Evita que URLs largas o palabras gigantes rompan la pantalla en móviles */
+  }
+
+  /* Easy to Read font sizes (Protocol 3.1)
   /* Note: We convert pt to rem for font sizes so that they scale with the user's font size settings, following accessibility best practices */
   @media screen {
     .slide-title, .slide-content :global(h1) {
@@ -68,76 +81,95 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
       font-size: 3.5rem; /* 42pt */
       font-weight: bold; /* 700/bold */
     }
+
+    /* Note: We NEED to use :global(*) here because Markdoc generates HTML elements dynamically, so the component data-attribute that Astro applies if we don't use :global() gets ignored by the Markdoc elements. So the only way to make it apply properly is to use :global(*) here */
+    .slide-content, .slide-content :global(*) {
+      /* Protocol 3.1: Body Text/Bullets: 45pt, regular */
+      /* NOTE: 45pt is 3.75rem. For a PPT presentation it looks good, but for a web page it is too big, so we reduce it to 36pt (3rem) for better readability on the web */
+      font-size: 3rem; /* 36pt */
+      font-weight: normal; /* 400/regular */
+    }
+
+    .slide-content :global(h3),
+    .slide-content :global(h4),
+    .slide-content :global(h5),
+    .slide-content :global(h6),
+    .slide-content :global(strong) {
+      font-weight: bold; /* Revert to bold for headings and strong text (previous selector applied normal weight to almost everything) */
+    }
   }
 
-  .slide-content :global(img),
-  .slide-content :global(.crop-wrapper) {
-    margin: 2rem auto; /* Centra la imagen y añade espacio arriba y abajo */
-  }
-
-  .slide-content {
-    width: 100%; /* Ocupa todo el ancho disponible */
-    display: grid; /* Usamos grid para poder centrar el contenido fácilmente */
-    /* (place-items está en style inline para poder cambiarlo dinámicamente según el atributo 'align') */
-
-    min-width: 0; /* Evita que el contenido se desborde del contenedor */
-    overflow-wrap: break-word; /* Evita que URLs largas o palabras gigantes rompan la pantalla en móviles */
-  }
-
-  /* Note: We NEED to use :global(*) here because Markdoc generates HTML elements dynamically, so the component data-attribute that Astro applies if we don't use :global() gets ignored by the Markdoc elements. So the only way to make it apply properly is to use :global(*) here */
-  .slide-content, .slide-content :global(*) {
-    /* Protocol 3.1: Body Text/Bullets: 45pt, regular */
-    /* NOTE: 45pt is 3.75rem. For a PPT presentation it looks good, but for a web page it is too big, so we reduce it to 36pt (3rem) for better readability on the web */
-    font-size: 3rem; /* 36pt */
-    font-weight: normal; /* 400/regular */
-  }
-
-  .slide-content :global(h3),
-  .slide-content :global(h4),
-  .slide-content :global(h5),
-  .slide-content :global(h6),
-  .slide-content :global(strong) {
-    font-weight: bold; /* Revert to bold for headings and strong text (previous selector applied normal weight to almost everything) */
-  }
-
+  /* =========================================
+     IMPRESIÓN (Print Mode Responsive)
+     ========================================= */
   @media print {
+    /* 1. Tamaños de fuente específicos para impresión para que quepa bien */
     .markdoc-slide {
-      /* Evita que una diapositiva se corte entre dos páginas */
-      break-inside: avoid;
-      page-break-inside: avoid;
+      font-size: 14pt; /* Tamaño base estándar de lectura */
+    }
+    .slide-title, .slide-content :global(h1) { font-size: 24pt; margin-bottom: 1rem; }
+    .slide-content :global(h2) { font-size: 20pt; }
+    .slide-content :global(h3) { font-size: 16pt; }
+    .slide-content, .slide-content :global(*) {
+      font-size: inherit; /* Hereda los 14pt, cancelando los 3rem si se colasen */
+    }
 
-      /*
-      Since we already make the slide take up the full height of the page,
-      we need to avoid an extra page break due to break-after, so we disable it
-      */
-      break-after: avoid; 
-      page-break-after: avoid;
-
-      /* Cambiamos el display: block por flex para poder centrar verticalmente */
+    /* 2. El truco del contenedor elástico (Responsive Print) */
+    .markdoc-slide {
+      /* min-height hace la magia: si es corto ocupa toda la página (99vh), si es largo CRECE */
+      min-height: 99vh; 
+      
       display: flex;
       flex-direction: column;
-      justify-content: center; /* Centrado vertical en print */
-      
-      /* Force the slide to take up the full height of the page (except a little bit to prevent overflow) */
-      height: 99vh; 
-      box-sizing: border-box; /* Evita que el padding sume altura extra y provoque desbordamientos */
+      justify-content: center; /* Sigue centrando verticalmente el contenido corto */
+      box-sizing: border-box;
+
+      /* Forzamos que cada diapositiva empiece en una página nueva */
+      break-before: page;
+      page-break-before: always;
+
+      /* IMPORTANTE: Quitamos el avoid general para permitir que la diapositiva se divida si es súper larga */
+      break-inside: auto; 
+      page-break-inside: auto;
+      break-after: auto;
+      page-break-after: auto;
     }
 
     .markdoc-slide:first-child {
-      /* Prevent the first slide from taking up the full height of the page */
-      /* This is so that we don't have a lot of blank space after the title of the course, and so that the first slide can be printed on the same page as the title if it fits */
-      height: auto;
-      
-      /* BUT we still want it to have a page break after it, so we never have multiple slides on the same page */
-      break-after: page;
+      min-height: auto; /* We allow the first slide to be shorter than a full page so it shows in the first page alongside the title if it can (avoiding a ton of blank space in the first page) */
+
+      /* The first slide should not have a page break before it, but it should have a page break after it to ensure that the next slide starts on a new page */
+      break-before: auto;
+      page-break-before: auto;
+      break-after: page; 
       page-break-after: always;
     }
-    
-    .slide-container {
-      padding: 2rem; /* Espaciado interno para que el contenido no toque los bordes del folio */
 
-      border: 1px dashed #000; /* Show a border around each slide for clarity in print */
+    .slide-container {
+      padding: 2rem;
+      border: 1px dashed #000; /* Show the dashed border for print to indicate the slide boundaries */
       border-radius: 8px;
+      /* Si la caja discontinua crece a dos páginas, queremos que se vea contigua */
+      box-decoration-break: clone; 
+    }
+
+    /* 3. Evitar que elementos individuales se partan por la mitad al cambiar de página */
+    .slide-content :global(p),
+    .slide-content :global(li),
+    .slide-content :global(h1),
+    .slide-content :global(h2),
+    .slide-content :global(h3) {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    /* 4. Control del tamaño de las imágenes para que no monopolicen el folio */
+    .slide-content :global(img) {
+      max-height: 35vh; /* La imagen nunca ocupará más de 1/3 del folio */
+      width: auto;
+      object-fit: contain;
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
   }
 </style>
