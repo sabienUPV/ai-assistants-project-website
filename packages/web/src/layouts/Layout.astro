@@ -11,7 +11,7 @@ import { locales, defaultLocale } from '@languages';
 import Header from '@components/Header.astro';
 import Footer from '@components/Footer.astro';
 import SkipLink from '@components/SkipLink.astro';
-import BackToTopButton from '@components/BackToTopButton.astro';
+import FloatingMenu from '@components/FloatingMenu.astro';
 
 import HeadIcons from '@components/Head/HeadIcons.astro';
 import HeadMeta from '@components/Head/HeadMeta.astro';
@@ -84,7 +84,7 @@ const hasSidebar = Astro.slots.has('sidebar');
     )}
 
 		<Footer />
-		<BackToTopButton />
+		<FloatingMenu />
 	</body>
 </html>
 

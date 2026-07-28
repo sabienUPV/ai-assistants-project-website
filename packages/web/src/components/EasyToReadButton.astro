@@ -1,0 +1,29 @@
+---
+import RoundedButton from '@components/RoundedButton.astro';
+
+const { t } = Astro.locals;
+---
+
+<RoundedButton class="easy-to-read-button" type="button" aria-pressed="false" label={t('easy_to_read_toggle_label')}>
+  {/* Icono de "Easy to Read" (un libro abierto) */}
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a4 4 0 0 1-4-4H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a4 4 0 0 0 4-4h6z"/></svg>
+</RoundedButton>
+
+<script>
+  const easyToReadButton = document.querySelector('.easy-to-read-button');
+  easyToReadButton && easyToReadButton.addEventListener('click', () => {
+    // 1. Alternamos la clase global en el body (como ya hacías)
+    const isActive = document.body.classList.toggle('easy-to-read');
+    
+    // 2. Actualizamos el estado ARIA para los lectores de pantalla
+    // Al pasarlo a string, se actualizará dinámicamente a "true" o "false"
+    easyToReadButton.setAttribute('aria-pressed', isActive.toString());
+  });
+</script>
+
+<style>
+  .easy-to-read-button[aria-pressed="true"] {
+    background-color: var(--color-toggle-enabled);
+    color: white;
+  }
+</style>

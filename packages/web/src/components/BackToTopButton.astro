@@ -1,42 +1,10 @@
 ---
+import RoundedButton from '@components/RoundedButton.astro';
+
 const { t } = Astro.locals;
 const backToTopLabel = t('back_to_top_label');
 ---
 
-<a class="back-to-top-button no-print" href="#top" aria-label={backToTopLabel} title={backToTopLabel}>
+<RoundedButton type="link" href="#top" label={backToTopLabel}>
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
-</a>
-<style>
-  .back-to-top-button {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    background-color: var(--color-secondary);
-    color: white;
-    width: 3.5rem;
-    height: 3.5rem;
-    border-radius: 50%;
-    border: var(--color-background) 1px solid;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 99;
-    transition: transform 0.2s ease;
-  }
-
-  .back-to-top-button:hover {
-    transform: scale(1.1);
-    background-color: var(--color-primary);
-  }
-
-  /* Make sure it's big enough to tap on mobile (Accessibility requirement) */
-  @media (max-width: 600px) {
-    .back-to-top-button {
-      bottom: 1rem;
-      right: 1rem;
-      width: 3rem;
-      height: 3rem;
-    }
-  }
-</style>
+</RoundedButton>

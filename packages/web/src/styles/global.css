@@ -13,7 +13,8 @@
   --color-text-on-secondary: var(--color-semi-transparent-white);
   --color-link: #0066cc;
   --color-link-hover: #26718f; /* A middle ground between the medium blue and the dark blue, for better contrast on hover */
-
+  --color-toggle-enabled: #309939 /* Green color for toggle buttons when enabled */;
+  
   /* Logo palette colors */
   --color-logo-light-blue: #A8D4DC;
   --color-logo-medium-blue: #3BA6BC;

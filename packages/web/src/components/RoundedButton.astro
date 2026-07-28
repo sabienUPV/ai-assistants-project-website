@@ -1,0 +1,52 @@
+---
+interface Props {
+  type: 'link' | 'button';
+  href?: string;
+  label: string;
+  class?: string;
+  [key: string]: any;
+};
+
+const { type, href, label, class: className, ...attributes } = Astro.props;
+---
+
+{type === 'link' ? (
+  <a class:list={['rounded-button', className]} {href} aria-label={label} title={label} {...attributes}>
+    <slot />
+  </a>
+) : (
+  <button class:list={['rounded-button', className]} aria-label={label} title={label}  {...attributes}>
+    <slot />
+  </button>
+)}
+
+<style>
+  .rounded-button {
+    background-color: var(--color-secondary);
+    color: white;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    border: var(--color-background) 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 99;
+    transition: transform 0.2s ease;
+    cursor: pointer;
+  }
+
+  .rounded-button:hover {
+    transform: scale(1.1);
+    background-color: var(--color-primary);
+  }
+
+  /* Make sure it's big enough to tap on mobile (Accessibility requirement) */
+  @media (max-width: 600px) {
+    .rounded-button {
+      width: 3rem;
+      height: 3rem;
+    }
+  }
+</style>
