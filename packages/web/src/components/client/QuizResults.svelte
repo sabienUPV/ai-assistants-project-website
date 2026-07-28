@@ -72,24 +72,24 @@
     align-items: center;
     gap: 2rem;
     padding: 2rem;
+    margin: 0 auto;
   }
 
   .score-display {
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
-    font-size: 2rem;
+    font-size: 3rem;
     color: var(--color-logo-dark-grey);
   }
 
   .score-number {
-    font-size: 5rem;
+    font-size: 6rem;
     font-weight: 900;
     color: var(--color-primary, #3b82f6);
   }
 
   .score-message {
-    font-size: 1.25rem;
     text-align: center;
     color: var(--color-text);
   }

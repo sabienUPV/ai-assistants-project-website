@@ -197,7 +197,7 @@
         onclick={() => guess(ans)}
         disabled={status === 'revealed'}
       >
-        <span class="answer-number">{index + 1})</span>{ans.text}
+        <span class="answer-number">{index + 1})</span><span class="answer-text">{ans.text}</span>
       </button>
     {/each}
   </div>
@@ -220,7 +220,7 @@
       <summary class="explanations-summary">{localizedTexts?.printAnswerExplanationsLabel || 'Explanation of each answer'}</summary>
       {#each answers as ans, index}
         <p class="explanation" class:not-available={!ans.explanation}>
-          <span class="answer-number">{index + 1})</span>{ans.explanation || "*"}
+          <span class="answer-number">{index + 1})</span><span class="answer-text">{ans.explanation || "*"}</span>
         </p>
       {/each}
       {#if answers.some(ans => !ans.explanation)}
@@ -345,7 +345,6 @@
 
   .result-selected-heading {
     margin: 0 0 0.5rem 0;
-    font-size: 1.2rem;
   }
 
   .result-selected-heading.success { color: #166534; }
@@ -353,7 +352,6 @@
 
   .explanation {
     margin: 0;
-    font-size: 1.05rem;
     color: #475569;
     line-height: 1.5;
   }
@@ -361,14 +359,12 @@
   .explanations {
     margin: 0;
     margin-top: 1rem;
-    font-size: 1.05rem;
     color: #475569;
     line-height: 1.5;
   }
 
   .explanations .explanations-summary {
     cursor: pointer;
-    font-weight: 600;
     color: #1e3a8a;
   }
 
