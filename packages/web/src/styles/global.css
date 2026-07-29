@@ -170,15 +170,7 @@ a:hover {
     /* Protocol 3.1: Body Text/Bullets: 45pt, regular */
     /* NOTE: 45pt is 3.75rem. For a PPT presentation it looks good, but for a web page it is too big, so we reduce it to 36pt (3rem) for better readability on the web */
     font-size: 3rem !important; /* 36pt */
-    font-weight: normal; /* 400/regular */
-  }
-
-  html.easy-to-read h3,
-  html.easy-to-read h4,
-  html.easy-to-read h5,
-  html.easy-to-read h6,
-  html.easy-to-read strong {
-    font-weight: bold; /* Revert to bold for headings and strong text (previous selector applied normal weight to almost everything) */
+    /* NOTE: Even though the protocol says "regular" (400), we don't control the font weight here, because we could inadvertently be overriding text that is styled as bold on purpose (e.g. titles, headings, other bold text that is in a span) */
   }
 }
 
