@@ -165,12 +165,15 @@ a:hover {
     font-weight: bold; /* 700/bold */
   }
 
-  /* Note: We NEED to use :global(*) here because Markdoc generates HTML elements dynamically, so the component data-attribute that Astro applies if we don't use :global() gets ignored by the Markdoc elements. So the only way to make it apply properly is to use :global(*) here */
   html.easy-to-read * {
     /* Protocol 3.1: Body Text/Bullets: 45pt, regular */
     /* NOTE: 45pt is 3.75rem. For a PPT presentation it looks good, but for a web page it is too big, so we reduce it to 36pt (3rem) for better readability on the web */
     font-size: 3rem !important; /* 36pt */
     /* NOTE: Even though the protocol says "regular" (400), we don't control the font weight here, because we could inadvertently be overriding text that is styled as bold on purpose (e.g. titles, headings, other bold text that is in a span) */
+  }
+
+  html.easy-to-read :where(h1, h2, h3) * {
+    font-size: inherit !important; /* Make sure that spans inside headings don't get their font size overridden by the global * selector above, they should inherit the font size from their heading */
   }
 }
 
