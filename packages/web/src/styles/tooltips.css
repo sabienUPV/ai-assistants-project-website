@@ -100,7 +100,11 @@
       /* flip-inline = Shift horizontally if it hits left/right */
       position-try-fallbacks: flip-inline;
 
-      max-width: min(12rem, calc(80vw - 32px)); /* Force to wrap at reasonable size (tooltips on top of text should not be very wide) + Safety margin for mobile screens */
+      max-width: min(30ch, calc(80vw - 32px)); /* Force to wrap at reasonable size (tooltips on top of text should not be very wide) + Safety margin for mobile screens */
+
+      /* Ensure long words break to avoid overflowing the tooltip box */
+      overflow-wrap: break-word; /* Supports older browsers (universal support) */
+      overflow-wrap: anywhere; /* Modern version that calculates sizes better (overrides previous property if supported, ignores it if not) */
     }
 
     /* The Tooltip Arrow */
