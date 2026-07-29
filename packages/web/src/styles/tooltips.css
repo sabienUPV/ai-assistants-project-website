@@ -43,6 +43,16 @@
 
   width: max-content;
   max-width: 70vw; /* Because it's fixed on the bottom left of the screen, we can use more space, but make sure it doesn't overflow and it doesn't cover the BackToTop button on the bottom right */
+
+  /* Ensure long words break to avoid overflowing the tooltip box */
+  overflow-wrap: break-word; /* Supports older browsers (universal support) */
+  overflow-wrap: anywhere; /* Modern version that calculates sizes better (overrides previous property if supported, ignores it if not) */
+
+  /* Modern enhancement: make the text more balanced between lines
+  (e.g. if a sentence has 4 words, instead of having 3 words in the first line and 1 word in the second line, it makes it so there are 2 words in each line)
+  (supported in modern browsers, older browsers will just skip this) */
+  text-wrap: balance;
+
   padding-block: 8px;
   padding-inline-start: 8px;
   padding-inline-end: 10px;
@@ -101,10 +111,6 @@
       position-try-fallbacks: flip-inline;
 
       max-width: min(30ch, calc(80vw - 32px)); /* Force to wrap at reasonable size (tooltips on top of text should not be very wide) + Safety margin for mobile screens */
-
-      /* Ensure long words break to avoid overflowing the tooltip box */
-      overflow-wrap: break-word; /* Supports older browsers (universal support) */
-      overflow-wrap: anywhere; /* Modern version that calculates sizes better (overrides previous property if supported, ignores it if not) */
     }
 
     /* The Tooltip Arrow */
