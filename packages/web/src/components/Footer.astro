@@ -29,14 +29,14 @@ const footerLinks : { href: string; label: string }[] = [
   <div class="project-number-eu no-print">
     {PROJECT_NUMBER_EU}
   </div>
-  <div class="logos-disclaimers-wrapper">
-    <div class="eu-logo-wrapper">
+  <div class="logos-disclaimers-container">
+    <div class="eu-logo-container">
       {/*
       In the footer, we want to use renderMode="img" because we want to lazy load the EU logo (and we can only do that in img mode, not svg mode), and because we never need to style the EU logo in the footer (we only need to style it in the header for print mode, where we use renderMode="svg").
       */}
       <EuLogo renderMode="img" loading="lazy" decoding="async" showDisclaimer={true} />
     </div>
-    <div class="arasaac-logo-wrapper">
+    <div class="arasaac-logo-container">
       <ArasaacLogo />
     </div>
   </div>
@@ -58,21 +58,15 @@ const footerLinks : { href: string; label: string }[] = [
     margin: 0;
     padding: 0;
   }
-  .logos-disclaimers-wrapper {
+  .logos-disclaimers-container {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     gap: 3rem;
     max-width: 60vw;
   }
-  .logos-disclaimers-wrapper > * {
+  .logos-disclaimers-container > * {
     flex: 1;
-  }
-  .logos-disclaimers-wrapper :global(.eu-logo),
-  .logos-disclaimers-wrapper :global(.arasaac-logo-image-container) {
-    margin: 0 auto;
-  }
-  .eu-logo-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -90,7 +84,7 @@ const footerLinks : { href: string; label: string }[] = [
 
   /* Responsive: Stack logos and disclaimers vertically on smaller screens */
   @media (max-width: 950px) {
-    .logos-disclaimers-wrapper {
+    .logos-disclaimers-container {
       flex-direction: column;
       gap: 1rem;
     }
@@ -110,7 +104,7 @@ const footerLinks : { href: string; label: string }[] = [
 
     /* Hide the social media links and EU logo for print (but keep the EU disclaimer text) */
     .socials-container,
-    .eu-logo-wrapper :global(.eu-logo) {
+    .eu-logo-container :global(.eu-logo) {
       display: none;
     }
   }

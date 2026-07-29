@@ -5,47 +5,32 @@ import { Image } from 'astro:assets';
 
 interface Props {
   height?: number;
+  includeCopyrightNotice?: boolean;
   loading?: HTMLAttributes<'img'>['loading'];
 }
 
-const { loading, height = 60 } = Astro.props;
+const { loading, height = 60, includeCopyrightNotice = true } = Astro.props;
 
 const { t } = Astro.locals;
 ---
 
-<div class="arasaac-logo-container">
-  <div class="arasaac-logo-image-container">
-    <Image 
-      src={logo} 
-      alt={t('alt_logo_template', false, 'ARASAAC')} 
-      height={height}
-      class="logo"
-      loading={loading || "lazy"}
-      decoding={loading === "eager" ? "sync" : "async"}
-      aria-hidden="true"
-    />
-    <span class="sr-only">{t('alt_logo_template', false, 'ARASAAC')}</span>
-  </div>
-  <div class="arasaac-logo-copyright-notice">
-    <p class="copyright-notice">
-      {t('arasaac_copyright_notice')}
-    </p>
-  </div>
-</div>
+<Image
+  src={logo}
+  alt={t('alt_logo_template', false, 'ARASAAC')}
+  height={height}
+  class="logo"
+  loading={loading || "lazy"}
+  decoding={loading === "eager" ? "sync" : "async"}
+  aria-hidden="true"
+/>
+
+{includeCopyrightNotice && (
+  <p class="copyright-notice">
+    {t('arasaac_copyright_notice')}
+  </p>
+)}
 
 <style>
-  .arasaac-logo-container {
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    gap: 0.5rem;
-  }
-
-  .arasaac-logo-image-container {
-    display: flex;
-    max-width: 100%;
-  }
-
   .logo {
     /* Permitimos que se encoja la altura si el ancho lo necesita */
     height: auto; 
@@ -57,5 +42,13 @@ const { t } = Astro.locals;
     width: auto; 
     /* Mantiene las proporciones sin deformarse */
     object-fit: contain; 
+  }
+
+  .copyright-notice {
+    /* Si la URL o palabra es más larga que el contenedor, la rompe sin añadir guiones */
+    overflow-wrap: anywhere; 
+    
+    /* Opcional: Blindaje extra por si algún estilo global tuyo tuviera hyphens: auto */
+    hyphens: none; 
   }
 </style>
