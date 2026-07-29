@@ -112,6 +112,25 @@ const hasSidebar = Astro.slots.has('sidebar');
 		width: 100%; /* Make sure the content uses all the available width */
 	}
 
+  .layout-with-sidebar .sidebar {
+    /* Sticky positioning keeps it visible when scrolling the main content */
+    position: sticky;
+    top: 2rem;
+    background-color: var(--color-background);
+    border: 1px solid var(--color-logo-light-blue);
+    border-radius: 8px;
+    padding: 1rem 0;
+
+    /* Responsive width */
+    width: fit-content; /* Se encoge para abrazar el texto, evitando ocupar espacio vacío */
+    min-width: min(50px, 100%); /* Asegura un ancho mínimo para que sea cómodo de leer, pero usa el 100% si la pantalla es enana */
+    max-width: 100%; /* Tope de seguridad para que un título larguísimo no rompa el diseño */
+
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto; /* Allow scrolling within the sidebar if it gets too long */
+    z-index: 10; /* Ensure it stays above other content */
+  }
+
 	/* En tablets, hacemos 2 columnas en vez de 3 de forma que el contenido tome todo el espacio disponible por la derecha
 	/* (no pasa nada porque se quede descentrado por la derecha ya que como no hay mucho espacio queda bien) */
 	/* (aquí miramos el max-width a mano según cómo queda bien, no hace falta que en todo el modo tablet se vea así) */
@@ -133,6 +152,12 @@ const hasSidebar = Astro.slots.has('sidebar');
 			/* Remove sticky behavior on mobile, move to top */
 			position: relative;
 			top: 0;
+      max-height: none;
+      margin-bottom: 2rem;
+      
+      /* En vista móvil (cuando se apila arriba o abajo del contenido) 
+         sí nos interesa que recupere todo el ancho disponible */
+      width: 100%;
 		}
 
     .layout-with-sidebar #main-content {
