@@ -45,10 +45,9 @@ const { t } = Astro.locals;
   }
 
   .copyright-notice {
-    /* Si la URL o palabra es más larga que el contenedor, la rompe sin añadir guiones */
-    overflow-wrap: anywhere; 
-    
-    /* Opcional: Blindaje extra por si algún estilo global tuyo tuviera hyphens: auto */
-    hyphens: none; 
+    /* Evita que el texto se desborde y se corte en pantallas pequeñas
+    (especialmente con la URL de ARASAAC, que de normal el navegador no la corta) */
+    overflow-wrap: break-word; /* 1. Respaldo para navegadores antiguos (soporte universal) */
+    overflow-wrap: anywhere; /* 2. Propiedad moderna que calcula mejor el ancho (esta línea sobreescribe la anterior si es compatible, y si es un navegador antiguo la ignora) */
   }
 </style>
