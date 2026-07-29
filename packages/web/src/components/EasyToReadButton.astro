@@ -11,13 +11,23 @@ const { t } = Astro.locals;
 
 <script>
   const easyToReadButton = document.querySelector('.easy-to-read-button');
+
+  // Al inicializar el componente, sincronizamos el aria-pressed con lo que haya en localStorage
+  if (localStorage.getItem('easy-to-read') === 'true') {
+    easyToReadButton?.setAttribute('aria-pressed', 'true');
+  }
+
   easyToReadButton && easyToReadButton.addEventListener('click', () => {
-    // 1. Alternamos la clase global en el body (como ya hacías)
-    const isActive = document.body.classList.toggle('easy-to-read');
+    // Alternamos la clase global en el HTML para activar/desactivar el modo "Easy to Read"
+    const isActive = document.documentElement.classList.toggle('easy-to-read');
+    const isActiveString = isActive.toString(); // Convertimos a string para usarlo en localStorage y ARIA
+
+    // Guardamos el estado en localStorage para que persista entre páginas y sesiones
+    localStorage.setItem('easy-to-read', isActiveString);
     
-    // 2. Actualizamos el estado ARIA para los lectores de pantalla
+    // Actualizamos el estado ARIA para los lectores de pantalla
     // Al pasarlo a string, se actualizará dinámicamente a "true" o "false"
-    easyToReadButton.setAttribute('aria-pressed', isActive.toString());
+    easyToReadButton.setAttribute('aria-pressed', isActiveString);
   });
 </script>
 

@@ -1,0 +1,11 @@
+{/*
+Script bloqueante en el HEAD (o lo más arriba posible) para evitar el parpadeo visual al navegar
+(por eso no está en EasyToReadButton.astro, que se carga después del body)
+Se ejecuta inmediatamente antes de que el navegador pinte la página
+Nota: Usamos documentElement (la etiqueta <html>) porque a veces el <body> aún no existe cuando esto se ejecuta.
+*/}
+<script is:inline>
+  if (localStorage.getItem('easy-to-read') === 'true') {
+    document.documentElement.classList.add('easy-to-read'); 
+  }
+</script>

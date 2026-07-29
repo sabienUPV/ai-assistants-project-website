@@ -15,6 +15,7 @@ import FloatingMenu from '@components/FloatingMenu.astro';
 
 import HeadIcons from '@components/Head/HeadIcons.astro';
 import HeadMeta from '@components/Head/HeadMeta.astro';
+import HeadEasyToReadScript from '@components/Head/HeadEasyToReadScript.astro';
 
 const locale = Astro.currentLocale || defaultLocale;
 const origin = Astro.site ? Astro.site.origin : Astro.url.origin;
@@ -45,6 +46,7 @@ const hasSidebar = Astro.slots.has('sidebar');
 
 		<HeadMeta title={title} description={description} />
 		<HeadIcons />
+    <HeadEasyToReadScript />
 
 		{/* --- SEO: HREFLANG TAGS (for search engines to serve links in the user's language) --- */}
     {/* x-default (mandatory fallback to default locale, usually points to English) */}
@@ -102,7 +104,7 @@ const hasSidebar = Astro.slots.has('sidebar');
     padding: 2rem;
   }
 
-  body.easy-to-read .layout-with-sidebar {
+  html.easy-to-read .layout-with-sidebar {
     grid-template-columns: minmax(280px, 350px) minmax(0, 1fr); /* Let the sidebar and right column take as much space as they need for larger font sizes */
   }
 
@@ -122,7 +124,7 @@ const hasSidebar = Astro.slots.has('sidebar');
   /* En móviles, apilamos el TOC arriba del contenido */
   @media (max-width: 1115px) {
     .layout-with-sidebar,
-    body.easy-to-read .layout-with-sidebar {
+    html.easy-to-read .layout-with-sidebar {
       grid-template-columns: 1fr;
       padding: 1rem;
     }
