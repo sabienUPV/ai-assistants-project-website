@@ -225,7 +225,7 @@ const {
 
   /* --- Mobile Landscape: Switch to row layout to save vertical space --- */
   /* We use 450px to catch most phones in landscape orientation */
-  @media (max-width: 1100px) and (max-height: 450px) {
+  @media (max-width: 1115px) and (max-height: 450px) {
       .dropdown-list {
           flex-direction: row;
           flex-wrap: wrap;
@@ -235,7 +235,8 @@ const {
   }
 
   /* --- Disable dropdown on desktop/tablet --- */
-  @media (min-width: 1100px) {
+  /* NOTE: Mobile breakpoint = 1115px. Since it's min-width and not max-width, we use 1116px = 1115px + 1px.*/
+  @media (min-width: 1116px) {
     .mobile-only.dropdown-wrapper:not(:has(.dropdown-menu:popover-open)) .dropdown-trigger {
       display: none;
     }
@@ -255,6 +256,7 @@ const {
     .mobile-only .dropdown-menu:not(:popover-open) .dropdown-list {
       flex-direction: row;
       gap: 1.5rem;
+      flex-wrap: wrap;
     }
   }
 </style>

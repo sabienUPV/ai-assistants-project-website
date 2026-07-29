@@ -68,7 +68,7 @@ main {
   margin: 0 auto;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1115px) {
   main {
     padding: 1rem;
     padding-top: 0.5rem;
@@ -142,6 +142,44 @@ a:hover {
 /* (they normally show properly as circles, but in some cases they for some unknown reason are displayed as squares, so this makes sure those cases are fixed) */
 .flag-icon {
   border-radius: 50%;
+}
+
+/* Easy to Read font sizes (Protocol 3.1) */
+/* Only applied when the user has toggled the "Easy to Read" mode */
+/* Note: We convert pt to rem for font sizes so that they scale with the user's font size settings, following accessibility best practices */
+@media screen {
+  body.easy-to-read h1 {
+    /* Protocol 3.1: Main Titles: 60pt, bold */
+    font-size: 5rem; /* 60pt */
+    font-weight: bold; /* 700/bold */
+  }
+  body.easy-to-read h2 {
+    /* Protocol 3.1: Subtitles: 50pt, bold */
+    font-size: 4.167rem; /* 50pt */
+    font-weight: bold; /* 700/bold */
+  }
+
+  body.easy-to-read h3 {
+    /* The protocol only covers "titles" and "subtitles", so we make h3 a bit bigger than the body text */
+    font-size: 3.5rem; /* 42pt */
+    font-weight: bold; /* 700/bold */
+  }
+
+  /* Note: We NEED to use :global(*) here because Markdoc generates HTML elements dynamically, so the component data-attribute that Astro applies if we don't use :global() gets ignored by the Markdoc elements. So the only way to make it apply properly is to use :global(*) here */
+  body.easy-to-read * {
+    /* Protocol 3.1: Body Text/Bullets: 45pt, regular */
+    /* NOTE: 45pt is 3.75rem. For a PPT presentation it looks good, but for a web page it is too big, so we reduce it to 36pt (3rem) for better readability on the web */
+    font-size: 3rem !important; /* 36pt */
+    font-weight: normal; /* 400/regular */
+  }
+
+  body.easy-to-read h3,
+  body.easy-to-read h4,
+  body.easy-to-read h5,
+  body.easy-to-read h6,
+  body.easy-to-read strong {
+    font-weight: bold; /* Revert to bold for headings and strong text (previous selector applied normal weight to almost everything) */
+  }
 }
 
 /* --- STYLES FOR PDF EXPORT & PRINTING --- */

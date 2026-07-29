@@ -89,8 +89,12 @@ const { includeLocaleSelector = true } = Astro.props;
         text-decoration: none;
     }
 
+    .project-title {
+        max-width: 400px; /* Limit the width of the title link to prevent it from stretching too much */
+    }
+
     /* --- TABLET LAYOUT --- */
-    @media (max-width: 1780px) {
+    @media (max-width: 1820px) {
         header {
             grid-template-columns: auto auto;
             
@@ -127,7 +131,7 @@ const { includeLocaleSelector = true } = Astro.props;
     }
 
     /* --- MOBILE LAYOUT --- */
-    @media (max-width: 1100px) {
+    @media (max-width: 1115px) {
         header {
             /* Two equal columns for the top row controls */
             grid-template-columns: 1fr 1fr;

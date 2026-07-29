@@ -94,12 +94,16 @@ const hasSidebar = Astro.slots.has('sidebar');
     display: grid;
     /* Columna 1: Sidebar, Columna 2: Contenido, Columna 3: Espejo vacío para centrar */
     /* Note: We make the right empty column a bit shorter than the left sidebar so that it feels like the content takes some needed space for itself and doesn't look like it's not making use of available space, while keeping it looking visually centered */
-    grid-template-columns: 280px minmax(0, 1000px) 140px;
+    grid-template-columns: minmax(280px, 350px) minmax(0, 1000px) 140px;
     gap: 2rem;
     justify-content: center;
     align-items: start;
     margin: 0 auto;
     padding: 2rem;
+  }
+
+  body.easy-to-read .layout-with-sidebar {
+    grid-template-columns: minmax(280px, 350px) minmax(0, 1fr); /* Let the sidebar and right column take as much space as they need for larger font sizes */
   }
 
 	.layout-with-sidebar #main-content {
@@ -111,13 +115,14 @@ const hasSidebar = Astro.slots.has('sidebar');
 	/* (aquí miramos el max-width a mano según cómo queda bien, no hace falta que en todo el modo tablet se vea así) */
 	@media (max-width: 1500px) {
 		.layout-with-sidebar {
-			grid-template-columns: 280px minmax(0, 1fr);
+			grid-template-columns: minmax(280px, 350px) minmax(0, 1fr);
 		}
 	}
 
   /* En móviles, apilamos el TOC arriba del contenido */
-  @media (max-width: 1100px) {
-    .layout-with-sidebar {
+  @media (max-width: 1115px) {
+    .layout-with-sidebar,
+    body.easy-to-read .layout-with-sidebar {
       grid-template-columns: 1fr;
       padding: 1rem;
     }

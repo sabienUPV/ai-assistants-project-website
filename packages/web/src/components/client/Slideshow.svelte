@@ -319,6 +319,32 @@
     }
   }
 
+  /* NOTE: This is a copy of the above media query but for "easy-to-read" mode. This is the simplest way to do it in standard CSS, since we can't mix the body.easy-to-read class with the @media query in a single selector. We should probably eventually switch to using SASS, that way we can avoid this redundancy by using mixins. */
+  @media (max-width: 950px) {
+    :global(body.easy-to-read) .slideshow-content {
+      padding: 1rem;
+    }
+
+    :global(body.easy-to-read) .navigation {
+      flex-direction: column;
+      gap: 1rem; /* Añade espacio entre los elementos apilados */
+      padding: 1.5rem;
+    }
+
+    :global(body.easy-to-read) .nav-btn {
+      width: 100%; /* Hace que los botones ocupen todo el ancho */
+      min-width: 0; /* Anula el tope de 130px que estaba rompiendo el grid */
+    }
+
+    /* Opcional: Forzamos al contador a irse a la primera posición arriba del todo, 
+       así los dos botones se quedan juntos abajo. */
+    :global(body.easy-to-read) .counter {
+      order: -1; 
+      padding-inline: 0;
+      margin-bottom: 0.5rem;
+    }
+  }
+
   @media print {
     .navigation {
       display: none; /* Oculta la navegación al imprimir */
