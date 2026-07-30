@@ -35,7 +35,7 @@ const { includeLocaleSelector = true } = Astro.props;
     )}
 </header>
 
-<style>
+<style lang="scss">
     header {
         display: grid;
         background-color: var(--color-secondary);
@@ -94,7 +94,7 @@ const { includeLocaleSelector = true } = Astro.props;
     }
 
     /* --- TABLET LAYOUT --- */
-    @media (max-width: 1820px) {
+    @media (max-width: $bp-tablet) {
         header {
             grid-template-columns: auto auto;
             
@@ -131,7 +131,7 @@ const { includeLocaleSelector = true } = Astro.props;
     }
 
     /* --- MOBILE LAYOUT --- */
-    @media (max-width: 1115px) {
+    @media (max-width: $bp-mobile) {
         header {
             /* Two equal columns for the top row controls */
             grid-template-columns: 1fr 1fr;

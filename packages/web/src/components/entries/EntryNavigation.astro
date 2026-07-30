@@ -43,7 +43,7 @@ const { previousEntry, nextEntry} = Astro.props;
   )}
 </nav>
 
-<style>
+<style lang="scss">
   .entry-navigation {
     display: flex;
     justify-content: space-between;
@@ -133,7 +133,7 @@ const { previousEntry, nextEntry} = Astro.props;
   }
 
   /* Responsive for mobile */
-  @media (max-width: 1115px) {
+  @media (max-width: $bp-mobile) {
     .entry-navigation {
       flex-direction: column;
       gap: 1rem;

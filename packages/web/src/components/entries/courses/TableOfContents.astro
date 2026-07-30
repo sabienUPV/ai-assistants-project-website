@@ -70,7 +70,7 @@ const sortedCourses = courses.sort((a, b) => {
   </details>
 </div>
 
-<style>
+<style lang="scss">
   .toc-header {
     cursor: pointer;
     padding-inline: 1.5rem;
@@ -159,7 +159,7 @@ const sortedCourses = courses.sort((a, b) => {
   }
 
   /* Responsive for mobile - changes to static position and expands */
-  @media (max-width: 1115px) {
+  @media (max-width: $bp-mobile) {
     .toc-header, .toc-link {
       padding-right: 0;
     }
