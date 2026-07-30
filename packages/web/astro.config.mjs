@@ -66,7 +66,9 @@ export default defineConfig({
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: `@import '@styles/_variables.scss';` // Import the SCSS variables file globally for all SCSS files
+          // Import the SCSS variables file globally for all SCSS files
+          // (we use "@use" instead of the deprecated "@import", and we use "as *" to make all variables available globally without a namespace)
+          additionalData: `@use '@styles/_variables.scss' as *;`
         }
       }
     }
