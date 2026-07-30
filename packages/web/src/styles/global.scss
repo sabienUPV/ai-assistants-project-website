@@ -27,6 +27,11 @@
 
   /* Other properties */
   --default-line-height: 1.8;
+
+  /* Include the SCSS variables from the variables.scss file as CSS variables too so that they can be used by JS as well (since JS can access CSS variables, but not SCSS variables directly since these are meant to be used only in SCSS files) */
+  /* NOTE: We use SCSS interpolation here to make sure that the SCSS variables are evaluated and their values are inserted into the CSS variables, and it doesn't output the literal string "$var" as a value for the CSS variable. (docs: https://sass-lang.com/documentation/interpolation/) */
+  --bp-mobile: #{$bp-mobile};
+  --bp-tablet: #{$bp-tablet};
 }
 html {
   background-color: var(--color-background);
