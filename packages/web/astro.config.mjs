@@ -61,4 +61,14 @@ export default defineConfig({
     // We use the "astro-icon" integration to easily use icons from various icon libraries in our components
     iconDir: 'src/assets/icons',
   }), markdoc(), svelte()],
+
+  vite: {
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: `@import '@styles/_variables.scss';` // Import the SCSS variables file globally for all SCSS files
+        }
+      }
+    }
+  },
 });
