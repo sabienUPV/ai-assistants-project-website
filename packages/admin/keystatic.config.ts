@@ -7,7 +7,8 @@ import React from 'react';
 import { locales, type Locale } from '@languages';
 import { slideAlignValues, type SlideSchema } from '@schemas/slide';
 import type { ImageContainerSchema } from '@schemas/image';
-import { calculateImageDimensionsForCrop } from '@core-utils/image';
+import type { OrderGameSchema } from '@schemas/games';
+import type { OrderGameItem } from '@core-types/games';
 
 // 1. CREAMOS EL TIPO MAPEADO
 // Le exigimos a TS que este objeto tenga obligatoriamente todas las keys de tu Post de Zod.
@@ -425,7 +426,39 @@ const createComponents = (collectionName: string) => ({
         })
       );
     }
-  })
+  }),
+  orderGame: block({
+    label: 'Order Game',
+    description: markdocTagAttributes.orderGame.description,
+    schema: {
+      items: fields.array(
+        fields.object({
+          text: fields.text({ label: 'Item Text', validation: { isRequired: true } }),
+        } satisfies Record<keyof OrderGameItem, ComponentSchema>),
+        {
+          label: 'Items',
+          itemLabel: (props) => props.fields.text.value ?? 'New Item',
+          validation: { length: { min: 1 } },
+        }
+      ),
+    } satisfies Record<keyof OrderGameSchema, ComponentSchema>,
+    ContentView: (props) => {
+      const { items } = props.value || {};
+
+      return React.createElement(
+        'div',
+        { style: { border: '2px solid #e0e0e0', borderRadius: '8px', padding: '12px', marginBottom: '16px', backgroundColor: '#f9fafb' } },
+        React.createElement('strong', {}, 'Order Game Items:'),
+        React.createElement('ul', { style: { marginTop: '8px' } },
+          (items || []).map((item, index) => 
+            React.createElement('li', { key: index },
+              item.text || 'New Item'
+            )
+          )
+        )
+      );
+    }
+  }),
 });
 
 // Select storage kind based on environment variable:

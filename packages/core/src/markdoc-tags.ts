@@ -141,6 +141,16 @@ export const markdocTagAttributes = {
       },
     }
   },
+  orderGame: {
+    description: "Render an order game component with the provided items.",
+    attributes: {
+      items: {
+        type: Array,
+        required: true,
+        description: "The items to be ordered in the game.",
+      },
+    }
+  }
 } satisfies AstroMarkdocConfig['tags'];
 
 /**
@@ -245,6 +255,10 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
     youtubeVideo: {
       ...markdocTagAttributes.youtubeVideo,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/YouTubeVideo.astro'),
+    },
+    orderGame: {
+      ...markdocTagAttributes.orderGame,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/entries/courses/games/OrderGame.astro'),
     },
   } satisfies AstroMarkdocConfig['tags'] & MarkdocTagsFromAttributes;
 }

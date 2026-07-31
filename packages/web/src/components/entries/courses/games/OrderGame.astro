@@ -1,0 +1,16 @@
+---
+import OrderGame from '@components/client/games/OrderGame.svelte';
+import type { OrderGameItem } from '@core-types/games';
+
+interface Props {
+  // Aquí definimos la propiedad 'steps' que recibirá el componente OrderGame
+  items: OrderGameItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<OrderGame client:load
+  {/* Agregamos un ID único a cada paso para que el componente OrderGame pueda identificar cada elemento de manera única (lo necesita para el ordenado) */}
+  correctOrder={items.map((item, index) => ({ ...item, id: index + 1}))}
+/>
