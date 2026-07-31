@@ -10,6 +10,8 @@
   import { flip } from 'svelte/animate';
   import { seededShuffle } from '@utils/array';
 
+  import restartIcon from '@assets/icons/restart.svg?raw';
+
   // 1. Props usando la runa $props()
   let { 
     correctOrder = [],
@@ -81,10 +83,7 @@
       <p class="success-text">🎉 {localizedTexts?.successMessage || 'Correct! You have ordered the items correctly.'}</p>
       
       <button class="restart-btn" onclick={restartGame}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-          <path d="M3 3v5h5"/>
-        </svg>
+        {@html restartIcon}
         {localizedTexts?.playAgainLabel || 'Play Again'}
       </button>
     </div>
