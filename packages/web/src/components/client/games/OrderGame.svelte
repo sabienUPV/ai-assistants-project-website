@@ -12,11 +12,15 @@
 
   // 1. Props usando la runa $props()
   let { 
-    correctOrder = [], 
-    seed = Math.floor(Math.random() * 1000000) 
+    correctOrder = [],
+    seed = Math.floor(Math.random() * 1000000),
+    localizedTexts
   }: { 
-    correctOrder: GameItem[], 
-    seed?: number 
+    correctOrder: GameItem[],
+    localizedTexts?: {
+      successMessage: string;
+    },
+    seed?: number
   } = $props();
 
   // 2. Estado mutable usando la runa $state()
@@ -67,7 +71,7 @@
 <div class="order-game">
   {#if isSuccess}
     <div class="success-message">
-      🎉 ¡Perfecto! Has ordenado los pasos correctamente.
+      🎉 {localizedTexts?.successMessage || 'Correct! You have ordered the items correctly.'}
     </div>
   {/if}
 

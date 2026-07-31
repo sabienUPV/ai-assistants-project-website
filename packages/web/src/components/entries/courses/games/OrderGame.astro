@@ -7,10 +7,15 @@ interface Props {
   items: OrderGameItem[];
 }
 
+const { t } = Astro.locals;
+
 const { items } = Astro.props;
 ---
 
 <OrderGame client:load
   {/* Agregamos un ID único a cada paso para que el componente OrderGame pueda identificar cada elemento de manera única (lo necesita para el ordenado) */}
   correctOrder={items.map((item, index) => ({ ...item, id: index + 1}))}
+  localizedTexts={{
+    successMessage: t('game_order_success_message')
+  }}
 />
