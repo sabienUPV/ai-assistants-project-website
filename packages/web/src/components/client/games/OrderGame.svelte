@@ -19,6 +19,7 @@
     correctOrder: GameItem[],
     localizedTexts?: {
       successMessage: string;
+      playAgainLabel: string;
     },
     seed?: number
   } = $props();
@@ -31,12 +32,18 @@
   );
   let draggingIndex: number | null = $state(null);
 
-  // 3. Estado derivado con $derived() (Sustituye al bloque $: de Svelte 4)
-  // Se recalcula automáticamente cada vez que currentOrder cambia
+  // 3. Estado derivado con $derived()
   let isSuccess = $derived(
     currentOrder.length > 0 && 
     currentOrder.every((item, index) => item.id === correctOrder[index].id)
   );
+
+  // --- LÓGICA DE JUEGO ---
+  function restartGame() {
+    // Generamos una semilla nueva para que el barajado sea distinto
+    const newSeed = Math.floor(Math.random() * 1000000);
+    currentOrder = seededShuffle([...correctOrder], newSeed);
+  }
 
   // --- LÓGICA DRAG & DROP HTML5 ---
   function handleDragStart(event: DragEvent, index: number) {
@@ -71,7 +78,15 @@
 <div class="order-game">
   {#if isSuccess}
     <div class="success-message">
-      🎉 {localizedTexts?.successMessage || 'Correct! You have ordered the items correctly.'}
+      <p class="success-text">🎉 {localizedTexts?.successMessage || 'Correct! You have ordered the items correctly.'}</p>
+      
+      <button class="restart-btn" onclick={restartGame}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+        {localizedTexts?.playAgainLabel || 'Play Again'}
+      </button>
     </div>
   {/if}
 
@@ -160,13 +175,42 @@
   }
 
   .success-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
     margin-bottom: 1.5rem;
-    padding: 1rem;
+    padding: 1.5rem;
     background-color: #dcfce7;
-    color: #166534;
     border-radius: 8px;
-    font-weight: 700;
-    text-align: center;
     border: 1px solid #bbf7d0;
+  }
+
+  .success-text {
+    margin: 0;
+    color: #166534;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+
+  .restart-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #166534;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .restart-btn:hover {
+    background-color: #14532d;
   }
 </style>
