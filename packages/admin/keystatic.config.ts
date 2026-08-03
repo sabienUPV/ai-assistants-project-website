@@ -371,7 +371,7 @@ const createComponents = (collectionName: string) => ({
           description: markdocTagAttributes.arasaac.attributes.id.description,
         }),
       alt: fields.text({ label: 'Alternative Text', validation: { isRequired: true } }),
-      size: fields.number({ label: 'Size (px)', validation: { min: 1, max: 2500 } }),
+      size: fields.number({ label: 'Size (px)', validation: { min: 1, max: 2500 }, defaultValue: markdocTagAttributes.arasaac.attributes.size.default }),
     },
     ContentView: (props) => {
       const { id, alt, size } = props.value || {};
