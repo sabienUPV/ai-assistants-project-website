@@ -99,7 +99,7 @@ const createComponents = (collectionName: string) => ({
       align: fields.select({
         label: 'Alignment',
         options: slideAlignValues.map(value => ({ label: value.charAt(0).toUpperCase() + value.slice(1), value })),
-        defaultValue: 'left' satisfies SlideSchema['align'],
+        defaultValue: markdocTagAttributes.slide.attributes.align.default,
       }),
     } satisfies Record<keyof SlideSchema, ComponentSchema>, // Ensure all Slide fields are present
     ContentView: (props) => {
