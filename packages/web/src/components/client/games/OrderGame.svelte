@@ -15,7 +15,7 @@
   // 1. Props usando la runa $props()
   let { 
     correctOrder = [],
-    seed = Math.floor(Math.random() * 1000000),
+    seed,
     localizedTexts
   }: { 
     correctOrder: GameItem[],
@@ -30,7 +30,7 @@
   // (Nota: Ignoramos el warning de Svelte 5 sobre "state_referenced_locally" porque en este caso es intencional (solo necesitamos el valor inicial de correctOrder, no un binding reactivo a correctOrder como sugiere el warning))
   // svelte-ignore state_referenced_locally
   let currentOrder: GameItem[] = $state(
-    correctOrder.length > 0 ? seededShuffle([...correctOrder], seed) : []
+    correctOrder.length > 0 ? generateRandomOrder(seed) : []
   );
   let draggingIndex: number | null = $state(null);
 
@@ -41,10 +41,27 @@
   );
 
   // --- LÓGICA DE JUEGO ---
-  function restartGame() {
+  function generateRandomOrder(seed?: number) {
     // Generamos una semilla nueva para que el barajado sea distinto
-    const newSeed = Math.floor(Math.random() * 1000000);
-    currentOrder = seededShuffle([...correctOrder], newSeed);
+    let newOrder;
+    let newSeed = seed;
+    do {
+      //console.log('Generating new seed...');
+      // Only generate a new seed if we need to reshuffle (if newOrder has a value, that means we already shuffled earlier and we are reshuffling)
+      // or if no initial seed was provided (newSeed is undefined)
+      if (newOrder || !newSeed) newSeed = Math.floor(Math.random() * 1000000);
+      newOrder = seededShuffle([...correctOrder], newSeed);
+    }
+    // Si el orden barajado es igual al correcto, generamos una nueva semilla y volvemos a barajar hasta que sea distinto
+    while (newOrder.every((item, index) => item.id === correctOrder[index].id));
+
+    // Una vez que tenemos un orden distinto al correcto, lo devolvemos para que quien llame (ya sea al principio o al reiniciar el juego) lo asigne a currentOrder
+    return newOrder;
+  }
+
+  function restartGame() {
+    currentOrder = generateRandomOrder();
+    draggingIndex = null;
   }
 
   // --- LÓGICA DRAG & DROP HTML5 ---
