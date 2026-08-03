@@ -504,11 +504,15 @@ const createCourseCollection = (locale: Locale) => {
     label: `Courses (${locale.toUpperCase()})`,
     slugField: 'unit',
     parseSlugForSort: (slug) => {
-      // Change the slug back to the unit replacing dashes with dots (e.g. "1-2" becomes "1.2") to get the unit number
-      const unit = slug.replace(/-/g, '.');
-      // Return the unit number as a number with decimals for sorting purposes
-      // (e.g. "1.2" will be sorted after "1" and before "2")
-      return parseFloat(unit);
+      // We need to parse the slug to ensure proper sorting of course units. For example, "1-11" should come after "1-2", but lexicographically it would come before. To fix this, we will pad each part of the slug with leading zeros to ensure correct sorting.
+      // 1. We split the slug by dashes: "1-11" -> ["1", "11"]
+      // 2. We pad each part with leading zeros to ensure each part has at least 4 characters: ["1", "11"] -> ["0001", "0011"]
+      // 3. We join the parts back together with dashes
+      // Note: We use 4 digits because we don't expect to have more than 9999 units in a course, and this ensures correct sorting for all reasonable cases. If you ever need more than 9999 units, you can increase the padding to 5 or more digits.
+      return slug
+        .split('-')
+        .map(part => part.padStart(4, '0'))
+        .join('-');
     },
     path: `src/content/${locale}/courses/*`,
     format: { contentField: 'content' },
