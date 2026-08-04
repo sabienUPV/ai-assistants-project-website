@@ -1,0 +1,22 @@
+---
+import MatchingGame from '@components/client/games/MatchingGame.svelte';
+import type { MatchPair } from '@components/client/games/MatchingGame.svelte';
+
+interface Props {
+  // Aquí definimos la propiedad 'pairs' que recibirá el componente MatchingGame
+  pairs: MatchPair[];
+}
+
+const { t } = Astro.locals;
+
+const { pairs } = Astro.props;
+---
+
+<MatchingGame client:load
+  {/* Agregamos un ID único a cada pareja para que el componente MatchingGame pueda identificar cada elemento de manera única (lo necesita para el ordenado) */}
+  pairs={pairs.map((pair, index) => ({ ...pair, id: index + 1 }))}
+  localizedTexts={{
+    successMessage: t('game_matching_success_message'),
+    playAgainLabel: t('quiz_play_again_label')
+  }}
+/>

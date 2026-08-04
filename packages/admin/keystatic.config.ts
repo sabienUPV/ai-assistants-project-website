@@ -7,8 +7,8 @@ import React from 'react';
 import { locales, type Locale } from '@languages';
 import { slideAlignValues, type SlideSchema } from '@schemas/slide';
 import type { ImageContainerSchema } from '@schemas/image';
-import type { OrderGameSchema } from '@schemas/games';
-import type { OrderGameItem } from '@core-types/games';
+import type { MatchingGameSchema, OrderGameSchema } from '@schemas/games';
+import type { MatchingGamePair, OrderGameItem } from '@core-types/games';
 
 // 1. CREAMOS EL TIPO MAPEADO
 // Le exigimos a TS que este objeto tenga obligatoriamente todas las keys de tu Post de Zod.
@@ -453,6 +453,41 @@ const createComponents = (collectionName: string) => ({
           (items || []).map((item, index) => 
             React.createElement('li', { key: index },
               item.text || 'New Item'
+            )
+          )
+        )
+      );
+    }
+  }),
+  matchingGame: block({
+    label: 'Matching Game',
+    description: markdocTagAttributes.matchingGame.description,
+    schema: {
+      pairs: fields.array(
+        fields.object({
+          leftText: fields.text({ label: 'Left Text', validation: { isRequired: true } }),
+          rightText: fields.text({ label: 'Right Text', validation: { isRequired: true } }),
+          leftImage: fields.image({ ...getImageSchemaOptions(collectionName), label: 'Left Image (optional)' }),
+          rightImage: fields.image({ ...getImageSchemaOptions(collectionName), label: 'Right Image (optional)' }),
+        } satisfies Record<keyof MatchingGamePair, ComponentSchema>),
+        {
+          label: 'Pairs',
+          itemLabel: (props) => `${props.fields.leftText.value || 'New Left Text'} ↔ ${props.fields.rightText.value || 'New Right Text'}`,
+          validation: { length: { min: 1 } },
+        }
+      ),
+    } satisfies Record<keyof MatchingGameSchema, ComponentSchema>,
+    ContentView: (props) => {
+      const { pairs } = props.value || {};
+
+      return React.createElement(
+        'div',
+        { style: { border: '2px solid #e0e0e0', borderRadius: '8px', padding: '12px', marginBottom: '16px', backgroundColor: '#f9fafb' } },
+        React.createElement('strong', {}, 'Matching Game Pairs:'),
+        React.createElement('ul', { style: { marginTop: '8px' } },
+          (pairs || []).map((pair, index) => 
+            React.createElement('li', { key: index },
+              `${pair.leftText || 'New Left Text'} ↔ ${pair.rightText || 'New Right Text'}`
             )
           )
         )

@@ -1,8 +1,9 @@
 <script module lang="ts">
+  import type { OrderGameItem } from '@core-types/games';
+
   // Exportamos los tipos en un bloque module separado para que el compilador no se queje
-  export interface GameItem {
+  export interface GameItem extends OrderGameItem {
     id: string | number;
-    text: string;
   }
 </script>
 
@@ -35,10 +36,12 @@
   let draggingIndex: number | null = $state(null);
 
   // 3. Estado derivado con $derived()
-  let isSuccess = $derived(
-    currentOrder.length > 0 && 
-    currentOrder.every((item, index) => item.id === correctOrder[index].id)
-  );
+  let isSuccess = $derived(isOrderSuccess(currentOrder));
+
+  function isOrderSuccess(order: GameItem[]) {
+    return order.length > 0 && 
+      order.every((item, index) => item.id === correctOrder[index].id);
+  }
 
   // --- LÓGICA DE JUEGO ---
   function generateRandomOrder(seed?: number) {
@@ -53,7 +56,7 @@
       newOrder = seededShuffle([...correctOrder], newSeed);
     }
     // Si el orden barajado es igual al correcto, generamos una nueva semilla y volvemos a barajar hasta que sea distinto
-    while (newOrder.every((item, index) => item.id === correctOrder[index].id));
+    while (isOrderSuccess(newOrder));
 
     // Una vez que tenemos un orden distinto al correcto, lo devolvemos para que quien llame (ya sea al principio o al reiniciar el juego) lo asigne a currentOrder
     return newOrder;

@@ -150,7 +150,17 @@ export const markdocTagAttributes = {
         description: "The items to be ordered in the game.",
       },
     }
-  }
+  },
+  matchingGame: {
+    description: "Render a matching game component with the provided pairs.",
+    attributes: {
+      pairs: {
+        type: Array,
+        required: true,
+        description: "The pairs of items to be matched in the game.",
+      },
+    }
+  },
 } satisfies AstroMarkdocConfig['tags'];
 
 /**
@@ -259,6 +269,10 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
     orderGame: {
       ...markdocTagAttributes.orderGame,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/entries/courses/games/OrderGame.astro'),
+    },
+    matchingGame: {
+      ...markdocTagAttributes.matchingGame,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/entries/courses/games/MatchingGame.astro'),
     },
   } satisfies AstroMarkdocConfig['tags'] & MarkdocTagsFromAttributes;
 }
