@@ -1,5 +1,7 @@
 ---
 import { Image } from 'astro:assets';
+import fs from 'node:fs';
+import path from 'node:path';
 
 interface Props {
   id: string | number;
@@ -7,12 +9,20 @@ interface Props {
   size?: number;
 }
 
-const { id, alt, size = 150 } = Astro.props;
+const { id, alt, size = 300 } = Astro.props;
 
-// ARASAAC API endpoint to fetch pictograms: https://api.arasaac.org/api/pictograms/:id
+// Check if there is a local copy of the pictogram in "/public/arasaac/"
+// (we have that option for maintainability, in case the ARASAAC API is down or the pictogram is removed from their database we can always have a local copy of the pictogram in our project)
+const localPath = path.join(process.cwd(), 'public', 'arasaac', `${id}.png`);
+const hasLocalFile = fs.existsSync(localPath);
+
+// If there is a local copy of the pictogram, we use the static path, otherwise we fetch it from the ARASAAC API.
+// (ARASAAC API endpoint to fetch pictograms: https://api.arasaac.org/api/pictograms/:id)
 // (see API documentation here: https://arasaac.org/developers/api)
-// (Note: The resolution is 500px by default, but we can request a higher resolution (2500px) by adding the query parameter `?resolution=2500` to the URL. However, we should only do this for sizes greater than 500px to avoid unnecessary bandwidth usage.)
-const imageUrl = `https://api.arasaac.org/api/pictograms/${id}${size > 500 ? '?resolution=2500' : ''}`;
+// (Note: The resolution from the API is 500px by default, but we can request a higher resolution (2500px) by adding the query parameter `?resolution=2500` to the URL. However, we should only do this for sizes greater than 500px to avoid unnecessary bandwidth usage.)
+const imageUrl = hasLocalFile 
+  ? `/arasaac/${id}.png` 
+  : `https://api.arasaac.org/api/pictograms/${id}${size > 500 ? '?resolution=2500' : ''}`;
 ---
 
 <Image 
@@ -21,7 +31,9 @@ const imageUrl = `https://api.arasaac.org/api/pictograms/${id}${size > 500 ? '?r
   width={size} 
   height={size} 
   class="arasaac-picto"
+  inferSize={hasLocalFile}
 />
+{ /* Note: inferSize helps Astro to infer the dimensions if the resource is remote/public */ }
 
 <style>
   .arasaac-picto {

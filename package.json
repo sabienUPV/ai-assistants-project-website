@@ -5,10 +5,11 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:web": "npm run -w @sabien-upv-astro-cms/web dev",
-    "dev:admin": "npm run -w @sabien-upv-astro-cms/admin dev",
-    "build:web": "npm run -w @sabien-upv-astro-cms/web build",
-    "build:admin": "npm run -w @sabien-upv-astro-cms/admin build",
-    "llm-translate": "npm run -w @sabien-upv-astro-cms/admin llm-translate"
+    "web:dev": "npm run -w @sabien-upv-astro-cms/web dev",
+    "admin:dev": "npm run -w @sabien-upv-astro-cms/admin dev",
+    "web:build": "npm run -w @sabien-upv-astro-cms/web build",
+    "admin:build": "npm run -w @sabien-upv-astro-cms/admin build",
+    "admin:llm-translate": "npm run -w @sabien-upv-astro-cms/admin llm-translate",
+    "web:sync-arasaac": "npm run -w @sabien-upv-astro-cms/web sync:arasaac"
   }
 }
