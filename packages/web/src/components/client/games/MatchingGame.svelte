@@ -263,17 +263,22 @@
   .match-card.is-error {
     border-color: #ef4444;
     background-color: #fef2f2;
-    animation: shake 0.4s ease-in-out;
   }
   .match-card.is-error .node {
     background-color: #ef4444;
   }
 
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
+  @media (prefers-reduced-motion: no-preference) {
+    .match-card.is-error {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+    }
   }
 
   /* Mensaje de éxito (heredado del OrderGame) */
