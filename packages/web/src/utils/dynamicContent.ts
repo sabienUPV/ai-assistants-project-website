@@ -8,7 +8,7 @@ import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 const dynamicContentGlobCollectionNames = ['posts', 'courses'] as const;
 const dynamicContentFileCollectionNames = ['ai-solutions'] as const;
 type DynamicContentCollectionName = typeof dynamicContentGlobCollectionNames[number] | typeof dynamicContentFileCollectionNames[number];
-type DynamicContentEntry<Name extends DynamicContentCollectionName, Data extends Record<string, unknown>> = CollectionEntry<`${Name}_${Locale}`> & { data: Data };
+type DynamicContentEntry<Name extends DynamicContentCollectionName, Data extends Record<string, unknown>> = Omit<CollectionEntry<`${Name}_${Locale}`>, 'data'> & { data: Data };
 
 export type PostEntry = DynamicContentEntry<'posts', Post>;
 export type CourseEntry = DynamicContentEntry<'courses', Course>;
