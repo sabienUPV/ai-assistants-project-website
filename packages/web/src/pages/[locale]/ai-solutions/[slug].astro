@@ -1,0 +1,205 @@
+---
+import Layout from '@layouts/Layout.astro';
+import { locales } from '@languages';
+import { getCollectionWithFallbacks, getEntryOrFallbackFromSlug, getSlugFromEntryId } from '@utils/dynamicContent';
+import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  let allSolutions = [];
+  for (const locale of locales) {
+    const { collection: solutions } = await getCollectionWithFallbacks('ai-solutions', locale);
+    allSolutions.push(...solutions.map(solution => ({ 
+      params: { locale, slug: getSlugFromEntryId(solution.id) } 
+    })));
+  }
+  return allSolutions;
+}
+
+const { locale, t } = Astro.locals;
+const { slug } = Astro.params;
+
+if (!slug) throw new Error('Slug not found');
+
+const { entry: solution, isFallback } = await getEntryOrFallbackFromSlug('ai-solutions', locale, slug);
+
+if (!solution) throw new Error('No AI solution found for this slug');
+---
+
+<Layout title={solution.data.name}>
+  <article class="solution-container">
+    <header class="solution-header">
+      {isFallback && (
+        <div class="not-in-language-pill-container">
+          <ContentNotInLanguagePill />
+        </div>
+      )}
+      <h1>{solution.data.name}</h1>
+      <div class="solution-meta">
+        <span class="company">{t('ai_solutions_entry_by')} {solution.data.company}</span> • 
+        <span class="type">{solution.data.type}</span> • 
+        <span class="origin">{solution.data.countryOfOrigin}</span>
+      </div>
+      <a href={solution.data.link} target="_blank" rel="noopener noreferrer" class="external-link-btn">
+        {t('ai_solutions_entry_visit_solution')} &nearr;
+      </a>
+    </header>
+
+    <div class="solution-content">
+      <section class="info-block">
+        <h2>{t('ai_solutions_entry_description_label')}</h2>
+        <p>{solution.data.description}</p>
+      </section>
+
+      <div class="two-col-grid">
+        <section class="info-block">
+          <h2>{t('ai_solutions_entry_usage_label')}</h2>
+          <p>{solution.data.usageForIndependentLiving}</p>
+          
+          <h3>{t('ai_solutions_entry_thematic_areas_label')}</h3>
+          <ul class="tag-list">
+            {solution.data.thematicArea.map(area => <li>{area}</li>)}
+          </ul>
+        </section>
+
+        <section class="info-block">
+          <h2>{t('ai_solutions_entry_technical_accessibility_label')}</h2>
+          <ul>
+            <li><strong>{t('ai_solutions_entry_available_as_label')}:</strong> {solution.data.availableAs}</li>
+            <li><strong>{t('ai_solutions_entry_supported_languages_label')}:</strong> {solution.data.availableLanguages.join(', ')}</li>
+            <li><strong>{t('ai_solutions_entry_registration_required_label')}:</strong> {solution.data.registrationRequired ? t('ai_solutions_entry_yes') : t('ai_solutions_entry_no')}</li>
+            <li><strong>{t('ai_solutions_entry_costs_label')}:</strong> {solution.data.costsMonetization}</li>
+          </ul>
+          {solution.data.accessibilityOptions && (
+            <>
+              <h3>{t('ai_solutions_entry_accessibility_options_label')}</h3>
+              <p>{solution.data.accessibilityOptions}</p>
+            </>
+          )}
+        </section>
+      </div>
+
+      {solution.data.potentialBarriers && (
+        <section class="info-block warning-block">
+          <h2>{t('ai_solutions_entry_potential_barriers_label')}</h2>
+          <p>{solution.data.potentialBarriers}</p>
+        </section>
+      )}
+
+      <section class="info-block">
+        <h3>{t('ai_solutions_entry_keywords_label')}</h3>
+        <div class="tag-list">
+          {solution.data.keywords.map(keyword => <span class="tag">{keyword}</span>)}
+        </div>
+      </section>
+    </div>
+  </article>
+</Layout>
+
+<style>
+  .solution-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    color: var(--color-text);
+  }
+  .solution-header {
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 2rem;
+    text-align: center;
+  }
+  .solution-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .solution-meta {
+    font-size: 1rem;
+    color: var(--color-logo-dark-grey);
+    margin-bottom: 1.5rem;
+  }
+  .external-link-btn {
+    display: inline-block;
+    background-color: var(--color-secondary);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.2s;
+  }
+  .external-link-btn:hover {
+    background-color: var(--color-dark-blue);
+  }
+  .solution-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .two-col-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  @media (min-width: 768px) {
+    .two-col-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .info-block h2 {
+    color: var(--color-secondary);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #f3f4f6;
+    padding-bottom: 0.5rem;
+  }
+  .info-block h3 {
+    color: var(--color-dark-blue);
+    font-size: 1.2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .info-block ul {
+    padding-left: 1.5rem;
+    line-height: 1.6;
+  }
+  .info-block li {
+    margin-bottom: 0.5rem;
+  }
+  .warning-block {
+    background-color: #fffbeb;
+    border-left: 4px solid #fbbf24;
+    padding: 1.5rem;
+    border-radius: 0 8px 8px 0;
+  }
+  .warning-block h2 {
+    border-bottom: none;
+    color: #b45309;
+    margin-top: 0;
+  }
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none !important;
+    padding-left: 0 !important;
+  }
+  .tag-list li, .tag {
+    background-color: #f3f4f6;
+    padding: 0.3rem 0.8rem;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    color: #4b5563;
+  }
+
+  @media print {
+    /* Show the actual URL in print, instead of the "Visit Solution" button */
+    .external-link-btn::before {
+      content: "[ ";
+    }
+    .external-link-btn::after {
+      content: "] ( " attr(href) " )";
+    }
+  }
+</style>

@@ -1,0 +1,135 @@
+---
+import Layout from '@layouts/Layout.astro';
+import { locales } from '@languages';
+import { getCollectionWithFallbacks, getSlugFromEntryId } from '@utils/dynamicContent';
+import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  return locales.map(locale => ({ params: { locale } }));
+}
+
+const { locale, t } = Astro.locals;
+
+// Fetch all entries from the ai-solutions collection
+const { collection: allSolutions, fallbackIds: missingSolutionIds } = await getCollectionWithFallbacks('ai-solutions', locale);
+---
+
+<Layout title={t('ai_solutions_title')}>
+  <main class="solutions-directory">
+    <h1 class="directory-title">{t('ai_solutions_title')}</h1>
+    
+    <div class="posts-grid">
+      {allSolutions.map(solution => {
+        // Construct the URL to the individual entry page
+        const solutionUrl = `/${locale}/ai-solutions/${getSlugFromEntryId(solution.id)}`;
+        
+        return (
+          <article class="post-card">
+            <div class="card-body">
+              {missingSolutionIds?.includes(solution.id) && (
+                <div class="not-in-language-pill-container">
+                  <ContentNotInLanguagePill />
+                </div>
+              )}
+              
+              <h2 class="card-title">
+                <a href={solutionUrl}>{solution.data.name}</a>
+              </h2>
+              <div class="card-date">
+                {solution.data.company} • {solution.data.type}
+              </div>
+              <p class="card-excerpt">
+                {solution.data.description}
+              </p>
+            </div>
+            <a href={solutionUrl} class="read-more-btn">
+              {t('ai_solutions_card_view_details')} &rarr;
+            </a>
+          </article>
+        );
+      })}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  /* Reusing your blog directory styles for consistency */
+  .solutions-directory {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 0;
+  }
+  .directory-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+  }
+  .posts-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+  .post-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #fff;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .post-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  .card-body {
+    display: flex;
+    flex-direction: column;
+  }
+  .card-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    line-height: 1.3;
+    text-align: left;
+    margin: 0 0 0.5rem 0;
+    padding-top: 0.5rem;
+  }
+  .card-title a {
+    color: var(--color-secondary);
+    text-decoration: none;
+  }
+  .card-title a:hover {
+    color: var(--color-link-hover);
+    text-decoration: underline;
+  }
+  .card-date {
+    font-size: 0.85rem;
+    color: var(--color-logo-dark-grey);
+    margin-bottom: 1rem;
+  }
+  .card-excerpt {
+    color: var(--color-text);
+    font-size: 0.95rem;
+    margin: 0 0 1.5rem 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .read-more-btn {
+    align-self: flex-start;
+    color: var(--color-link);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    margin-top: auto;
+  }
+  .read-more-btn:hover {
+    text-decoration: underline;
+    color: var(--color-link-hover);
+  }
+</style>

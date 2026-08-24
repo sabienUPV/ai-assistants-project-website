@@ -2,13 +2,17 @@ import { defaultLocale, type Locale } from '@languages';
 import Markdoc from '@markdoc/markdoc';
 import type { Post } from '@schemas/posts';
 import type { Course } from '@schemas/courses';
+import type { AiSolution } from '@schemas/ai-solutions';
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 
-type DynamicContentCollectionName = 'posts' | 'courses';
+const dynamicContentGlobCollectionNames = ['posts', 'courses'] as const;
+const dynamicContentFileCollectionNames = ['ai-solutions'] as const;
+type DynamicContentCollectionName = typeof dynamicContentGlobCollectionNames[number] | typeof dynamicContentFileCollectionNames[number];
 type DynamicContentEntry<Name extends DynamicContentCollectionName, Data extends Record<string, unknown>> = CollectionEntry<`${Name}_${Locale}`> & { data: Data };
 
 export type PostEntry = DynamicContentEntry<'posts', Post>;
 export type CourseEntry = DynamicContentEntry<'courses', Course>;
+export type AiSolutionEntry = DynamicContentEntry<'ai-solutions', AiSolution>;
 
 // Helper functions for dynamic content (e.g. blog posts)
 
@@ -22,6 +26,7 @@ export type CollectionWithFallbacksResult<ContentEntry extends DynamicContentEnt
 // What this allows is TypeScript to automatically infer that if you pass 'posts' as the collectionName, the return type will be PostEntry[], and if you pass 'courses', the return type will be CourseEntry[], WITHOUT having to manually specify the Data generic type parameter when calling the function. This makes the function easier to use and reduces the chance of type errors.
 export async function getCollectionWithFallbacks(collectionName: 'posts', locale: Locale): Promise<CollectionWithFallbacksResult<PostEntry, Post>>;
 export async function getCollectionWithFallbacks(collectionName: 'courses', locale: Locale): Promise<CollectionWithFallbacksResult<CourseEntry, Course>>;
+export async function getCollectionWithFallbacks(collectionName: 'ai-solutions', locale: Locale): Promise<CollectionWithFallbacksResult<AiSolutionEntry, AiSolution>>;
 
 export async function getCollectionWithFallbacks<Data extends Record<string, unknown>>(collectionName: DynamicContentCollectionName, locale: Locale): Promise<CollectionWithFallbacksResult<DynamicContentEntry<DynamicContentCollectionName, Data>, Data>> {
   // Fetch all entries from the specified collection in the current locale
@@ -64,6 +69,7 @@ export type EntryOrFallbackResult<ContentEntry extends DynamicContentEntry<Dynam
 // More overload declarations for getEntryOrFallbackFromSlug to allow TypeScript to infer the correct return type based on the collectionName parameter (see above in getCollectionWithFallbacks for an in-depth explanation)
 export async function getEntryOrFallbackFromSlug(collectionName: 'posts', locale: Locale, slug: string): Promise<EntryOrFallbackResult<PostEntry, Post>>;
 export async function getEntryOrFallbackFromSlug(collectionName: 'courses', locale: Locale, slug: string): Promise<EntryOrFallbackResult<CourseEntry, Course>>;
+export async function getEntryOrFallbackFromSlug(collectionName: 'ai-solutions', locale: Locale, slug: string): Promise<EntryOrFallbackResult<AiSolutionEntry, AiSolution>>;
 
 export async function getEntryOrFallbackFromSlug<Data extends Record<string, unknown>>(collectionName: DynamicContentCollectionName, locale: Locale, slug: string): Promise<EntryOrFallbackResult<DynamicContentEntry<DynamicContentCollectionName, Data>, Data>> {
   // Try to get the entry in the current locale
@@ -81,7 +87,12 @@ export function getSlugFromEntryId(entryId: string): string {
   return parts[parts.length - 1];
 }
 
-export function getEntryIdFromSlug(locale: string, collection: string, slug: string): string {
+export function getEntryIdFromSlug(locale: string, collection: DynamicContentCollectionName, slug: string): string {
+  if ((dynamicContentFileCollectionNames as readonly string[]).includes(collection)) {
+    // For file-based collections, the entryId is just the slug
+    return slug;
+  }
+
   // Construct the entryId in the format "locale/posts/slug"
   return `${locale}/${collection}/${slug}`;
 }
