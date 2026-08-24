@@ -115,10 +115,6 @@ const { includeLocaleSelector = true } = Astro.props;
             flex-wrap: wrap;
         }
 
-        .branding .eu-logo {
-            height: 55px;
-        }
-
         /* Moving the locale and nav next to each other somehow centers them out */
         .locale {
             font-size: 1.5rem;
@@ -145,10 +141,6 @@ const { includeLocaleSelector = true } = Astro.props;
             gap: 0;
         }
 
-        .branding .eu-logo {
-            display: none; /* Hide the EU logo on mobile to save space */
-        }
-
         .locale {
             grid-area: locale;
             justify-self: end; /* Top Right */
@@ -157,6 +149,12 @@ const { includeLocaleSelector = true } = Astro.props;
 
         .nav-wrapper {
             justify-self: start; /* Top Left */
+        }
+    }
+
+    @media screen {
+        .branding .eu-logo {
+            display: none; /* Hide the EU logo to save space, only show it on print mode because it looks good and we have more space because we don't have the NavigationMenu on print */
         }
     }
 
@@ -174,10 +172,6 @@ const { includeLocaleSelector = true } = Astro.props;
             justify-content: space-between; /* Move the project title to the top left and the EU logo to the top right */
             align-items: center;
             gap: 1rem;
-        }
-
-        .branding .eu-logo {
-            display: block; /* Show the EU logo on print (overrides the mobile style, that might wrongly apply on print too) */
         }
 
         .nav-wrapper,
