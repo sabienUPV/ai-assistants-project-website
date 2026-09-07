@@ -1,0 +1,26 @@
+---
+import ContentDirectory, { type SolutionItem } from '@components/client/navigation/ContentDirectory.svelte';
+
+interface Props {
+  items: SolutionItem[];
+  missingIds?: string[];
+  readMoreLabel?: string;
+  locale: string;
+}
+
+const { t } = Astro.locals;
+
+const { items, missingIds, readMoreLabel, locale } = Astro.props;
+---
+
+<ContentDirectory
+  client:load
+  items={items}
+  missingIds={missingIds}
+  readMoreLabel={readMoreLabel}
+  locale={locale}
+  translations={{
+    notInLanguage: t('content_not_available_in_your_language'),
+    noResults: t('content_directory_no_results_label'),
+  }}
+/>

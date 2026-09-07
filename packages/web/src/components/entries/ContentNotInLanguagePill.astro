@@ -1,50 +1,8 @@
 ---
-import { Icon } from 'astro-icon/components';
-
+// IMPORTANT: Even though we are importing a Svelte component here, as long as we don't use client:load or similar directives when using the component,
+// Astro will render it as a static HTML element, with 0 JavaScript, the same way as any other static content.
+import ContentNotInLanguagePill from '@components/client/shared/ContentNotInLanguagePill.svelte';
 const { t } = Astro.locals;
 ---
 
-<div class="not-in-language-pill" role="status">
-  <Icon name="warning" class="warning-icon" aria-hidden="true" />
-  <span class="message">
-    {t('content_not_available_in_your_language')}
-  </span>
-</div>
-
-<style>
-  .not-in-language-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    
-    /* Colors matching the ones from AiDisclaimer.astro */
-    background-color: #fffbeb;
-    color: #92400e;
-    border: 1px solid #f59e0b;
-    
-    /* Small 'pill' design */
-    border-radius: 100vw; /* Completely rounded borders (pill-shaped) */
-    padding: 0.25rem 0.75rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    line-height: 1.4;
-  }
-
-  .warning-icon {
-    flex-shrink: 0;
-    width: 16px;
-    height: 16px;
-    color: #d97706;
-  }
-
-  .message {
-    margin: 0;
-    padding: 0;
-  }
-
-  @media print {
-    .not-in-language-pill {
-      display: none;
-    }
-  }
-</style>
+<ContentNotInLanguagePill message={t('content_not_available_in_your_language')} />

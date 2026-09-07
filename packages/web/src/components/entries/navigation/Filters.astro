@@ -1,0 +1,23 @@
+---
+import FilterInterceptor from '@components/client/navigation/FilterInterceptor.svelte';
+import FiltersUI from './FiltersUI.astro';
+import { getAbsoluteUrlFromRelativePathWithoutPageNumber } from '@utils/url';
+
+interface Props {
+  filters: string[]; // Array of filter names to display
+  actionRelativePath?: string; // e.g. "search"
+  isClient?: boolean; // If true, use Svelte to intercept the form submission and handle it client-side. If false, use a standard HTML form that navigates to /search.
+}
+
+const { filters, actionRelativePath = "search", isClient = false } = Astro.props;
+---
+
+{isClient ? (
+  <FilterInterceptor client:load>
+    <FiltersUI filters={filters} />
+  </FilterInterceptor>
+) : (
+  <form action={getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro.url.pathname, actionRelativePath)} method="GET" class="astro-static-form">
+    <FiltersUI filters={filters} />
+  </form>
+)}
