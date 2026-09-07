@@ -1,10 +1,10 @@
 ---
 import { render } from 'astro:content';
 import Layout from '@layouts/Layout.astro';
-import AiDisclaimer from '@components/AiDisclaimer.astro';
+import AiDisclaimer from '@components/entries/blog/AiDisclaimer.astro';
 import { locales } from '@languages';
 import { getCollectionWithFallbacks, getEntryOrFallbackFromSlug, getSlugFromEntryId } from '@utils/dynamicContent';
-import PostNavigation from '@components/entries/posts/PostNavigation.astro';
+import PostNavigation from '@components/entries/blog/PostNavigation.astro';
 import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
 
 export const prerender = true;

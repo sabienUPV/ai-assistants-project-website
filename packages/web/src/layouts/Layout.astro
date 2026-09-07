@@ -8,10 +8,10 @@ import '@styles/tooltips.css';
 import { getPlainPathNoLocale, getAbsoluteLocaleUrlFromOrigin} from '@utils/localizedUrl.ts';
 import { locales, defaultLocale } from '@languages';
 
-import Header from '@components/Header.astro';
-import Footer from '@components/Footer.astro';
-import SkipLink from '@components/SkipLink.astro';
-import FloatingMenu from '@components/FloatingMenu.astro';
+import Header from '@components/navigation/Header.astro';
+import Footer from '@components/navigation/Footer.astro';
+import SkipLink from '@components/a11y/SkipLink.astro';
+import FloatingMenu from '@components/shared/FloatingMenu.astro';
 
 import HeadIcons from '@components/Head/HeadIcons.astro';
 import HeadMeta from '@components/Head/HeadMeta.astro';

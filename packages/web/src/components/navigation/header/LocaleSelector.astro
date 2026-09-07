@@ -5,7 +5,7 @@ import { Icon } from "astro-icon/components";
 import { getRelativeLocaleUrl } from "astro:i18n";
 import { getPlainPathNoLocale } from "@utils/localizedUrl";
 
-import Dropdown from "./Dropdown.astro";
+import Dropdown from "@components/shared/Dropdown.astro";
 
 const { locale: currentLocale } = Astro.locals;
 const { class: className, ...attributes } = Astro.props;
