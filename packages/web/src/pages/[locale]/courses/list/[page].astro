@@ -3,7 +3,7 @@ import type { GetStaticPaths, Page } from "astro";
 import Layout from '@layouts/Layout.astro';
 import { getExcerptFromBody, getFirstLevelCourses, getSlugFromEntryId } from '@utils/dynamicContent';
 import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
-import PageNavigation from '@components/entries/PageNavigation.astro';
+import PageNavigation from '@components/entries/navigation/PageNavigation.astro';
 import { locales } from "@languages";
 import { getAbsoluteUrlFromRelativePathWithoutPageNumber } from "@utils/url";
 
