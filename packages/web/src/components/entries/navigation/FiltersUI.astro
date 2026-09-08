@@ -116,9 +116,13 @@ const instanceId = randomId('filter-');
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 0.5px solid black;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    transition: transform 0.2s ease;
     cursor: pointer;
+  }
+
+  .filter-search-group .search-btn:hover {
+    background-color: var(--color-link-hover);
   }
 
   .filter-search-group .search-btn svg {
@@ -128,6 +132,7 @@ const instanceId = randomId('filter-');
 
   .filter-title {
     text-align: left;
+    text-color: var(--color-secondary);
     font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 0.5rem;

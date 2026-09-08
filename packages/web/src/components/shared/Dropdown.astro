@@ -49,7 +49,7 @@ const {
         <Icon name={iconName} width={iconSize} height={iconSize} class:list={["dropdown-icon", "dropdown-icon-closed", iconClass]} aria-hidden="true" />
         { iconOpenName && <Icon name={iconOpenName} width={iconSize} height={iconSize} class:list={["dropdown-icon", "dropdown-icon-open", iconOpenClass]} aria-hidden="true" /> }
       </span>
-      { title && <span>{title}</span> }
+      { title && <span class="dropdown-title">{title}</span> }
       {includeChevron && <span class:list={["arrow-down", "chevron"]} aria-hidden="true"></span>}
     </button>
   <div id={id} popover class:list={["dropdown-menu", `is-${position}`]}>
@@ -79,6 +79,7 @@ const {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 0.2rem;
     padding: 0.5rem;
     font-family: inherit;
 

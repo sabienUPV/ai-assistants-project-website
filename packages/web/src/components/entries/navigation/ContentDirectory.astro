@@ -2,6 +2,7 @@
 import ContentDirectorySvelte, { type DirectoryItem, type FilterConfig as FilterConfigBase } from '@components/client/navigation/ContentDirectory.svelte';
 import Filters from '@components/entries/navigation/Filters.astro';
 import PageNavigation from '@components/entries/navigation/PageNavigation.astro';
+import Dropdown from '@components/shared/Dropdown.astro';
 import type { Page } from 'astro';
 
 // We re-export the types so that the parent page can use them to type its data without having to import the Svelte component directly.
@@ -73,26 +74,75 @@ const translations = {
     )}
   </div>
   
-  {/* Setup filters */}
+  {/* Setup filters using Dropdown for mobile modal behavior */}
   {filterGroups && Object.keys(filterGroups).length > 0 && (
     <div class="directory-filters">
-      <Filters actionRelativePath={actionRelativePath} isClient={isClient} filterGroups={filterGroups} />
+      <Dropdown
+        title={t('filter_title')}
+        iconName="search"
+        mobileOnly={true}
+        position="left"
+      >
+        <li class="filters-dropdown-container">
+          <Filters actionRelativePath={actionRelativePath} isClient={isClient} filterGroups={filterGroups} />
+        </li>
+      </Dropdown>
     </div>
   )}
 </div>
 
-<style>
+<style lang="scss">
   .directory-content-columns {
     display: flex;
     flex-direction: row;
     gap: 4rem;
+    align-items: flex-start; /* Prevents the sidebar from stretching vertically if content is long */
   }
 
   .directory-content-wrapper {
     flex: 1;
+    min-width: 0; /* Prevents grid blowouts */
   }
 
   .directory-filters {
     width: 300px;
+    flex-shrink: 0;
+  }
+
+  /* Reset list styling for the dropdown content */
+  .filters-dropdown-container {
+    list-style: none;
+    padding: 1rem;
+    margin: 0;
+  }
+
+  /* Responsive layout: Stack columns and make filters full width on mobile */
+  @media (max-width: $bp-mobile) {
+    .directory-content-columns {
+      /* Column-reverse ensures the filters button appears ABOVE the items grid on mobile */
+      flex-direction: column-reverse; 
+      gap: 2rem;
+    }
+
+    .directory-filters {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start; /* Align the filter button to the left */
+    }
+
+    .filters-dropdown-container {
+      background-color: var(--color-secondary);
+      color: white;
+    }
+
+    .directory-filters :global(.dropdown-trigger) {
+      background-color: var(--color-secondary);
+      color: white;
+      border-radius: 0.5rem;
+    }
+
+    .directory-filters :global(.dropdown-trigger:hover) {
+      background-color: var(--color-link-hover);
+    }
   }
 </style>
