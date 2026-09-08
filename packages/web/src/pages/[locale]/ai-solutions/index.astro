@@ -29,14 +29,6 @@ const directoryItems : DirectoryItem[] = allSolutions.map(solution => ({
   rawData: solution.data,
 }));
 
-const uniqueAreas = [...new Set(allSolutions.flatMap(s => s.data.thematicAreas))];
-const uniqueTypes = [...new Set(allSolutions.map(s => s.data.type))];
-
-const filterGroups = {
-  [t('ai_solutions_entry_thematic_areas_label')]: uniqueAreas,
-  [t('ai_solutions_entry_type_label')]: uniqueTypes
-};
-
 // Create the JSON-serializable configuration object
 const filterConfig: FilterConfig = {
   searchFields: ['name', 'description'],
