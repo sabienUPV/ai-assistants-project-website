@@ -1,11 +1,11 @@
 ---
 import { getUrlFriendlyVersionOfString } from '@utils/url';
 
-export type FilterGroupsType = Record<string, string[]>;
+export type FilterGroups = Record<string, string[]>;
 
 interface Props {
   // e.g., { "Thematic Area": ["Mobility", "Health"], "Platform": ["Web", "App"] }
-  filterGroups: FilterGroupsType;
+  filterGroups: FilterGroups;
 }
 
 const { t } = Astro.locals;
