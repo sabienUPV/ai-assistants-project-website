@@ -1,13 +1,20 @@
 ---
-import ContentDirectorySvelte, { type DirectoryItem, type FilterConfig } from '@components/client/navigation/ContentDirectory.svelte';
+import ContentDirectorySvelte, { type DirectoryItem, type FilterConfig as FilterConfigBase } from '@components/client/navigation/ContentDirectory.svelte';
 import Filters from '@components/entries/navigation/Filters.astro';
 
 // We re-export the types so that the parent page can use them to type its data without having to import the Svelte component directly.
-export type { DirectoryItem, FilterConfig };
+export type { DirectoryItem };
+
+// Export FilterConfig now as a generic type that can be used to type the filterConfig prop in the parent page, while still being compatible with the Svelte component's FilterConfig type.
+export type FilterConfig<T extends Record<string, any>> = FilterConfigBase & {
+  searchFields: (keyof T)[];
+  arrayFilters?: { paramName: string; dataKey: keyof T }[]; // For arrays like thematicArea
+  exactFilters?: { paramName: string; dataKey: keyof T }[]; // For exact matches like type
+};
 
 interface Props {
   items: DirectoryItem[];
-  filterConfig?: FilterConfig;
+  filterConfig?: FilterConfigBase;
   readMoreLabel?: string;
 }
 

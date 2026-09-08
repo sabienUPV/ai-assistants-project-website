@@ -30,13 +30,13 @@ const directoryItems : DirectoryItem[] = allSolutions.map(solution => ({
 }));
 
 // Create the JSON-serializable configuration object
-const filterConfig: FilterConfig = {
+const filterConfig: FilterConfig<AiSolution> = {
   searchFields: ['name', 'description'],
   arrayFilters: [
-    { paramName: t('ai_solutions_entry_thematic_areas_label'), dataKey: 'thematicAreas' satisfies keyof AiSolution }
+    { paramName: t('ai_solutions_entry_thematic_areas_label'), dataKey: 'thematicAreas' }
   ],
   exactFilters: [
-    { paramName: t('ai_solutions_entry_type_label'), dataKey: 'type' satisfies keyof AiSolution }
+    { paramName: t('ai_solutions_entry_type_label'), dataKey: 'type' }
   ]
 };
 
