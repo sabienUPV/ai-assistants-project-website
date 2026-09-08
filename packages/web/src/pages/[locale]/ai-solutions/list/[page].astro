@@ -1,0 +1,39 @@
+---
+import type { GetStaticPaths, Page } from "astro";
+import { getCollectionWithFallbacks } from '@utils/dynamicContent';
+import { locales } from "@languages";
+import AiSolutionsDirectory from "@components/entries/ai-solutions/AiSolutionsDirectory.astro";
+
+export const prerender = true;
+
+export const getStaticPaths = (async function ({ paginate }) {
+  const postsLocalesMap = Object.fromEntries(
+    await Promise.all(
+      locales.map(async (currentLocale) => {
+        const { collection: posts } = await getCollectionWithFallbacks('posts', currentLocale);
+        return [currentLocale, posts] as const;
+      })
+    )
+  );
+
+  // For every locale, return a `paginate()` result.
+  // Make sure that you pass `{ params: { locale }}` to `paginate()`
+  // so that Astro knows which locale grouping the result is for.
+  return locales.flatMap((currentLocale) => {
+    return paginate(postsLocalesMap[currentLocale], {
+      params: { locale: currentLocale },
+      pageSize: 6,
+    });
+  });
+}) satisfies GetStaticPaths;
+
+// Expected props: the 'page' object that Astro injects into the component
+interface Props {
+  page: Page;
+}
+
+const { page } = Astro.props;
+
+---
+
+<AiSolutionsDirectory isClient={false} page={page} />

@@ -1,6 +1,8 @@
 ---
 import ContentDirectorySvelte, { type DirectoryItem, type FilterConfig as FilterConfigBase } from '@components/client/navigation/ContentDirectory.svelte';
 import Filters from '@components/entries/navigation/Filters.astro';
+import PageNavigation from '@components/entries/navigation/PageNavigation.astro';
+import type { Page } from 'astro';
 
 // We re-export the types so that the parent page can use them to type its data without having to import the Svelte component directly.
 export type { DirectoryItem };
@@ -18,10 +20,11 @@ interface Props {
   actionRelativePath?: string; // The relative path to the search endpoint. Defaults to "search".
   filterConfig?: FilterConfigBase;
   readMoreLabel?: string;
+  page?: Page; // The Astro page object, required to render static pagination when isClient is false.
 }
 
 const { t } = Astro.locals;
-const { items, isClient, actionRelativePath = 'search', filterConfig, readMoreLabel } = Astro.props;
+const { items, isClient = false, actionRelativePath = 'search', filterConfig, readMoreLabel, page } = Astro.props;
 
 const filterGroups = filterConfig?.arrayFilters?.concat(filterConfig.exactFilters || [])?.reduce((acc, filter) => {
   const uniqueValues = new Set(items.flatMap(item => {
@@ -31,24 +34,46 @@ const filterGroups = filterConfig?.arrayFilters?.concat(filterConfig.exactFilter
   acc[filter.paramName] = Array.from(uniqueValues).filter(v => v !== undefined && v !== null).map(String);
   return acc;
 }, {} as Record<string, string[]>);
+
+const translations = {
+  notInLanguage: t('content_not_available_in_your_language'),
+  noResults: t('content_directory_no_results_label'),
+}
 ---
 
 <div class="directory-content-columns">
   {/* Setup the directory by injecting the backend data */}
   <div class="directory-content-wrapper">
-    <ContentDirectorySvelte
-      client:load
-      items={items}
-      filterConfig={filterConfig}
-      readMoreLabel={readMoreLabel}
-      translations={{
-        notInLanguage: t('content_not_available_in_your_language'),
-        noResults: t('content_directory_no_results_label'),
-      }}
-    />
+    {/* 
+      IMPORTANT ASTRO ARCHITECTURE BEHAVIOR:
+      Astro does not support dynamic directives like `client:load={isClient}`. 
+      To handle our hybrid approach, we use a conditional block.
+      
+      - When `isClient` is true, we apply `client:load`. The Svelte component hydrates, manages state, and handles dynamic searching without reloads.
+      - When `isClient` is false, we omit `client:load`. Astro compiles the Svelte component into pure static HTML on the server and strips away all its JavaScript, shipping exactly 0 bytes of JS to the browser. In this static mode, we also append the native Astro <PageNavigation /> component.
+    */}
+    {isClient ? (
+      <ContentDirectorySvelte
+        client:load
+        items={items}
+        filterConfig={filterConfig}
+        readMoreLabel={readMoreLabel}
+        translations={translations}
+      />
+    ) : (
+      <>
+        <ContentDirectorySvelte
+          items={items}
+          filterConfig={filterConfig}
+          readMoreLabel={readMoreLabel}
+          translations={translations}
+        />
+        {page && <PageNavigation page={page} />}
+      </>
+    )}
   </div>
   
-  {/* Setup filters in client-side mode */}
+  {/* Setup filters */}
   {filterGroups && Object.keys(filterGroups).length > 0 && (
     <div class="directory-filters">
       <Filters actionRelativePath={actionRelativePath} isClient={isClient} filterGroups={filterGroups} />

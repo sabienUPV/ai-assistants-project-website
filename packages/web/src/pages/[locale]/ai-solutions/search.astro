@@ -1,0 +1,12 @@
+---
+import AiSolutionsDirectory from '@components/entries/ai-solutions/AiSolutionsDirectory.astro';
+import { locales } from '@languages';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  return locales.map(locale => ({ params: { locale } }));
+}
+---
+
+<AiSolutionsDirectory isClient={true} />
