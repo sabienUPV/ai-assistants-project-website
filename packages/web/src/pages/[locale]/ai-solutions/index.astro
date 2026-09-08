@@ -55,16 +55,20 @@ const filterConfig: FilterConfig = {
   <main class="solutions-directory">
     <h1 class="directory-title">{t('ai_solutions_title')}</h1>
     
-    <div class="directory-content">
+    <div class="directory-content-columns">
       {/* Setup the directory by injecting the backend data */}
-      <ContentDirectory 
-        items={directoryItems}
-        filterConfig={filterConfig}
-        readMoreLabel={t('ai_solutions_card_view_details')}
-      />
+      <div class="directory-content-wrapper">
+        <ContentDirectory 
+          items={directoryItems}
+          filterConfig={filterConfig}
+          readMoreLabel={t('ai_solutions_card_view_details')}
+        />
+      </div>
       
       {/* Setup filters in client-side mode */}
-      <Filters actionRelativePath="search" isClient={true} filterGroups={filterGroups} />
+      <div class="directory-filters">
+        <Filters actionRelativePath="search" isClient={true} filterGroups={filterGroups} />
+      </div>
     </div>
   </main>
 </Layout>
@@ -80,9 +84,17 @@ const filterConfig: FilterConfig = {
     font-weight: 700;
     margin-bottom: 2rem;
   }
-  .directory-content {
+  .directory-content-columns {
     display: flex;
     flex-direction: row;
     gap: 4rem;
+  }
+
+  .directory-content-wrapper {
+    flex: 1;
+  }
+
+  .directory-filters {
+    width: 300px;
   }
 </style>
