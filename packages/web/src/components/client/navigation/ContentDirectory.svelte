@@ -78,15 +78,15 @@
   // Derived state: Automatically recalculates when currentParams changes
   let filteredItems = $derived.by(() => {
     const query = currentParams.get('q')?.toLowerCase() || '';
-    const keyword = currentParams.get('keyword')?.toLowerCase() || '';
+    const keywords = currentParams.getAll('keyword');
 
     return items.filter(item => {
       const matchesQuery = query 
         ? item.data.name.toLowerCase().includes(query) || item.data.description.toLowerCase().includes(query)
         : true;
       
-      const matchesKeyword = keyword
-        ? item.data.keywords?.includes(keyword) 
+      const matchesKeyword = keywords.length > 0
+        ? item.data.keywords?.some(k => keywords.includes(k.toLowerCase()))
         : true;
       
       return matchesQuery && matchesKeyword;
@@ -119,11 +119,11 @@
             <ContentNotInLanguagePill message={translations.notInLanguage} />
           </div>
         {/if}
-        
+
         <h2 class="card-title">
           <a href={solutionUrl}>{solution.data.name}</a>
         </h2>
-        <div class="card-date">
+        <div class="card-meta">
           {solution.data.company} • {solution.data.type}
         </div>
         <p class="card-excerpt">
@@ -133,6 +133,13 @@
       <a href={solutionUrl} class="read-more-btn">
         {readMoreLabel || 'Read more'} &rarr;
       </a>
+      <div class="card-keywords">
+        {#if solution.data.keywords}
+          {#each solution.data.keywords as keyword}
+            <span class="keyword">{keyword}</span>
+          {/each}
+        {/if}
+      </div>
     </article>
   {/each}
 </div>
@@ -163,6 +170,21 @@
     display: flex;
     flex-direction: column;
   }
+  .card-keywords {
+    margin-top: 1rem;
+  }
+  .card-keywords .keyword {
+    display: inline-block;
+    background-color: var(--color-logo-light-grey);
+    color: var(--color-logo-dark-grey);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.2rem 0.5rem;
+    padding-left: 0;
+    border-radius: 4px;
+    margin-right: 0.3rem;
+    margin-bottom: 0.3rem;
+  }
   .card-title {
     font-size: 1.4rem;
     font-weight: 600;
@@ -179,7 +201,7 @@
     color: var(--color-link-hover);
     text-decoration: underline;
   }
-  .card-date {
+  .card-meta {
     font-size: 0.85rem;
     color: var(--color-logo-dark-grey);
     margin-bottom: 1rem;

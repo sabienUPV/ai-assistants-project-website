@@ -9,22 +9,55 @@ const { filters, filterParamName = 'keyword' } = Astro.props;
 ---
 
 <div class="filter-group">
-  <label for="q">{t('filter_label_search_action')}</label>
   <input type="text" id="q" name="q" placeholder={t('filter_search_placeholder')} />
 </div>
 
-{filters.map((filterValue) => (
-  <div class="filter-group">
-    <label for={filterValue}>{filterValue}</label>
-    {/* All checkboxes share the same 'name' but have distinct 'value' and 'id' attributes */}
-    <input 
-      type="checkbox" 
-      id={filterValue} 
-      name={filterParamName} 
-      value={filterValue} 
-    />
-  </div>
-))}
+<h2 class="filter-title">{t('filter_title')}</h2>
 
-<button type="submit" class="submit-btn">{t('filter_label_filter_action')}</button>
-<button type="reset" class="reset-btn">{t('filter_label_clear_action')}</button>
+<div class="filters-list">
+  {filters.map((filterValue) => (
+    <div class="filter-group">
+      <label for={filterValue}>{filterValue}</label>
+      {/* All checkboxes share the same 'name' but have distinct 'value' and 'id' attributes */}
+      <input 
+        type="checkbox" 
+        id={filterValue} 
+        name={filterParamName} 
+        value={filterValue} 
+      />
+    </div>
+  ))}
+</div>
+
+<div class="filter-buttons">
+  <button type="submit" class="submit-btn">{t('filter_label_filter_action')}</button>
+  <button type="reset" class="reset-btn">{t('filter_label_clear_action')}</button>
+</div>
+
+<style>
+  .filter-title {
+    text-align: left;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .filters-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .filter-group input[type="text"] {
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .submit-btn, .reset-btn {
+    margin-right: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+</style>

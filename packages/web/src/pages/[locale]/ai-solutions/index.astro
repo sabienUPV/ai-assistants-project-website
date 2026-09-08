@@ -19,16 +19,18 @@ const { collection: allSolutions, fallbackIds: missingSolutionIds } = await getC
   <main class="solutions-directory">
     <h1 class="directory-title">{t('ai_solutions_title')}</h1>
     
-    {/* Setup filters in client-side mode */}
-    <Filters actionRelativePath="search" isClient={true} filters={allSolutions.map(s => s.data.keywords).flat()} />
-    
-    {/* Setup the directory by injecting the backend data */}
-    <ContentDirectory
-      items={allSolutions}
-      missingIds={missingSolutionIds}
-      readMoreLabel={t('ai_solutions_card_view_details')}
-      locale={locale}
-    />
+    <div class="directory-content">
+      {/* Setup the directory by injecting the backend data */}
+      <ContentDirectory
+        items={allSolutions}
+        missingIds={missingSolutionIds}
+        readMoreLabel={t('ai_solutions_card_view_details')}
+        locale={locale}
+      />
+
+      {/* Setup filters in client-side mode */}
+      <Filters actionRelativePath="search" isClient={true} filters={allSolutions.map(s => s.data.keywords).flat()} />
+    </div>
   </main>
 </Layout>
 
@@ -42,5 +44,10 @@ const { collection: allSolutions, fallbackIds: missingSolutionIds } = await getC
     font-size: 2.25rem;
     font-weight: 700;
     margin-bottom: 2rem;
+  }
+  .directory-content {
+    display: flex;
+    flex-direction: row;
+    gap: 4rem;
   }
 </style>
