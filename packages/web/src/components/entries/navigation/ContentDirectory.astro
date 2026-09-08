@@ -14,12 +14,14 @@ export type FilterConfig<T extends Record<string, any>> = FilterConfigBase & {
 
 interface Props {
   items: DirectoryItem[];
+  isClient?: boolean; // If true, use Svelte to render the directory and handle filtering client-side. If false, use a standard HTML form that navigates to /search.
+  actionRelativePath?: string; // The relative path to the search endpoint. Defaults to "search".
   filterConfig?: FilterConfigBase;
   readMoreLabel?: string;
 }
 
 const { t } = Astro.locals;
-const { items, filterConfig, readMoreLabel } = Astro.props;
+const { items, isClient, actionRelativePath = 'search', filterConfig, readMoreLabel } = Astro.props;
 
 const filterGroups = filterConfig?.arrayFilters?.concat(filterConfig.exactFilters || [])?.reduce((acc, filter) => {
   const uniqueValues = new Set(items.flatMap(item => {
@@ -49,7 +51,7 @@ const filterGroups = filterConfig?.arrayFilters?.concat(filterConfig.exactFilter
   {/* Setup filters in client-side mode */}
   {filterGroups && Object.keys(filterGroups).length > 0 && (
     <div class="directory-filters">
-      <Filters actionRelativePath="search" isClient={true} filterGroups={filterGroups} />
+      <Filters actionRelativePath={actionRelativePath} isClient={isClient} filterGroups={filterGroups} />
     </div>
   )}
 </div>
