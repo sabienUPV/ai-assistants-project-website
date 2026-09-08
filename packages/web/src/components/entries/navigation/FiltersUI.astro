@@ -1,5 +1,6 @@
 ---
 import { getUrlFriendlyVersionOfString } from '@utils/url';
+import { Icon } from 'astro-icon/components';
 
 export type FilterGroups = Record<string, string[]>;
 
@@ -14,6 +15,9 @@ const { filterGroups } = Astro.props;
 
 <div class="filter-search-group">
   <input type="text" id="q" name="q" placeholder={t('filter_search_placeholder')} />
+  <button type="submit" class="search-btn">
+    <Icon name="search" />
+  </button>
 </div>
 
 <div class="filter-title">{t('filter_title')}</div>
@@ -50,6 +54,39 @@ const { filterGroups } = Astro.props;
 </div>
 
 <style>
+  .filter-search-group {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .filter-search-group input[type="text"] {
+    padding: 0.5rem;
+    font-size: 1rem;
+    flex: 1;
+  }
+
+  .filter-search-group .search-btn {
+    background: none; /* Remove default button background to add our own below with background-color */
+    background-color: var(--color-secondary);
+    color: white;
+    width: 2.5rem;
+    border: none;
+    border-radius: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: transform 0.2s ease;
+    cursor: pointer;
+  }
+
+  .filter-search-group .search-btn svg {
+    width: 100%;
+    height: 100%;
+  }
+
   .filter-title {
     text-align: left;
     font-size: 1.5rem;
@@ -75,16 +112,5 @@ const { filterGroups } = Astro.props;
     flex-direction: column;
     gap: 0.5rem;
     margin-bottom: 1rem;
-  }
-
-  .filter-search-group {
-    margin-bottom: 1rem;
-  }
-
-  .filter-search-group input[type="text"] {
-    padding: 0.5rem;
-    font-size: 1rem;
-    width: 100%;
-    box-sizing: border-box;
   }
 </style>

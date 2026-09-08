@@ -50,10 +50,3 @@
 >
   {@render children?.()}
 </form>
-
-<style>
-  /* Hide the submit button if JS is active (auto-filtering is happening) */
-  :global(.svelte-interceptor-wrapper button[type="submit"]) {
-    display: none;
-  }
-</style>
