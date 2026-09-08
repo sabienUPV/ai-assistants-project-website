@@ -53,35 +53,36 @@ const { filterGroups } = Astro.props;
   ))}
 </div>
 
-<script>
-  // This script runs on the client to restore filter states from the URL.
-  // It is necessary because in statically generated pages (SSG), we cannot 
-  // read URL parameters during the server build.
+{/*
+  This script runs on the client to restore filter states from the URL.
+  It is necessary because in statically generated pages (SSG), we cannot 
+  read URL parameters during the server build.
+
+  Notes:
+  1. We use `window.location.search` to get the query parameters.
+  2. We restore the search input and checkboxes based on the URL parameters.
+  3. We call `restoreFiltersFromUrl()` on page load to initialize the filter states.
+  4. We also listen for `popstate` and `filters-updated` events to re-apply the filter states when the user navigates back or when filters are updated via Svelte.
+ */}
+<script is:inline>
   function restoreFiltersFromUrl() {
     const params = new URLSearchParams(window.location.search);
-    
-    // 1. Restore search input
-    const searchInput = document.querySelector('.filter-search-group input[name="q"]') as HTMLInputElement;
+    //(1)
+    const searchInput = /** @type {HTMLInputElement} */ (document.querySelector('.filter-search-group input[name="q"]'));
     if (searchInput) {
       searchInput.value = params.get('q') || '';
     }
-
-    // 2. Restore checkboxes
+    //(2)
     const checkboxes = document.querySelectorAll('.filters-list input[type="checkbox"]');
-    checkboxes.forEach((el) => {
-      const checkbox = el as HTMLInputElement;
-      const activeValues = params.getAll(checkbox.name);
-      checkbox.checked = activeValues.includes(checkbox.value);
+    checkboxes.forEach(/** @param {HTMLInputElement} el */ (el) => {
+      const activeValues = params.getAll(el.name);
+      el.checked = activeValues.includes(el.value);
     });
   }
-
-  // Run on initial page load
+  //(3)
   restoreFiltersFromUrl();
-
-  // Keep UI synced if the user navigates using the browser's Back/Forward buttons
+  //(4)
   window.addEventListener('popstate', restoreFiltersFromUrl);
-
-  // Keep UI synced if Svelte programmatically updates the filters
   window.addEventListener('filters-updated', restoreFiltersFromUrl);
 </script>
 
