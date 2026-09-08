@@ -1,24 +1,24 @@
 ---
-import ContentDirectory, { type SolutionItem } from '@components/client/navigation/ContentDirectory.svelte';
+import ContentDirectorySvelte, { type DirectoryItem, type FilterConfig } from '@components/client/navigation/ContentDirectory.svelte';
+
+// We re-export the types so that the parent page can use them to type its data without having to import the Svelte component directly.
+export type { DirectoryItem, FilterConfig };
 
 interface Props {
-  items: SolutionItem[];
-  missingIds?: string[];
+  items: DirectoryItem[];
+  filterConfig: FilterConfig;
   readMoreLabel?: string;
-  locale: string;
 }
 
 const { t } = Astro.locals;
-
-const { items, missingIds, readMoreLabel, locale } = Astro.props;
+const { items, filterConfig, readMoreLabel } = Astro.props;
 ---
 
-<ContentDirectory
+<ContentDirectorySvelte
   client:load
   items={items}
-  missingIds={missingIds}
+  filterConfig={filterConfig}
   readMoreLabel={readMoreLabel}
-  locale={locale}
   translations={{
     notInLanguage: t('content_not_available_in_your_language'),
     noResults: t('content_directory_no_results_label'),

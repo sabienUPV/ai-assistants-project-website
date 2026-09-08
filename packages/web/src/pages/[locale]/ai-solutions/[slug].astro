@@ -59,7 +59,7 @@ if (!solution) throw new Error('No AI solution found for this slug');
           
           <h3>{t('ai_solutions_entry_thematic_areas_label')}</h3>
           <ul class="tag-list">
-            {solution.data.thematicArea.map(area => <li>{area}</li>)}
+            {solution.data.thematicAreas.map(area => <li>{area}</li>)}
           </ul>
         </section>
 

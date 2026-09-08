@@ -1,45 +1,59 @@
 ---
+import { getUrlFriendlyVersionOfString } from '@utils/url';
+
+export type FilterGroupsType = Record<string, string[]>;
+
 interface Props {
-  filters: string[]; // Array of filter values to display
-  filterParamName?: string; // The URL parameter key to group them under (defaults to 'filter')
+  // e.g., { "Thematic Area": ["Mobility", "Health"], "Platform": ["Web", "App"] }
+  filterGroups: FilterGroupsType;
 }
 
 const { t } = Astro.locals;
-const { filters, filterParamName = 'keyword' } = Astro.props;
+const { filterGroups } = Astro.props;
 ---
 
-<div class="filter-group">
+<div class="filter-search-group">
   <input type="text" id="q" name="q" placeholder={t('filter_search_placeholder')} />
 </div>
 
-<h2 class="filter-title">{t('filter_title')}</h2>
+<div class="filter-title">{t('filter_title')}</div>
 
 <div class="filters-list">
-  {filters.map((filterValue) => (
-    <div class="filter-group">
-      <label for={filterValue}>{filterValue}</label>
-      {/* All checkboxes share the same 'name' but have distinct 'value' and 'id' attributes */}
-      <input 
-        type="checkbox" 
-        id={filterValue} 
-        name={filterParamName} 
-        value={filterValue} 
-      />
-    </div>
+  {Object.entries(filterGroups).map(([groupName, filters]) => (
+    <fieldset class="filter-group">
+      <legend>{groupName}</legend>
+      
+      {filters.map((filterValue) => {
+        // Create a URL-safe parameter name from the group name (e.g., "Thematic Area" -> "thematic_area")
+        const paramName = getUrlFriendlyVersionOfString(groupName);
+        const urlFriendlyFilterValue = getUrlFriendlyVersionOfString(filterValue);
+        
+        return (
+          <div class="checkbox-wrapper">
+            <input 
+              type="checkbox" 
+              id={`${paramName}-${urlFriendlyFilterValue}`} 
+              name={paramName} 
+              value={urlFriendlyFilterValue}
+            />
+            <label for={`${paramName}-${urlFriendlyFilterValue}`}>{filterValue}</label>
+          </div>
+        );
+      })}
+    </fieldset>
   ))}
 </div>
 
-<div class="filter-buttons">
+<div class="filter-actions">
   <button type="submit" class="submit-btn">{t('filter_label_filter_action')}</button>
   <button type="reset" class="reset-btn">{t('filter_label_clear_action')}</button>
 </div>
-
 <style>
   .filter-title {
     text-align: left;
     font-size: 1.5rem;
     font-weight: 600;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   .filters-list {
@@ -49,9 +63,15 @@ const { filters, filterParamName = 'keyword' } = Astro.props;
     margin-bottom: 1rem;
   }
 
-  .filter-group input[type="text"] {
+  .filter-search-group {
+    margin-bottom: 1rem;
+  }
+
+  .filter-search-group input[type="text"] {
     padding: 0.5rem;
     font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .submit-btn, .reset-btn {

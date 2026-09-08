@@ -36,7 +36,7 @@ export const aiSolutionSchema = z.object({
   company: z.string(),
   link: z.url(),
   description: z.string(),
-  thematicArea: z.string().transform((str) => str.split(',').map(s => s.trim())),
+  thematicAreas: z.string().transform((str) => str.split(',').map(s => s.trim())),
   usageForIndependentLiving: z.string(),
   potentialBarriers: z.string().optional(),
   keywords: z.string().transform((str) => str.split(',').map(s => s.trim())),

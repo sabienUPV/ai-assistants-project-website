@@ -111,6 +111,8 @@ ai_solutions_entry_costs_label,Costs/Monetization,Costes/Monetización,Kosten/Mo
 ai_solutions_entry_accessibility_options_label,Accessibility Options,Opciones de Accesibilidad,Barrierefreiheitsoptionen,Opções de Acessibilidade,Opzioni di Accessibilità,Opcije pristupačnosti,Options d'Accessibilité
 ai_solutions_entry_potential_barriers_label,Potential Barriers,Barreras Potenciales,Potenzielle Barrieren,Barreiras Potenciais,Potenziali Barriere,Potencijalne prepreke,Obstacles Potentiels
 ai_solutions_entry_keywords_label,Keywords,Palabras Clave,Schlüsselwörter,Palavras-chave,Parole Chiave,Ključne riječi,Mots-clés
+ai_solutions_entry_creator_label,Creator,Creador,Ersteller,Criador,Creatore,Tvorac,Créateur
+ai_solutions_entry_type_label,Type,Tipo,Typ,Tipo,Tipo,Vrsta,Type
 filter_title,Filter by,Filtrar por,Filtern nach,Filtrar por,Filtra per,Filtar po,Filtrer par
 filter_label_filter_action,Filter,Filtrar,Filtern,Filtrar,Filtra,Filtar,Filtrer
 filter_label_clear_action,Clear,Limpiar,Löschen,Limpar,Cancella,Očisti,Effacer

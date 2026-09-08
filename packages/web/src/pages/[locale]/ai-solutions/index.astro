@@ -1,9 +1,11 @@
 ---
 import Layout from '@layouts/Layout.astro';
 import { locales } from '@languages';
-import { getCollectionWithFallbacks } from '@utils/dynamicContent';
+import { getCollectionWithFallbacks, getSlugFromEntryId } from '@utils/dynamicContent';
 import Filters from '@components/entries/navigation/Filters.astro';
-import ContentDirectory from '@components/entries/navigation/ContentDirectory.astro';
+import ContentDirectory, { type DirectoryItem, type FilterConfig } from '@components/entries/navigation/ContentDirectory.astro';
+import { getAbsoluteUrlFromRelativePathWithoutPageNumber, getUrlFriendlyVersionOfString } from '@utils/url';
+import type { AiSolution } from '@schemas/ai-solutions';
 
 export const prerender = true;
 
@@ -13,6 +15,40 @@ export async function getStaticPaths() {
 
 const { locale, t } = Astro.locals;
 const { collection: allSolutions, fallbackIds: missingSolutionIds } = await getCollectionWithFallbacks('ai-solutions', locale);
+
+const directoryItems : DirectoryItem[] = allSolutions.map(solution => ({
+  id: solution.id,
+  title: solution.data.name,
+  subtitle: `${solution.data.company} • ${solution.data.type}`,
+  excerpt: solution.data.description,
+  isMissingTranslation: missingSolutionIds?.includes(solution.id) || false,
+  // TODO: IMPORTANT: For now we DO NOT do '../' like the comment below says because we are not using pagination yet.
+  // HOWEVER, once we implement pagination here, we will want to do it again, so that's why I keep the comment here as reference.
+  // Note: We need the '../' prefix because the post URL is relative to the current page, which is /[locale]/ai-solutions/list/[page].astro, and we want to go up one level to /[locale]/ai-solutions/[slug].astro
+  url: getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro.url.pathname, /*'../' +*/ getSlugFromEntryId(solution.id)),
+  keywords: solution.data.keywords || [],
+  rawData: solution.data,
+}));
+
+const uniqueAreas = [...new Set(allSolutions.flatMap(s => s.data.thematicAreas))];
+const uniqueTypes = [...new Set(allSolutions.map(s => s.data.type))];
+
+const filterGroups = {
+  [t('ai_solutions_entry_thematic_areas_label')]: uniqueAreas,
+  [t('ai_solutions_entry_type_label')]: uniqueTypes
+};
+
+// Create the JSON-serializable configuration object
+const filterConfig: FilterConfig = {
+  searchFields: ['name', 'description'],
+  arrayFilters: [
+    { paramName: t('ai_solutions_entry_thematic_areas_label'), dataKey: 'thematicAreas' satisfies keyof AiSolution }
+  ],
+  exactFilters: [
+    { paramName: t('ai_solutions_entry_type_label'), dataKey: 'type' satisfies keyof AiSolution }
+  ]
+};
+
 ---
 
 <Layout title={t('ai_solutions_title')}>
@@ -21,15 +57,14 @@ const { collection: allSolutions, fallbackIds: missingSolutionIds } = await getC
     
     <div class="directory-content">
       {/* Setup the directory by injecting the backend data */}
-      <ContentDirectory
-        items={allSolutions}
-        missingIds={missingSolutionIds}
+      <ContentDirectory 
+        items={directoryItems}
+        filterConfig={filterConfig}
         readMoreLabel={t('ai_solutions_card_view_details')}
-        locale={locale}
       />
-
+      
       {/* Setup filters in client-side mode */}
-      <Filters actionRelativePath="search" isClient={true} filters={allSolutions.map(s => s.data.keywords).flat()} />
+      <Filters actionRelativePath="search" isClient={true} filterGroups={filterGroups} />
     </div>
   </main>
 </Layout>

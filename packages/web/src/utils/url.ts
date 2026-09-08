@@ -1,5 +1,3 @@
-import type { AstroGlobal } from "astro";
-
 /**
  * Base path for the site, normalized to be always WITHOUT a trailing slash to ensure consistent URL construction
  */
@@ -151,4 +149,15 @@ function applyRelativePathToCurrentUrlPath(astroUrlPathName: string, relativePat
   
   // Join the segments back together to form the new URL path (e.g., "/es/courses/unidad-2")
   return segments.join('/');
+}
+
+export function getUrlFriendlyVersionOfString(input: string): string {
+  return input
+    .toLowerCase()
+    .normalize('NFD') // Normalize accented characters to their decomposed form
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritical marks (accents)
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/[^a-z0-9-]/g, '') // Remove any non-alphanumeric characters (except hyphens)
+    .replace(/--+/g, '-') // Replace multiple hyphens with a single hyphen
+    .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
 }

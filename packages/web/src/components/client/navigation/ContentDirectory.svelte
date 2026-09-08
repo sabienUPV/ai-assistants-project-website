@@ -1,39 +1,42 @@
 <script module lang="ts">
-  export interface Translations {
-    notInLanguage: string;
-    noResults: string;
-  }
-
-  export interface SolutionData {
-    name: string;
-    company: string;
-    type: string;
-    description: string;
-    keywords?: string[];
-  }
-
-  export interface SolutionItem {
+  export interface DirectoryItem {
     id: string;
-    data: SolutionData;
+    url: string;
+    title: string;
+    subtitle?: string;
+    excerpt?: string;
+    keywords?: string[];
+    isMissingTranslation?: boolean;
+    // We keep the raw data so the search function can access it
+    rawData: any;
+  }
+
+  // Pure JSON serializable configuration
+  export interface FilterConfig {
+    searchFields?: string[]; // Keys in rawData to apply text search (e.g. ['name', 'description'])
+    arrayFilters?: { paramName: string; dataKey: string }[]; // For arrays like thematicArea
+    exactFilters?: { paramName: string; dataKey: string }[]; // For exact matches like type
   }
 </script>
 
 <script lang="ts">
   import { onMount } from 'svelte';
   import ContentNotInLanguagePill from '@components/client/shared/ContentNotInLanguagePill.svelte';
+  import { getUrlFriendlyVersionOfString } from '@utils/url';
 
   interface Props {
-    items: SolutionItem[];
-    missingIds?: string[];
+    items: DirectoryItem[];
+    filterConfig?: FilterConfig;
     readMoreLabel?: string;
-    locale: string;
-    translations: Translations;
+    translations: {
+      notInLanguage: string;
+      noResults: string;
+    };
   }
 
   let { 
     items = [],
-    missingIds = [],
-    locale,
+    filterConfig,
     readMoreLabel,
     translations
   }: Props = $props();
@@ -61,8 +64,7 @@
 
     // Listen to our custom event from the FilterInterceptor
     const handleFiltersUpdated = (e: Event) => {
-      const customEvent = e as CustomEvent<URLSearchParams>;
-      currentParams = customEvent.detail;
+      currentParams = (e as CustomEvent<URLSearchParams>).detail;
       currentPage = 1; // Reset to first page when filtering
     };
     
@@ -76,20 +78,51 @@
   });
 
   // Derived state: Automatically recalculates when currentParams changes
+  // Generic Filter Engine
   let filteredItems = $derived.by(() => {
     const query = currentParams.get('q')?.toLowerCase() || '';
-    const keywords = currentParams.getAll('keyword');
 
     return items.filter(item => {
-      const matchesQuery = query 
-        ? item.data.name.toLowerCase().includes(query) || item.data.description.toLowerCase().includes(query)
-        : true;
+      if (!filterConfig) return true; // If no config, return everything
       
-      const matchesKeyword = keywords.length > 0
-        ? item.data.keywords?.some(k => keywords.includes(k.toLowerCase()))
-        : true;
-      
-      return matchesQuery && matchesKeyword;
+      const data = item.rawData;
+
+      // 1. Text Search
+      if (query && filterConfig.searchFields?.length) {
+        const matchesQuery = filterConfig.searchFields.some(field => 
+          String(data[field] || '').toLowerCase().includes(query)
+        );
+        if (!matchesQuery) return false;
+      }
+
+      // 2. Array Intersect Filters (e.g. thematic areas)
+      if (filterConfig.arrayFilters) {
+        for (const filter of filterConfig.arrayFilters) {
+          const selectedValues = currentParams.getAll(getUrlFriendlyVersionOfString(filter.paramName));
+          if (selectedValues.length > 0) {
+            const rawItemValue = data[filter.dataKey];
+            const itemValues = Array.isArray(rawItemValue)
+              ? rawItemValue.map(v => getUrlFriendlyVersionOfString(String(v || '')))
+              : [getUrlFriendlyVersionOfString(String(rawItemValue || ''))];
+            const matches = itemValues.some((v: string) => selectedValues.includes(v));
+            if (!matches) return false;
+          }
+        }
+      }
+
+      // 3. Exact Match Filters (e.g. solution type)
+      if (filterConfig.exactFilters) {
+        for (const filter of filterConfig.exactFilters) {
+          const selectedValues = currentParams.getAll(getUrlFriendlyVersionOfString(filter.paramName));
+          if (selectedValues.length > 0) {
+            const rawItemValue = data[filter.dataKey];
+            const itemValue = getUrlFriendlyVersionOfString(String(rawItemValue || ''));
+            if (!selectedValues.includes(itemValue)) return false;
+          }
+        }
+      }
+
+      return true;
     });
   });
 
@@ -97,11 +130,6 @@
   let paginatedItems = $derived(
     filteredItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
   );
-
-  // Helper to generate the correct URL just like in Astro
-  function getSlugFromEntryId(id: string) {
-    return id.split('/').pop()?.replace(/\.[^/.]+$/, "") || id;
-  }
 </script>
 
 <div class="posts-grid">
@@ -109,33 +137,33 @@
     <div class="no-results">{translations.noResults}</div>
   {/if}
 
-  {#each paginatedItems as solution (solution.id)}
-    {@const solutionUrl = `/${locale}/ai-solutions/${getSlugFromEntryId(solution.id)}`}
-    
+  {#each paginatedItems as item (item.id)}
     <article class="post-card">
       <div class="card-body">
-        {#if missingIds.includes(solution.id)}
+        {#if item.isMissingTranslation}
           <div class="not-in-language-pill-container">
             <ContentNotInLanguagePill message={translations.notInLanguage} />
           </div>
         {/if}
 
         <h2 class="card-title">
-          <a href={solutionUrl}>{solution.data.name}</a>
+          <a href={item.url}>{item.title}</a>
         </h2>
-        <div class="card-meta">
-          {solution.data.company} • {solution.data.type}
-        </div>
-        <p class="card-excerpt">
-          {solution.data.description}
-        </p>
+        
+        {#if item.subtitle}
+          <div class="card-subtitle">{item.subtitle}</div>
+        {/if}
+        
+        {#if item.excerpt}
+          <p class="card-excerpt">{item.excerpt}</p>
+        {/if}
       </div>
-      <a href={solutionUrl} class="read-more-btn">
+      <a href={item.url} class="read-more-btn">
         {readMoreLabel || 'Read more'} &rarr;
       </a>
       <div class="card-keywords">
-        {#if solution.data.keywords}
-          {#each solution.data.keywords as keyword}
+        {#if item.keywords}
+          {#each item.keywords as keyword}
             <span class="keyword">{keyword}</span>
           {/each}
         {/if}
@@ -201,7 +229,7 @@
     color: var(--color-link-hover);
     text-decoration: underline;
   }
-  .card-meta {
+  .card-subtitle {
     font-size: 0.85rem;
     color: var(--color-logo-dark-grey);
     margin-bottom: 1rem;
