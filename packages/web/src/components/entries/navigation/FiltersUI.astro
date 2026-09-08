@@ -1,4 +1,5 @@
 ---
+import { randomId } from '@utils/a11y';
 import { getUrlFriendlyVersionOfString } from '@utils/url';
 import { Icon } from 'astro-icon/components';
 
@@ -11,10 +12,13 @@ interface Props {
 
 const { t } = Astro.locals;
 const { filterGroups } = Astro.props;
+
+// Generate a unique ID for this instance of the filter component to avoid ID collisions if multiple instances are rendered on the same page.
+const instanceId = randomId('filter-');
 ---
 
 <div class="filter-search-group">
-  <input type="text" id="q" name="q" placeholder={t('filter_search_placeholder')} />
+  <input type="text" id={`${instanceId}-q`} name="q" placeholder={t('filter_search_placeholder')} />
   <button type="submit" class="search-btn" aria-label={t('filter_label_search_action')}>
     <Icon name="search" />
   </button>
@@ -36,16 +40,18 @@ const { filterGroups } = Astro.props;
         // Create a URL-safe parameter name from the group name (e.g., "Thematic Area" -> "thematic_area")
         const paramName = getUrlFriendlyVersionOfString(groupName);
         const urlFriendlyFilterValue = getUrlFriendlyVersionOfString(filterValue);
+
+        const uniqueCheckboxId = `${instanceId}-${paramName}-${urlFriendlyFilterValue}`;
         
         return (
           <div class="checkbox-wrapper">
             <input 
               type="checkbox" 
-              id={`${paramName}-${urlFriendlyFilterValue}`} 
+              id={uniqueCheckboxId} 
               name={paramName} 
               value={urlFriendlyFilterValue}
             />
-            <label for={`${paramName}-${urlFriendlyFilterValue}`}>{filterValue}</label>
+            <label for={uniqueCheckboxId}>{filterValue}</label>
           </div>
         );
       })}
