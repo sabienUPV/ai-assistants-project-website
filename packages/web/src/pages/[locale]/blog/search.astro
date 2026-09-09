@@ -1,0 +1,12 @@
+---
+import BlogDirectory from '@components/entries/blog/BlogDirectory.astro';
+import { locales } from '@languages';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  return locales.map(locale => ({ params: { locale } }));
+}
+---
+
+<BlogDirectory isClient={true} />

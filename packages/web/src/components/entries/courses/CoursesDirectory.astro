@@ -1,0 +1,73 @@
+---
+import Layout from '@layouts/Layout.astro';
+import { getFirstLevelCourses, getExcerptFromBody, getSlugFromEntryId } from '@utils/dynamicContent';
+import ContentDirectory, { type DirectoryItem, type FilterConfig } from '@components/entries/navigation/ContentDirectory.astro';
+import { getAbsoluteUrlFromRelativePathWithoutPageNumber } from '@utils/url';
+import type { Course } from '@schemas/courses';
+import type { Page } from 'astro';
+
+interface Props {
+  isClient?: boolean;
+  page?: Page;
+}
+
+const { isClient, page } = Astro.props;
+
+const { locale, t } = Astro.locals;
+
+// 1. Fetch only first-level courses from the courses collection
+const { collection: firstLevelCourses, fallbackIds: missingCourseIds } = await getFirstLevelCourses(locale);
+
+// 2. Sort courses by unit, and finally by title for consistent ordering
+const courseUnits = firstLevelCourses.sort((a, b) => {
+  const unitComparison = a.data.unit.localeCompare(b.data.unit);
+  if (unitComparison !== 0) return unitComparison;
+
+  return a.data.title.localeCompare(b.data.title);
+});
+
+const directoryItems : DirectoryItem[] = courseUnits.map(course => ({
+  id: course.id,
+  title: `${course.data.unit}. ${course.data.title}`,
+  excerpt: course.data.description || (course.body ? getExcerptFromBody(course.body, 150) : t('blog_card_click_to_read')),
+  isMissingTranslation: missingCourseIds?.includes(course.id) || false,
+  // Note: We need the '../' prefix because the course URL is relative to the current page, which is /[locale]/courses/list/[page].astro, and we want to go up one level to /[locale]/courses/[slug].astro
+  url: getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro.url.pathname, '../' + getSlugFromEntryId(course.id)),
+  rawData: course.data,
+}));
+
+// Create the JSON-serializable configuration object
+const filterConfig: FilterConfig<Course> = {
+  searchFields: ['title', 'description'],
+};
+
+const paginatedItems = page ? directoryItems.slice((page.currentPage - 1) * page.size, page.currentPage * page.size) : directoryItems;
+---
+
+<Layout title={t('nav_courses')}>
+  <main class="courses-directory">
+    <h1 class="directory-title">{t('nav_courses')}</h1>
+    
+    <ContentDirectory 
+      items={paginatedItems}
+      isClient={isClient}
+      actionRelativePath="../search"
+      filterConfig={filterConfig}
+      readMoreLabel={t('blog_card_read_more')}
+      page={page}
+    />
+  </main>
+</Layout>
+
+<style>
+  .courses-directory {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 0;
+  }
+  .directory-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+  }
+</style>

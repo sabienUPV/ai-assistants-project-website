@@ -7,58 +7,65 @@ export type FilterGroups = Record<string, string[]>;
 
 interface Props {
   // e.g., { "Thematic Area": ["Mobility", "Health"], "Platform": ["Web", "App"] }
-  filterGroups: FilterGroups;
+  filterGroups?: FilterGroups;
+  isSearchEnabled?: boolean; // If true, show a search input field above the filters.
 }
 
 const { t } = Astro.locals;
-const { filterGroups } = Astro.props;
+const { filterGroups, isSearchEnabled } = Astro.props;
 
 // Generate a unique ID for this instance of the filter component to avoid ID collisions if multiple instances are rendered on the same page.
 const instanceId = randomId('filter-');
 ---
 
 <div class="filters-ui-wrapper">
-  <div class="filter-search-group">
-    <input type="text" id={`${instanceId}-q`} name="q" placeholder={t('filter_search_placeholder')} />
-    <button type="submit" class="search-btn" aria-label={t('filter_label_search_action')}>
-      <Icon name="search" />
-    </button>
-  </div>
+  {isSearchEnabled && (
+    <div class="filter-search-group">
+      <input type="text" id={`${instanceId}-q`} name="q" placeholder={t('filter_search_placeholder')} />
+      <button type="submit" class="search-btn" aria-label={t('filter_label_search_action')}>
+        <Icon name="search" />
+      </button>
+    </div>
+  )}
 
-  <div class="filter-title">{t('filter_title')}</div>
+  {
+    (filterGroups && Object.keys(filterGroups).length > 0) && (
+      <div class="filter-title">{t('filter_title')}</div>
 
-  <div class="filter-actions">
-    <button type="submit" class="submit-btn">{t('filter_label_filter_action')}</button>
-    <button type="reset" class="reset-btn">{t('filter_label_clear_action')}</button>
-  </div>
+      <div class="filter-actions">
+        <button type="submit" class="submit-btn">{t('filter_label_filter_action')}</button>
+        <button type="reset" class="reset-btn">{t('filter_label_clear_action')}</button>
+      </div>
 
-  <div class="filters-list">
-    {Object.entries(filterGroups).map(([groupName, filters]) => (
-      <fieldset class="filter-group">
-        <legend>{groupName}</legend>
-        
-        {filters.map((filterValue) => {
-          // Create a URL-safe parameter name from the group name (e.g., "Thematic Area" -> "thematic_area")
-          const paramName = getUrlFriendlyVersionOfString(groupName);
-          const urlFriendlyFilterValue = getUrlFriendlyVersionOfString(filterValue);
+      <div class="filters-list">
+        {Object.entries(filterGroups).map(([groupName, filters]) => (
+          <fieldset class="filter-group">
+            <legend>{groupName}</legend>
+            
+            {filters.map((filterValue) => {
+              // Create a URL-safe parameter name from the group name (e.g., "Thematic Area" -> "thematic_area")
+              const paramName = getUrlFriendlyVersionOfString(groupName);
+              const urlFriendlyFilterValue = getUrlFriendlyVersionOfString(filterValue);
 
-          const uniqueCheckboxId = `${instanceId}-${paramName}-${urlFriendlyFilterValue}`;
-          
-          return (
-            <div class="checkbox-wrapper">
-              <input 
-                type="checkbox" 
-                id={uniqueCheckboxId} 
-                name={paramName} 
-                value={urlFriendlyFilterValue}
-              />
-              <label for={uniqueCheckboxId}>{filterValue}</label>
-            </div>
-          );
-        })}
-      </fieldset>
-    ))}
-  </div>
+              const uniqueCheckboxId = `${instanceId}-${paramName}-${urlFriendlyFilterValue}`;
+              
+              return (
+                <div class="checkbox-wrapper">
+                  <input 
+                    type="checkbox" 
+                    id={uniqueCheckboxId} 
+                    name={paramName} 
+                    value={urlFriendlyFilterValue}
+                  />
+                  <label for={uniqueCheckboxId}>{filterValue}</label>
+                </div>
+              );
+            })}
+          </fieldset>
+        ))}
+      </div>
+    )
+  }
 </div>
 
 {/*

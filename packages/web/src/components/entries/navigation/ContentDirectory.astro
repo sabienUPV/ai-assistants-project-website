@@ -25,7 +25,7 @@ interface Props {
 }
 
 const { t } = Astro.locals;
-const { items, isClient = false, actionRelativePath = 'search', filterConfig, readMoreLabel, page } = Astro.props;
+const { items, isClient, actionRelativePath, filterConfig, readMoreLabel, page } = Astro.props;
 
 const filterGroups = filterConfig?.arrayFilters?.concat(filterConfig.exactFilters || [])?.reduce((acc, filter) => {
   const uniqueValues = new Set(items.flatMap(item => {
@@ -35,6 +35,9 @@ const filterGroups = filterConfig?.arrayFilters?.concat(filterConfig.exactFilter
   acc[filter.paramName] = Array.from(uniqueValues).filter(v => v !== undefined && v !== null).map(String);
   return acc;
 }, {} as Record<string, string[]>);
+
+const isSearchEnabled = filterConfig?.searchFields != null;
+const hasFilters = filterGroups && Object.keys(filterGroups).length > 0;
 
 const translations = {
   notInLanguage: t('content_not_available_in_your_language'),
@@ -75,7 +78,7 @@ const translations = {
   </div>
   
   {/* Setup filters using Dropdown for mobile modal behavior */}
-  {filterGroups && Object.keys(filterGroups).length > 0 && (
+  {(isSearchEnabled || hasFilters) && (
     <div class="directory-filters">
       <Dropdown
         title={t('filter_title')}
@@ -84,7 +87,7 @@ const translations = {
         position="left"
       >
         <li class="filters-dropdown-container">
-          <Filters actionRelativePath={actionRelativePath} isClient={isClient} filterGroups={filterGroups} />
+          <Filters actionRelativePath={actionRelativePath} isClient={isClient} filterGroups={filterGroups} isSearchEnabled={isSearchEnabled} />
         </li>
       </Dropdown>
     </div>

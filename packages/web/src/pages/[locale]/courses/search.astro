@@ -1,0 +1,12 @@
+---
+import CoursesDirectory from '@components/entries/courses/CoursesDirectory.astro';
+import { locales } from '@languages';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  return locales.map(locale => ({ params: { locale } }));
+}
+---
+
+<CoursesDirectory isClient={true} />
