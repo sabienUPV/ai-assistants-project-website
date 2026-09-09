@@ -11,14 +11,16 @@ interface Props {
 }
 
 const { filterGroups, actionRelativePath = "search", isClient = false } = Astro.props;
+
+const actionUrl = getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro.url.pathname, actionRelativePath);
 ---
 
 {isClient ? (
-  <FilterInterceptor client:load>
+  <FilterInterceptor client:idle fallbackAction={actionUrl}>
     <FiltersUI filterGroups={filterGroups} />
   </FilterInterceptor>
 ) : (
-  <form action={getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro.url.pathname, actionRelativePath)} method="GET" class="astro-static-form">
+  <form action={actionUrl} method="GET" class="astro-static-form">
     <FiltersUI filterGroups={filterGroups} />
   </form>
 )}

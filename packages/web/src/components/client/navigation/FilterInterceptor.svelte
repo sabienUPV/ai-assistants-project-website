@@ -3,9 +3,10 @@
 
   interface Props {
     children?: Snippet;
+    fallbackAction?: string; // When JS is disabled or has not yet loaded/hydrated, this action will be used for the form submission as a fallback (for example, go to a "search" page with the selected filters applied)
   }
 
-  let { children }: Props = $props();
+  let { children, fallbackAction }: Props = $props();
 
   function dispatchUpdate(params: URLSearchParams) {
     // Update the browser URL without reloading the page
@@ -28,7 +29,7 @@
   }
 
   function handleSubmit(event: SubmitEvent) {
-    event.preventDefault(); // Prevent standard navigation
+    event.preventDefault(); // Prevent standard navigation (this makes sure fallbackAction is not used when JS is enabled and loaded/hydrated)
     handleInput(event);
   }
 
@@ -41,9 +42,11 @@
   }
 </script>
 
-<form 
-  onsubmit={handleSubmit} 
-  onchange={handleInput} 
+<form
+  action={fallbackAction}
+  method="GET"
+  onsubmit={handleSubmit}
+  onchange={handleInput}
   oninput={handleInput}
   onreset={handleReset}
   class="svelte-interceptor-wrapper"
