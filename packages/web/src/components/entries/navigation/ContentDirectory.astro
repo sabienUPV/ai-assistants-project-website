@@ -48,6 +48,13 @@ const translations = {
 <div class="directory-content-columns">
   {/* Setup the directory by injecting the backend data */}
   <div class="directory-content-wrapper">
+    {/* Setup only search bar if only search is enabled */}
+    {isSearchEnabled && !hasFilters && (
+      <div class="directory-search-bar">
+        <Filters actionRelativePath={actionRelativePath} isClient={isClient} filterGroups={filterGroups} isSearchEnabled={isSearchEnabled} />
+      </div>
+    )}
+
     {/* 
       IMPORTANT ASTRO ARCHITECTURE BEHAVIOR:
       Astro does not support dynamic directives like `client:load={isClient}`. 
@@ -77,8 +84,8 @@ const translations = {
     )}
   </div>
   
-  {/* Setup filters using Dropdown for mobile modal behavior */}
-  {(isSearchEnabled || hasFilters) && (
+  {/* Setup full filters using Dropdown for mobile modal behavior if having filters other than search */}
+  {hasFilters && (
     <div class="directory-filters">
       <Dropdown
         title={t('filter_title')}
