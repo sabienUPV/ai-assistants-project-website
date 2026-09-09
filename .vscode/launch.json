@@ -11,9 +11,8 @@
       "restart": true,
       "serverReadyAction": {
         "pattern": "ready in|Local:",
-        "action": "debugWithChrome",
-        "uriFormat": "http://localhost:4321",
-        "webRoot": "${workspaceFolder}/packages/web"
+        "action": "startDebugging",
+        "name": "🌐 Chrome Web"
       }
     },
     {
@@ -26,10 +25,27 @@
       "restart": true,
       "serverReadyAction": {
         "pattern": "ready in|Local:",
-        "action": "debugWithChrome",
-        "uriFormat": "http://localhost:4322",
-        "webRoot": "${workspaceFolder}/packages/admin"
+        "action": "startDebugging",
+        "name": "🌐 Chrome Admin"
       }
+    },
+    {
+      "type": "chrome",
+      "presentation": { "hidden": true },
+      "request": "launch",
+      "name": "🌐 Chrome Web",
+      "url": "http://localhost:4321",
+      "webRoot": "${workspaceFolder}/packages/web",
+      "userDataDir": "${workspaceFolder}/.vscode/chrome-profile-web"
+    },
+    {
+      "type": "chrome",
+      "presentation": { "hidden": true },
+      "request": "launch",
+      "name": "🌐 Chrome Admin",
+      "url": "http://localhost:4322",
+      "webRoot": "${workspaceFolder}/packages/admin",
+      "userDataDir": "${workspaceFolder}/.vscode/chrome-profile-admin"
     }
   ],
   "compounds": [
