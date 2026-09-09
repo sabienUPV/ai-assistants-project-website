@@ -36,7 +36,8 @@
       "name": "🌐 Chrome Web",
       "url": "http://localhost:4321",
       "webRoot": "${workspaceFolder}/packages/web",
-      "userDataDir": "${workspaceFolder}/.vscode/chrome-profile-web"
+      "userDataDir": "${workspaceFolder}/.vscode/chrome-profile-web",
+      "cascadeTerminateToConfigurations": ["🚀 Dev Web (Astro + Chrome)"]
     },
     {
       "type": "chrome",
@@ -45,7 +46,8 @@
       "name": "🌐 Chrome Admin",
       "url": "http://localhost:4322",
       "webRoot": "${workspaceFolder}/packages/admin",
-      "userDataDir": "${workspaceFolder}/.vscode/chrome-profile-admin"
+      "userDataDir": "${workspaceFolder}/.vscode/chrome-profile-admin",
+      "cascadeTerminateToConfigurations": ["🚀 Dev Admin (Astro + Chrome)"]
     }
   ],
   "compounds": [
