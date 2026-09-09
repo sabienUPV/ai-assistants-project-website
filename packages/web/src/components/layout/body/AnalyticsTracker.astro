@@ -1,0 +1,24 @@
+---
+// Define the external API endpoint hosted on your WordPress instance
+const ANALYTICS_ENDPOINT = import.meta.env.PROD 
+  ? 'https://community.ai4pid.eu/api-visits.php' 
+  : 'http://localhost:43212/api-visits.php'; // Or mock URL for local testing (I chose port "43212": like "4321" from the website but with a "2" at the end to avoid port conflicts with the website itself or other Astro websites such as the admin panel)
+---
+
+{/*
+  Lightweight, privacy-first analytics tracker.
+  - is:inline ensures it is evaluated immediately without bundling overhead.
+  - window.addEventListener('load') guarantees rendering and FCP/LCP are never delayed.
+  - Fail-silent catch avoids throwing errors if blocked by privacy shields or adblockers.
+*/}
+<script is:inline define:vars={{ ANALYTICS_ENDPOINT }}>
+  (function () {
+    window.addEventListener('load', function () {
+      fetch(ANALYTICS_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ url: window.location.href }),
+      }).catch(function () {});
+    });
+  })();
+</script>
