@@ -17,46 +17,48 @@ const { filterGroups } = Astro.props;
 const instanceId = randomId('filter-');
 ---
 
-<div class="filter-search-group">
-  <input type="text" id={`${instanceId}-q`} name="q" placeholder={t('filter_search_placeholder')} />
-  <button type="submit" class="search-btn" aria-label={t('filter_label_search_action')}>
-    <Icon name="search" />
-  </button>
-</div>
+<div class="filters-ui-wrapper">
+  <div class="filter-search-group">
+    <input type="text" id={`${instanceId}-q`} name="q" placeholder={t('filter_search_placeholder')} />
+    <button type="submit" class="search-btn" aria-label={t('filter_label_search_action')}>
+      <Icon name="search" />
+    </button>
+  </div>
 
-<div class="filter-title">{t('filter_title')}</div>
+  <div class="filter-title">{t('filter_title')}</div>
 
-<div class="filter-actions">
-  <button type="submit" class="submit-btn">{t('filter_label_filter_action')}</button>
-  <button type="reset" class="reset-btn">{t('filter_label_clear_action')}</button>
-</div>
+  <div class="filter-actions">
+    <button type="submit" class="submit-btn">{t('filter_label_filter_action')}</button>
+    <button type="reset" class="reset-btn">{t('filter_label_clear_action')}</button>
+  </div>
 
-<div class="filters-list">
-  {Object.entries(filterGroups).map(([groupName, filters]) => (
-    <fieldset class="filter-group">
-      <legend>{groupName}</legend>
-      
-      {filters.map((filterValue) => {
-        // Create a URL-safe parameter name from the group name (e.g., "Thematic Area" -> "thematic_area")
-        const paramName = getUrlFriendlyVersionOfString(groupName);
-        const urlFriendlyFilterValue = getUrlFriendlyVersionOfString(filterValue);
-
-        const uniqueCheckboxId = `${instanceId}-${paramName}-${urlFriendlyFilterValue}`;
+  <div class="filters-list">
+    {Object.entries(filterGroups).map(([groupName, filters]) => (
+      <fieldset class="filter-group">
+        <legend>{groupName}</legend>
         
-        return (
-          <div class="checkbox-wrapper">
-            <input 
-              type="checkbox" 
-              id={uniqueCheckboxId} 
-              name={paramName} 
-              value={urlFriendlyFilterValue}
-            />
-            <label for={uniqueCheckboxId}>{filterValue}</label>
-          </div>
-        );
-      })}
-    </fieldset>
-  ))}
+        {filters.map((filterValue) => {
+          // Create a URL-safe parameter name from the group name (e.g., "Thematic Area" -> "thematic_area")
+          const paramName = getUrlFriendlyVersionOfString(groupName);
+          const urlFriendlyFilterValue = getUrlFriendlyVersionOfString(filterValue);
+
+          const uniqueCheckboxId = `${instanceId}-${paramName}-${urlFriendlyFilterValue}`;
+          
+          return (
+            <div class="checkbox-wrapper">
+              <input 
+                type="checkbox" 
+                id={uniqueCheckboxId} 
+                name={paramName} 
+                value={urlFriendlyFilterValue}
+              />
+              <label for={uniqueCheckboxId}>{filterValue}</label>
+            </div>
+          );
+        })}
+      </fieldset>
+    ))}
+  </div>
 </div>
 
 {/*
@@ -65,31 +67,35 @@ const instanceId = randomId('filter-');
   read URL parameters during the server build.
 
   Notes:
-  1. We use `window.location.search` to get the query parameters.
-  2. We restore the search input and checkboxes based on the URL parameters.
-  3. We call `restoreFiltersFromUrl()` on page load to initialize the filter states.
-  4. We also listen for `popstate` and `filters-updated` events to re-apply the filter states when the user navigates back or when filters are updated via Svelte.
+  1. We use an if-guard to manually deduplicate the script execution in case multiple FilterUIs are rendered.
+  2. We iterate over all '.filters-ui-wrapper' to sync every filter instance simultaneously.
+  3. We restore the search input and checkboxes based on the URL parameters.
+  4. We call `restoreFiltersFromUrl()` on page load to initialize the filter states, and we also listen for `popstate` and `filters-updated` events to re-apply the filter states when the user navigates back or when filters are updated via Svelte.
  */}
 <script is:inline>
-  function restoreFiltersFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    //(1)
-    const searchInput = /** @type {HTMLInputElement} */ (document.querySelector('.filter-search-group input[name="q"]'));
-    if (searchInput) {
-      searchInput.value = params.get('q') || '';
-    }
-    //(2)
-    const checkboxes = document.querySelectorAll('.filters-list input[type="checkbox"]');
-    checkboxes.forEach(/** @param {HTMLInputElement} el */ (el) => {
-      const activeValues = params.getAll(el.name);
-      el.checked = activeValues.includes(el.value);
-    });
+  //(1)
+  if (!window.restoreFiltersFromUrl) {
+    window.restoreFiltersFromUrl = function() {
+      const params = new URLSearchParams(window.location.search);
+      //(2)
+      document.querySelectorAll('.filters-ui-wrapper').forEach(wrapper => {
+        //(3)
+        const searchInput = /** @type {HTMLInputElement} */ (wrapper.querySelector('.filter-search-group input[name="q"]'));
+        if (searchInput) {
+          searchInput.value = params.get('q') || '';
+        }
+        const checkboxes = wrapper.querySelectorAll('.filters-list input[type="checkbox"]');
+        checkboxes.forEach(/** @param {HTMLInputElement} el */ (el) => {
+          const activeValues = params.getAll(el.name);
+          el.checked = activeValues.includes(el.value);
+        });
+      });
+    };
+    //(4)
+    window.restoreFiltersFromUrl();
+    window.addEventListener('popstate', window.restoreFiltersFromUrl);
+    window.addEventListener('filters-updated', window.restoreFiltersFromUrl);
   }
-  //(3)
-  restoreFiltersFromUrl();
-  //(4)
-  window.addEventListener('popstate', restoreFiltersFromUrl);
-  window.addEventListener('filters-updated', restoreFiltersFromUrl);
 </script>
 
 <style>
@@ -132,7 +138,7 @@ const instanceId = randomId('filter-');
 
   .filter-title {
     text-align: left;
-    text-color: var(--color-secondary);
+    color: var(--color-secondary);
     font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
