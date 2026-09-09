@@ -1,0 +1,63 @@
+---
+import { getStaticPathsFromLocales as getStaticPaths } from '@utils/translation';
+
+export { getStaticPaths };
+
+import Layout from "@layouts/Layout.astro";
+
+const { t, homeLocale } = Astro.locals;
+const imprintUrl = `${homeLocale()}imprint`;
+---
+
+<Layout title={t('privacy_title')}>
+  <main class="privacy-container">
+    <h1>{t('privacy_title')}</h1>
+
+    <section class="privacy-section">
+      <h2>{t('privacy_intro_title')}</h2>
+      <p>{t('privacy_intro_text')}</p>
+    </section>
+
+    <section class="privacy-section">
+      <h2>{t('privacy_analytics_title')}</h2>
+      <p set:html={t('privacy_analytics_text1', true)} />
+      <p>{t('privacy_analytics_text2')}</p>
+      <p>{t('privacy_analytics_text3')}</p>
+    </section>
+
+    <section class="privacy-section">
+      <h2>{t('privacy_hosting_title')}</h2>
+      <p>{t('privacy_hosting_text')}</p>
+    </section>
+
+    <section class="privacy-section">
+      <h2>{t('privacy_rights_title')}</h2>
+      <p>
+        {t('privacy_rights_text')} <a href={imprintUrl}>{t('imprint_title')}</a>.
+      </p>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .privacy-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem 1rem;
+    color: var(--color-text);
+  }
+
+  h1 { font-size: 2.5rem; margin-bottom: 2.5rem; }
+  h2 { font-size: 1.5rem; margin-bottom: 1.2rem; color: var(--color-secondary); border-bottom: 1px solid #eaeaea; padding-bottom: 0.5rem; }
+  
+  .privacy-section { margin-bottom: 3rem; }
+  
+  .privacy-section p {
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  a { color: var(--color-secondary); text-decoration: underline; }
+  a:hover { text-decoration: none; }
+</style>
