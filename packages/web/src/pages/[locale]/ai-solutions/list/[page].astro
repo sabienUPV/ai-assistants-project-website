@@ -10,8 +10,8 @@ export const getStaticPaths = (async function ({ paginate }) {
   const postsLocalesMap = Object.fromEntries(
     await Promise.all(
       locales.map(async (currentLocale) => {
-        const { collection: posts } = await getCollectionWithFallbacks('posts', currentLocale);
-        return [currentLocale, posts] as const;
+        const { collection: aiSolutions } = await getCollectionWithFallbacks('ai-solutions', currentLocale);
+        return [currentLocale, aiSolutions] as const;
       })
     )
   );

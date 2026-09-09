@@ -50,6 +50,7 @@ const paginatedItems = page ? directoryItems.slice((page.currentPage - 1) * page
     <ContentDirectory 
       items={paginatedItems}
       isClient={isClient}
+      page={page}
       actionRelativePath="../search"
       filterConfig={filterConfig}
       readMoreLabel={t('ai_solutions_card_view_details')}
