@@ -13,9 +13,10 @@ import Footer from '@components/navigation/Footer.astro';
 import SkipLink from '@components/a11y/SkipLink.astro';
 import FloatingMenu from '@components/shared/FloatingMenu.astro';
 
-import HeadIcons from '@components/Head/HeadIcons.astro';
-import HeadMeta from '@components/Head/HeadMeta.astro';
-import HeadEasyToReadScript from '@components/Head/HeadEasyToReadScript.astro';
+import HeadIcons from '@components/layout/head/HeadIcons.astro';
+import HeadMeta from '@components/layout/head/HeadMeta.astro';
+import HeadEasyToReadScript from '@components/layout/head/HeadEasyToReadScript.astro';
+import AnalyticsTracker from '@components/layout/body/AnalyticsTracker.astro';
 
 const locale = Astro.currentLocale || defaultLocale;
 const origin = Astro.site ? Astro.site.origin : Astro.url.origin;
@@ -87,6 +88,8 @@ const hasSidebar = Astro.slots.has('sidebar');
 
 		<Footer />
 		<FloatingMenu />
+
+    <AnalyticsTracker />
 	</body>
 </html>
 

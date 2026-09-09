@@ -1,0 +1,12 @@
+services:
+  analytics-mock:
+    # Use the exact PHP version (8.3.3) the real WordPress website uses to avoid any compatibility issues with the mock API
+    image: php:8.3.3-cli
+    ports:
+      # I chose port "43212": like "4321" from the website but with a "2" at the end to avoid port conflicts with the website itself or other Astro websites such as the admin panel
+      - "43212:80"
+    volumes:
+      - ./api-visits-mock.php:/var/www/html/api-visits.php
+    working_dir: /var/www/html
+    # Spin up the internal PHP server on port 80 of the container
+    command: php -S 0.0.0.0:80
