@@ -140,9 +140,12 @@ const translations = {
       justify-content: flex-start; /* Align the filter button to the left */
     }
 
-    .filters-dropdown-container {
+    .directory-filters :global(.dropdown-menu) {
       background-color: var(--color-secondary);
-      color: white;
+    }
+
+    .filters-dropdown-container {
+      background-color: var(--color-background);
     }
 
     .directory-filters :global(.dropdown-trigger) {
