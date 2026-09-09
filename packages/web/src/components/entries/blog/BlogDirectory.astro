@@ -26,14 +26,17 @@ const sortedPosts = allPosts.sort((a, b) => {
 const directoryItems : DirectoryItem[] = sortedPosts.map(post => ({
   id: post.id,
   title: post.data.title,
-  subtitle: post.data.pubDate ? post.data.pubDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : undefined,
+  // We use the publication date as the subtitle for the blog posts
+  subtitle: post.data.pubDate ? post.data.pubDate.toLocaleDateString(locale === 'en' ? 'en-GB' : locale, { day: 'numeric', month: 'short', year: 'numeric' }) : undefined,
   excerpt: post.data.description || (post.body ? getExcerptFromBody(post.body, 150) : t('blog_card_click_to_read')),
   isMissingTranslation: missingPostIds?.includes(post.id) || false,
+  // Note: We need the '../' prefix because the post URL is relative to the current page, which is /[locale]/blog/list/[page].astro, and we want to go up one level to /[locale]/blog/[slug].astro
   url: getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro.url.pathname, '../' + getSlugFromEntryId(post.id)),
   rawData: post.data,
 }));
 
 // Create the JSON-serializable configuration object
+// Since we only provide searchFields, ContentDirectory will render just the search bar without the sidebar/dropdown
 const filterConfig: FilterConfig<Post> = {
   searchFields: ['title', 'description'],
 };
@@ -52,7 +55,6 @@ const paginatedItems = page ? directoryItems.slice((page.currentPage - 1) * page
       actionRelativePath="../search"
       filterConfig={filterConfig}
       readMoreLabel={t('blog_card_read_more')}
-      page={page}
     />
   </main>
 </Layout>

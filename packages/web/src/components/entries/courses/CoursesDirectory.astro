@@ -37,6 +37,7 @@ const directoryItems : DirectoryItem[] = courseUnits.map(course => ({
 }));
 
 // Create the JSON-serializable configuration object
+// Since we only provide searchFields, ContentDirectory will render just the search bar without the sidebar/dropdown
 const filterConfig: FilterConfig<Course> = {
   searchFields: ['title', 'description'],
 };
@@ -51,10 +52,10 @@ const paginatedItems = page ? directoryItems.slice((page.currentPage - 1) * page
     <ContentDirectory 
       items={paginatedItems}
       isClient={isClient}
+      page={page}
       actionRelativePath="../search"
       filterConfig={filterConfig}
       readMoreLabel={t('blog_card_read_more')}
-      page={page}
     />
   </main>
 </Layout>
