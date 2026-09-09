@@ -5,6 +5,7 @@ import ContentDirectory, { type DirectoryItem, type FilterConfig } from '@compon
 import { getAbsoluteUrlFromRelativePathWithoutPageNumber } from '@utils/url';
 import type { Post } from '@schemas/posts';
 import type { Page } from 'astro';
+import { getLocaleForDate } from '@utils/date';
 
 interface Props {
   isClient?: boolean;
@@ -27,7 +28,7 @@ const directoryItems : DirectoryItem[] = sortedPosts.map(post => ({
   id: post.id,
   title: post.data.title,
   // We use the publication date as the subtitle for the blog posts
-  subtitle: post.data.pubDate ? post.data.pubDate.toLocaleDateString(locale === 'en' ? 'en-GB' : locale, { day: 'numeric', month: 'short', year: 'numeric' }) : undefined,
+    subtitle: post.data.pubDate ? post.data.pubDate.toLocaleDateString(getLocaleForDate(locale), { day: 'numeric', month: 'short', year: 'numeric' }) : undefined,
   excerpt: post.data.description || (post.body ? getExcerptFromBody(post.body, 150) : t('blog_card_click_to_read')),
   isMissingTranslation: missingPostIds?.includes(post.id) || false,
   // Note: We need the '../' prefix because the post URL is relative to the current page, which is /[locale]/blog/list/[page].astro, and we want to go up one level to /[locale]/blog/[slug].astro
