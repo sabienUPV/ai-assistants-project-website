@@ -2,30 +2,40 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "chrome",
+      "type": "node",
       "request": "launch",
-      "name": "Start Web + Chrome (dev)",
-      "url": "http://localhost:4321",
-      "webRoot": "${workspaceFolder}/packages/web",
-      "preLaunchTask": "Start Astro (dev): Web",
-      "port": 9222,
-      "userDataDir": "${workspaceFolder}/.vscode/chrome-profile-web"
+      "name": "🚀 Dev Web (Astro + Chrome)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "-w", "@sabien-upv-astro-cms/web"],
+      "console": "integratedTerminal",
+      "restart": true,
+      "serverReadyAction": {
+        "pattern": "ready in|Local:",
+        "action": "debugWithChrome",
+        "uriFormat": "http://localhost:4321",
+        "webRoot": "${workspaceFolder}/packages/web"
+      }
     },
     {
-      "type": "chrome",
+      "type": "node",
       "request": "launch",
-      "name": "Start Admin + Chrome (dev)",
-      "url": "http://localhost:4322",
-      "webRoot": "${workspaceFolder}/packages/admin",
-      "preLaunchTask": "Start Astro (dev): Admin",
-      "port": 9223,
-      "userDataDir": "${workspaceFolder}/.vscode/chrome-profile-admin"
+      "name": "🚀 Dev Admin (Astro + Chrome)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "-w", "@sabien-upv-astro-cms/admin", "--", "--port", "4322"],
+      "console": "integratedTerminal",
+      "restart": true,
+      "serverReadyAction": {
+        "pattern": "ready in|Local:",
+        "action": "debugWithChrome",
+        "uriFormat": "http://localhost:4322",
+        "webRoot": "${workspaceFolder}/packages/admin"
+      }
     }
   ],
   "compounds": [
     {
-      "name": "🚀 Start Full Stack (Web + Admin) (dev)",
-      "configurations": ["Start Web + Chrome (dev)", "Start Admin + Chrome (dev)"]
+      "name": "🚀 Dev Full (Web + Admin)",
+      "configurations": ["🚀 Dev Web (Astro + Chrome)", "🚀 Dev Admin (Astro + Chrome)"]
     }
   ]
 }
