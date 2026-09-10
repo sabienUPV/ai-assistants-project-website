@@ -199,9 +199,92 @@ function ai4pid_analytics_admin_page() {
 
         echo '</tbody></table>';
 
+        // Render Markdown Export Interface
+        ai4pid_render_markdown_export_ui($table_name);
+
     } else {
         echo '<div class="notice notice-warning inline"><p>⚠️ The data table does not exist yet. Click the "Initialize System" button to begin.</p></div>';
     }
 
     echo '</div>'; // End of .wrap
+}
+
+// Render the Markdown Export Box
+function ai4pid_render_markdown_export_ui($table_name) {
+    global $wpdb;
+
+    // 1. Total Unique Visitors (Platform-wide)
+    // We concatenate hash and date because the hash of the same user changes the next day
+    $total_unique = $wpdb->get_var("SELECT COUNT(DISTINCT CONCAT(visitor_hash, visit_date)) FROM $table_name");
+
+    // 2. Daily Unique Visitors (Last 30 days)
+    $daily_visits = $wpdb->get_results("
+        SELECT visit_date, COUNT(DISTINCT visitor_hash) as uniques 
+        FROM $table_name 
+        WHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) 
+        GROUP BY visit_date 
+        ORDER BY visit_date DESC
+    ");
+
+    // 3. Top URLs (Last 30 days)
+    $top_urls = $wpdb->get_results("
+        SELECT url, COUNT(DISTINCT CONCAT(visitor_hash, visit_date)) as uniques 
+        FROM $table_name 
+        WHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) 
+        GROUP BY url 
+        ORDER BY uniques DESC 
+        LIMIT 15
+    ");
+
+    // Build the Markdown string
+    $md = "### 📊 Analytics Export (" . wp_date('Y-m-d H:i') . ")\n\n";
+    $md .= "**Total Unique Visitors (Platform-wide):** " . intval($total_unique) . "\n\n";
+    
+    $md .= "**Daily Unique Visitors (Last 30 Days)**\n";
+    $md .= "| Date | Unique Visits |\n|---|---|\n";
+    if ($daily_visits) {
+        foreach ($daily_visits as $day) {
+            $md .= "| {$day->visit_date} | {$day->uniques} |\n";
+        }
+    }
+    $md .= "\n";
+
+    $md .= "**Top URLs (Last 30 Days)**\n";
+    $md .= "| URL | Unique Visits |\n|---|---|\n";
+    if ($top_urls) {
+        foreach ($top_urls as $url_row) {
+            $md .= "| {$url_row->url} | {$url_row->uniques} |\n";
+        }
+    }
+
+    // Render the UI in the Dashboard
+    ?>
+    <div style="margin-top: 2rem; background: #fff; padding: 1.5rem; border: 1px solid #ccd0d4; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+        <h2 style="margin-top: 0;">Export to Markdown</h2>
+        <p>Copy this data to share it or paste it into external tools while retaining the table formatting.</p>
+        
+        <textarea id="ai4pid-md-export" style="width: 100%; height: 250px; font-family: monospace; background: #f0f0f1; padding: 1rem;" readonly><?php echo esc_textarea($md); ?></textarea>
+        
+        <div style="margin-top: 1rem; display: flex; align-items: center; gap: 10px;">
+            <button type="button" class="button button-primary" onclick="copyAnalyticsMD()">Copy to Clipboard</button>
+            <span id="ai4pid-copy-feedback" style="color: #00a32a; font-weight: 600; display: none;">✓ Copied successfully!</span>
+        </div>
+
+        <script>
+        function copyAnalyticsMD() {
+            const copyText = document.getElementById("ai4pid-md-export");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // For mobile compatibility
+            
+            navigator.clipboard.writeText(copyText.value).then(() => {
+                const feedback = document.getElementById("ai4pid-copy-feedback");
+                feedback.style.display = "inline";
+                setTimeout(() => { feedback.style.display = "none"; }, 2500);
+            }).catch(err => {
+                console.error('Copy failed: ', err);
+            });
+        }
+        </script>
+    </div>
+    <?php
 }
