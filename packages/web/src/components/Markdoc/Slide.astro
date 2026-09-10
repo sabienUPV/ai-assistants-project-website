@@ -51,6 +51,11 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
   .slide-content :global(img),
   .slide-content :global(.crop-wrapper) {
     margin: 2rem auto; /* Centra la imagen y añade espacio arriba y abajo */
+
+    /* FIX: Fuerza a la imagen a encogerse si es más ancha que el móvil */
+    max-width: 100%;
+    height: auto;
+    box-sizing: border-box;
   }
 
   .slide-content {
@@ -58,8 +63,17 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
     display: grid; /* Usamos grid para poder centrar el contenido fácilmente */
     /* (place-items está en style inline para poder cambiarlo dinámicamente según el atributo 'align') */
 
+    /* FIX: Obliga a la columna a tener un máximo del 100% del espacio (1fr) y le permite encogerse hasta 0 */
+    grid-template-columns: minmax(0, 1fr);
+
     min-width: 0; /* Evita que el contenido se desborde del contenedor */
     overflow-wrap: break-word; /* Evita que URLs largas o palabras gigantes rompan la pantalla en móviles */
+  }
+
+  /* FIX: Aplica contención a TODOS los elementos directos inyectados por Markdoc (p, ul, img, etc) */
+  .slide-content > :global(*) {
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   /* =========================================
