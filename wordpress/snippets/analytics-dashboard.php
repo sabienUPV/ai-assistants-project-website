@@ -17,7 +17,7 @@ function ai4pid_analytics_admin_menu() {
     );
 }
 
-// Handle Form Submissions securely via POST-Redirect-GET pattern (prevents F5 resubmission)
+// Handle Form Submissions securely via POST-Redirect-GET pattern
 add_action( 'admin_init', 'ai4pid_analytics_process_actions' );
 
 function ai4pid_analytics_process_actions() {
@@ -27,7 +27,10 @@ function ai4pid_analytics_process_actions() {
 
     global $wpdb;
     $table_name = $wpdb->prefix . AI4PID_ANALYTICS_TABLE_NAME;
-    $base_url = admin_url( 'admin.php?page=ai4pid-analytics' );
+    
+    // Preserve the current period parameter in redirects
+    $current_period = isset($_GET['period']) ? sanitize_text_field($_GET['period']) : '30';
+    $base_url = add_query_arg( 'period', $current_period, admin_url( 'admin.php?page=ai4pid-analytics' ) );
 
     // 1. INIT TABLE
     if ( isset( $_POST['ai4pid_analytics_setup_submit'] ) && check_admin_referer( 'ai4pid_analytics_setup', 'ai4pid_analytics_nonce' ) ) {
@@ -80,7 +83,7 @@ function ai4pid_analytics_process_actions() {
         } else {
             $msg = 'destroy_mismatch';
         }
-        wp_safe_redirect( add_query_arg( 'msg', $msg, $base_url ) );
+        wp_safe_redirect( add_query_arg( 'msg', $msg, admin_url( 'admin.php?page=ai4pid-analytics' ) ) ); // Remove period arg on destroy
         exit;
     }
 }
@@ -122,33 +125,54 @@ function ai4pid_analytics_admin_page() {
         $start_7d = $start_today - (6 * DAY_IN_SECONDS);
         $start_30d = $start_today - (29 * DAY_IN_SECONDS);
 
-        // --- SUMMARY METRICS ---
+        // --- SUMMARY METRICS (Always Global) ---
         $metric_today = $wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT visitor_hash) FROM $table_name WHERE visit_timestamp >= %d", $start_today));
         $metric_yesterday = $wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT visitor_hash) FROM $table_name WHERE visit_timestamp >= %d AND visit_timestamp < %d", $start_yesterday, $start_today));
         
         // Grouping by localized day mathematically: FLOOR((timestamp + offset) / 86400)
         $metric_7d = $wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT CONCAT(visitor_hash, FLOOR((visit_timestamp + %d) / 86400))) FROM $table_name WHERE visit_timestamp >= %d", $wp_offset_seconds, $start_7d));
         $metric_30d = $wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT CONCAT(visitor_hash, FLOOR((visit_timestamp + %d) / 86400))) FROM $table_name WHERE visit_timestamp >= %d", $wp_offset_seconds, $start_30d));
+        $metric_all = $wpdb->get_var($wpdb->prepare("SELECT COUNT(DISTINCT CONCAT(visitor_hash, FLOOR((visit_timestamp + %d) / 86400))) FROM $table_name", $wp_offset_seconds));
 
-        echo '<div style="display: flex; gap: 15px; margin: 20px 0;">';
-        echo ai4pid_render_metric_card('Unique Visitors Today', $metric_today, '#007cba');
-        echo ai4pid_render_metric_card('Unique Visitors Yesterday', $metric_yesterday, '#50575e');
-        echo ai4pid_render_metric_card('Unique Visitor-Days (Last 7D)', $metric_7d, '#50575e');
-        echo ai4pid_render_metric_card('Unique Visitor-Days (Last 30D)', $metric_30d, '#50575e');
+        echo '<div style="display: flex; gap: 15px; margin: 20px 0; flex-wrap: wrap;">';
+        echo ai4pid_render_metric_card('Unique Today', $metric_today, '#007cba');
+        echo ai4pid_render_metric_card('Unique Yesterday', $metric_yesterday, '#50575e');
+        echo ai4pid_render_metric_card('Visitor-Days (7D)', $metric_7d, '#50575e');
+        echo ai4pid_render_metric_card('Visitor-Days (30D)', $metric_30d, '#50575e');
+        echo ai4pid_render_metric_card('Visitor-Days (All Time)', $metric_all, '#8c5f00');
         echo '</div>';
 
-        // --- DAILY VISITS CHART (CSS ONLY) & TABLE ---
+        // --- PERIOD SELECTOR FOR CHARTS AND TABLES ---
+        $current_period = isset($_GET['period']) ? sanitize_text_field($_GET['period']) : '30';
+        $period_label = 'Last 30 Days';
+        $filter_timestamp = $start_30d;
+
+        if ($current_period === '7') { $filter_timestamp = $start_7d; $period_label = 'Last 7 Days'; }
+        elseif ($current_period === '90') { $filter_timestamp = $start_today - (89 * DAY_IN_SECONDS); $period_label = 'Last 90 Days'; }
+        elseif ($current_period === 'all') { $filter_timestamp = 0; $period_label = 'All Time'; }
+
+        echo '<form method="get" style="background: #fff; padding: 15px; border: 1px solid #ccd0d4; margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">';
+        echo '<input type="hidden" name="page" value="ai4pid-analytics">';
+        echo '<strong><label for="ai4pid_period">Reporting Period:</label></strong>';
+        echo '<select name="period" id="ai4pid_period" onchange="this.form.submit()">';
+        echo '<option value="7" ' . selected($current_period, '7', false) . '>Last 7 Days</option>';
+        echo '<option value="30" ' . selected($current_period, '30', false) . '>Last 30 Days</option>';
+        echo '<option value="90" ' . selected($current_period, '90', false) . '>Last 90 Days</option>';
+        echo '<option value="all" ' . selected($current_period, 'all', false) . '>All Time</option>';
+        echo '</select>';
+        echo '<noscript><button type="submit" class="button">Apply</button></noscript>';
+        echo '</form>';
+
+        // --- DAILY VISITS CHART (CSS ONLY) ---
         $daily_visits = $wpdb->get_results($wpdb->prepare("
-            SELECT 
-                FLOOR((visit_timestamp + %d) / 86400) as day_id, 
-                COUNT(DISTINCT visitor_hash) as uniques
+            SELECT FLOOR((visit_timestamp + %d) / 86400) as day_id, COUNT(DISTINCT visitor_hash) as uniques
             FROM $table_name
             WHERE visit_timestamp >= %d
             GROUP BY day_id
             ORDER BY day_id ASC
-        ", $wp_offset_seconds, $start_30d));
+        ", $wp_offset_seconds, $filter_timestamp));
 
-        echo '<h3>Daily Unique Visitors (Last 30 Days)</h3>';
+        echo '<h3>Daily Unique Visitors (' . esc_html($period_label) . ')</h3>';
         
         if ( $daily_visits ) {
             $max_visits = 0;
@@ -159,25 +183,18 @@ function ai4pid_analytics_admin_page() {
             $mid_visits = ceil($max_visits / 2);
 
             // Adaptive X-Axis Logic: Detect if data spans multiple months or years
-            $months = [];
-            $years = [];
+            $months = []; $years = [];
             foreach ($daily_visits as $d) {
                 $ts = $d->day_id * 86400;
                 $months[gmdate('m', $ts)] = true;
                 $years[gmdate('Y', $ts)] = true;
             }
-            
             $is_multi_year = count($years) > 1;
             $is_multi_month = count($months) > 1;
             
-            if ($is_multi_year) {
-                $x_label = 'Date (DD/MM/YY)';
-            } elseif ($is_multi_month) {
-                $x_label = 'Date (DD/MM)';
-            } else {
-                $month_name = gmdate('F Y', $daily_visits[0]->day_id * 86400); 
-                $x_label = 'Day (' . $month_name . ')';
-            }
+            if ($is_multi_year) { $x_label = 'Date (DD/MM/YY)'; } 
+            elseif ($is_multi_month) { $x_label = 'Date (DD/MM)'; } 
+            else { $x_label = 'Day (' . gmdate('F Y', $daily_visits[0]->day_id * 86400) . ')'; }
             
             // Global Wrapper to hold Axis Labels and Chart cleanly
             echo '<div style="font-family: sans-serif; margin-bottom: 30px;">';
@@ -190,17 +207,13 @@ function ai4pid_analytics_admin_page() {
             
             // Left Column: Y-axis (Numbers)
             echo '<div style="display: flex; flex-direction: column; justify-content: space-between; text-align: right; color: #8c8f94; font-size: 11px; padding: 10px 0 25px 0; width: 30px;">';
-            echo '<span>' . $max_visits . '</span>';
-            echo '<span>' . $mid_visits . '</span>';
-            echo '<span>0</span>';
-            echo '</div>';
+            echo '<span>' . $max_visits . '</span><span>' . $mid_visits . '</span><span>0</span></div>';
             
             // Right Column: Graph Area Container
             echo '<div style="flex-grow: 1; background: #fff; display: flex; flex-direction: column; padding: 10px 10px 0 10px; overflow-x: auto; overflow-y: hidden; border: 1px solid #ccd0d4; border-bottom: 0;">';
             
                 // Graph Track
                 echo '<div style="flex-grow: 1; position: relative; display: flex; align-items: flex-end; gap: 4px;">';
-                
                     // Horizontal reference lines (background)
                     echo '<div style="position: absolute; top: 0; left: 0; right: 0; border-top: 1px solid #e2e4e7; z-index: 1;"></div>'; // Line Top
                     echo '<div style="position: absolute; top: 50%; left: 0; right: 0; border-top: 1px dashed #dcdcde; z-index: 1;"></div>'; // Line Middle
@@ -212,55 +225,43 @@ function ai4pid_analytics_admin_page() {
                         $local_date = gmdate('Y-m-d', $ts); 
                         $height = round(($d->uniques / $max_visits) * 100);
                         $title = esc_attr( $local_date . ': ' . $d->uniques . ' visits' );
-                        
                         // Apply the adaptive date format
-                        if ($is_multi_year) {
-                            $display_date = gmdate('d/m/y', $ts);
-                        } elseif ($is_multi_month) {
-                            $display_date = gmdate('d/m', $ts);
-                        } else {
-                            $display_date = gmdate('d', $ts);
-                        }
+                        $display_date = $is_multi_year ? gmdate('d/m/y', $ts) : ($is_multi_month ? gmdate('d/m', $ts) : gmdate('d', $ts));
                         
-                        // Bar
+                        // Bar with hover effect and tooltip
                         echo "<div title=\"$title\" style=\"flex-grow: 1; min-width: 20px; max-width: 40px; background: #007cba; height: {$height}%; position: relative; border-radius: 2px 2px 0 0; z-index: 2; transition: opacity 0.2s;\" onmouseover=\"this.style.opacity='0.8'\" onmouseout=\"this.style.opacity='1'\">";
                         // Day label (X-axis)
-                        echo "<span style=\"position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #8c8f94; white-space: nowrap;\">" . $display_date . "</span>";
-                        echo "</div>";
+                        echo "<span style=\"position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #8c8f94; white-space: nowrap;\">" . $display_date . "</span></div>";
                     }
-                
                 echo '</div>'; // End Graph Track
-
                 // Spacer for X-axis labels
                 echo '<div style="height: 45px; flex-shrink: 0; position: relative;">';
                     // X-axis global label (Bottom Left)
                     echo '<div style="position: absolute; bottom: 5px; left: 0; font-size: 11px; font-weight: bold; color: #646970;">' . esc_html($x_label) . '</div>';
                 echo '</div>';
-
-            echo '</div>'; // End Right Column Container
-            echo '</div>'; // End Main Flex Container
-            echo '</div>'; // End Global Wrapper
+            echo '</div></div></div>'; // End Right Column Container, Main Flex Container, Global Wrapper
+        } else {
+            echo '<p>No data available for this period.</p>';
         }
 
         // --- TOP DOMAINS ---
         $unique_domains = $wpdb->get_results($wpdb->prepare("
             SELECT domain, COUNT(DISTINCT CONCAT(visitor_hash, FLOOR((visit_timestamp + %d) / 86400))) AS visits
             FROM $table_name
+            WHERE visit_timestamp >= %d
             GROUP BY domain
             ORDER BY visits DESC
             LIMIT 10
-        ", $wp_offset_seconds));
+        ", $wp_offset_seconds, $filter_timestamp));
 
-        echo '<h3>Top Domains (All Time Visitor-Days)</h3>';
+        echo '<h3>Top Domains (' . esc_html($period_label) . ' Visitor-Days)</h3>';
         echo '<table class="wp-list-table widefat fixed striped">';
         echo '<thead><tr><th>Domain</th><th>Visitor-Days</th></tr></thead><tbody>';
         if ( $unique_domains ) {
             foreach ( $unique_domains as $row ) {
                 echo '<tr><td><code>' . esc_html( $row->domain ) . '</code></td><td>' . intval( $row->visits ) . '</td></tr>';
             }
-        } else {
-            echo '<tr><td colspan="2">No data available.</td></tr>';
-        }
+        } else { echo '<tr><td colspan="2">No data available.</td></tr>'; }
         echo '</tbody></table>';
 
         // --- TOP URLS ---
@@ -270,33 +271,38 @@ function ai4pid_analytics_admin_page() {
             WHERE visit_timestamp >= %d
             GROUP BY url
             ORDER BY visits DESC
-            LIMIT 10
-        ", $wp_offset_seconds, $start_30d));
+            LIMIT 15
+        ", $wp_offset_seconds, $filter_timestamp));
 
-        echo '<h3>Top URLs (Last 30 Days Visitor-Days)</h3>';
+        echo '<h3>Top URLs (' . esc_html($period_label) . ' Visitor-Days)</h3>';
         echo '<table class="wp-list-table widefat fixed striped" style="margin-bottom: 30px;">';
         echo '<thead><tr><th>Normalized URL</th><th>Visitor-Days</th></tr></thead><tbody>';
         if ( $top_urls ) {
             foreach ( $top_urls as $row ) {
                 echo '<tr><td><code>' . esc_html( $row->url ) . '</code></td><td>' . intval( $row->visits ) . '</td></tr>';
             }
-        } else {
-            echo '<tr><td colspan="2">No data available.</td></tr>';
-        }
+        } else { echo '<tr><td colspan="2">No data available.</td></tr>'; }
         echo '</tbody></table>';
 
-        // Markdown Export
-        ai4pid_render_markdown_export_ui($table_name, $wp_offset_seconds, $start_30d);
+        // Markdown Export (Passing all summary metrics and period details)
+        $summary_metrics = [
+            'today' => $metric_today,
+            'yesterday' => $metric_yesterday,
+            '7d' => $metric_7d,
+            '30d' => $metric_30d,
+            'all' => $metric_all
+        ];
+        ai4pid_render_markdown_export_ui($table_name, $wp_offset_seconds, $filter_timestamp, $period_label, $summary_metrics);
 
     } else {
         echo '<div class="notice notice-warning inline"><p>⚠️ The data table does not exist yet. Initialize it using the settings below.</p></div>';
     }
 
-    // --- SYSTEM CONTROLS (Always at the bottom) ---
+    // --- SYSTEM CONTROLS ---
     echo '<hr style="margin: 40px 0;"><h2 style="color:#d63638">System Controls</h2>';
     echo '<div style="display: flex; flex-wrap: wrap; gap: 20px;">';
-
-    // INIT Form
+    
+    // Setup
     echo '<form method="post" style="flex: 1; min-width: 250px; background: #fff; padding: 15px; border: 1px solid #ccd0d4;">';
     echo '<h4>1. Initialize / Upgrade Schema</h4>';
     echo '<p style="font-size: 13px; color: #646970;">Creates the table or upgrades indexes/columns safely without deleting data.</p>';
@@ -304,7 +310,7 @@ function ai4pid_analytics_admin_page() {
     submit_button( 'Initialize System', 'primary', 'ai4pid_analytics_setup_submit', false );
     echo '</form>';
 
-    // CLEAR Form
+    // Clear
     echo '<form method="post" style="flex: 1; min-width: 250px; background: #fffdf0; padding: 15px; border: 1px solid #f0b849;">';
     echo '<h4 style="color: #a17000;">2. Clear Analytics Data</h4>';
     echo '<p style="font-size: 13px; color: #646970;">Deletes all rows but preserves the database table structure. Type <strong>CLEAR</strong> below to confirm.</p>';
@@ -313,7 +319,7 @@ function ai4pid_analytics_admin_page() {
     submit_button( 'Clear All Data', 'secondary', 'ai4pid_analytics_clear_submit', false, ['style' => 'color: #8c5f00; border-color: #f0b849;'] );
     echo '</form>';
 
-    // DESTROY Form
+    // Destroy
     echo '<form method="post" style="flex: 1; min-width: 250px; background: #fcf0f1; padding: 15px; border: 1px solid #d63638;">';
     echo '<h4 style="color: #d63638;">3. Destroy Analytics Table</h4>';
     echo '<p style="font-size: 13px; color: #646970;">Completely deletes the table and all data. Type <strong>DESTROY</strong> below to confirm.</p>';
@@ -322,35 +328,42 @@ function ai4pid_analytics_admin_page() {
     submit_button( 'Drop Table', 'secondary', 'ai4pid_analytics_destroy_submit', false, ['style' => 'color: #d63638; border-color: #d63638;'] );
     echo '</form>';
     
-    echo '</div>'; // End flex controls
-    echo '</div>'; // End wrap
+    echo '</div></div>'; // End flex controls and wrap
 }
 
 // Helper: Render Metric Card
 function ai4pid_render_metric_card($label, $value, $color) {
     return '
-    <div style="flex: 1; background: #fff; padding: 20px; border-left: 4px solid '.esc_attr($color).'; border-radius: 3px; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
+    <div style="flex: 1; min-width: 150px; background: #fff; padding: 20px; border-left: 4px solid '.esc_attr($color).'; border-radius: 3px; box-shadow: 0 1px 1px rgba(0,0,0,.04);">
         <h4 style="margin: 0 0 10px 0; color: #646970; font-weight: 500;">'.esc_html($label).'</h4>
         <div style="font-size: 28px; font-weight: 600; color: #1d2327;">'.intval($value).'</div>
     </div>';
 }
 
 // Render the Markdown Export Box
-function ai4pid_render_markdown_export_ui($table_name, $wp_offset, $start_30d) {
+function ai4pid_render_markdown_export_ui($table_name, $wp_offset, $filter_timestamp, $period_label, $metrics) {
     global $wpdb;
 
     $md = "### 📊 Analytics Export (" . wp_date('Y-m-d H:i') . ")\n\n";
     
-    $daily_visits = $wpdb->get_results($wpdb->prepare("SELECT FLOOR((visit_timestamp + %d) / 86400) as day_id, COUNT(DISTINCT visitor_hash) as uniques FROM $table_name WHERE visit_timestamp >= %d GROUP BY day_id ORDER BY day_id ASC", $wp_offset, $start_30d));
-    $md .= "**Daily Unique Visitors (Last 30 Days)**\n";
+    // Add Summary Metrics to Markdown
+    $md .= "### Summary Metrics\n";
+    $md .= "- **Unique Visitors Today:** " . intval($metrics['today']) . "\n";
+    $md .= "- **Unique Visitors Yesterday:** " . intval($metrics['yesterday']) . "\n";
+    $md .= "- **Visitor-Days (Last 7 Days):** " . intval($metrics['7d']) . "\n";
+    $md .= "- **Visitor-Days (Last 30 Days):** " . intval($metrics['30d']) . "\n";
+    $md .= "- **Visitor-Days (All Time):** " . intval($metrics['all']) . "\n\n";
+
+    $daily_visits = $wpdb->get_results($wpdb->prepare("SELECT FLOOR((visit_timestamp + %d) / 86400) as day_id, COUNT(DISTINCT visitor_hash) as uniques FROM $table_name WHERE visit_timestamp >= %d GROUP BY day_id ORDER BY day_id ASC", $wp_offset, $filter_timestamp));
+    $md .= "### Daily Unique Visitors ({$period_label})\n";
     $md .= "| Date | Unique Visits |\n|---|---|\n";
     if ($daily_visits) {
         foreach ($daily_visits as $day) { $md .= "| " . gmdate('Y-m-d', $day->day_id * 86400) . " | " . intval($day->uniques) . " |\n"; }
     }
     $md .= "\n";
 
-    $top_urls = $wpdb->get_results($wpdb->prepare("SELECT url, COUNT(DISTINCT CONCAT(visitor_hash, FLOOR((visit_timestamp + %d) / 86400))) as uniques FROM $table_name WHERE visit_timestamp >= %d GROUP BY url ORDER BY uniques DESC LIMIT 15", $wp_offset, $start_30d));
-    $md .= "**Top URLs (Last 30 Days Visitor-Days)**\n";
+    $top_urls = $wpdb->get_results($wpdb->prepare("SELECT url, COUNT(DISTINCT CONCAT(visitor_hash, FLOOR((visit_timestamp + %d) / 86400))) as uniques FROM $table_name WHERE visit_timestamp >= %d GROUP BY url ORDER BY uniques DESC LIMIT 15", $wp_offset, $filter_timestamp));
+    $md .= "### Top URLs ({$period_label} Visitor-Days)\n";
     $md .= "| URL | Visitor-Days |\n|---|---|\n";
     if ($top_urls) {
         foreach ($top_urls as $url_row) { $md .= "| {$url_row->url} | " . intval($url_row->uniques) . " |\n"; }
@@ -359,7 +372,7 @@ function ai4pid_render_markdown_export_ui($table_name, $wp_offset, $start_30d) {
     ?>
     <div style="margin-top: 2rem; background: #fff; padding: 1.5rem; border: 1px solid #ccd0d4;">
         <h2 style="margin-top: 0;">Export to Markdown</h2>
-        <textarea id="ai4pid-md-export" style="width: 100%; height: 200px; font-family: monospace; background: #f0f0f1; padding: 1rem;" readonly><?php echo esc_textarea($md); ?></textarea>
+        <textarea id="ai4pid-md-export" style="width: 100%; height: 250px; font-family: monospace; background: #f0f0f1; padding: 1rem;" readonly><?php echo esc_textarea($md); ?></textarea>
         <div style="margin-top: 1rem;">
             <button type="button" class="button button-primary" onclick="copyAnalyticsMD()">Copy to Clipboard</button>
             <span id="ai4pid-copy-feedback" style="color: #00a32a; margin-left: 10px; display: none;">✓ Copied!</span>
