@@ -1,5 +1,5 @@
 ---
-import { SEO_TITLE, SEO_DESCRIPTION, SEO_IMAGE } from '@constants';
+import { SEO_IMAGE } from '@constants';
 import { getPlainPathNoLocale, getAbsoluteLocaleUrlFromOrigin} from '@utils/localizedUrl.ts';
 import { locales, defaultLocale } from '@languages';
 import { homeNoLocale } from '@utils/url.ts';
@@ -10,9 +10,16 @@ interface Props {
   image?: string;
 }
 
+const { t } = Astro.locals;
+
+import { getSeoTitle, getSeoDescription } from '@utils/seo';
+
+const seoTitle = getSeoTitle(t);
+const seoDescription = getSeoDescription(t);
+
 const {
-  title = SEO_TITLE,
-  description = SEO_DESCRIPTION,
+  title = seoTitle,
+  description = seoDescription,
   image = SEO_IMAGE,
 } = Astro.props;
 

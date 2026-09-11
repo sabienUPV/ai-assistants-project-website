@@ -2,9 +2,6 @@ export const PROJECT_NAME = 'AI-ASSISTANTS 4PID';
 export const PROJECT_SUBTITLE = 'AI-Assisted Solutions for Enhancing the Independent Living of Persons with Intellectual Disabilities'
 export const PROJECT_NUMBER_EU = '2025-1-DE02-KA220-ADU-000360510';
 
-// --- SEO CONFIGURATION ---
-export const SEO_TITLE = PROJECT_NAME + ' | Enhancing Independent Living of PIDs';
-export const SEO_DESCRIPTION = 'Discover how AI assistants are revolutionizing the lives of persons with intellectual disabilities (PID) by providing innovative solutions for independent living. Learn about our project, its goals, and the impact we aim to achieve.';
 /**
  * Relative path to the social preview image for social media sharing (place it in the public/ folder)
  */

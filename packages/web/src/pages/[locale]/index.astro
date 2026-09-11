@@ -5,8 +5,6 @@ export { getStaticPaths };
 
 const { t } = Astro.locals;
 
-import { SEO_TITLE } from '@constants';
-
 import Layout from '@layouts/Layout.astro';
 
 import Description from '@components/home/Description.astro';
@@ -14,9 +12,13 @@ import Objectives from '@components/home/Objectives.astro';
 import Partners from '@components/home/Partners.astro';
 import Documents from '@components/home/Documents.astro';
 import Contact from '@components/home/Contact.astro';
+
+import { getSeoTitle } from '@utils/seo';
+
+const seoTitle = getSeoTitle(t);
 ---
 
-<Layout title={SEO_TITLE}>
+<Layout title={seoTitle}>
 	<section id="description">
 		<Description />
 	</section>
