@@ -1,6 +1,6 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
-import { defaultLocale, locales } from '../core/src/languages';
+import { defaultLocale, localeRegionCodes, locales } from '../core/src/languages';
 
 import icon from 'astro-icon';
 
@@ -62,7 +62,13 @@ export default defineConfig({
   integrations: [icon({
     // We use the "astro-icon" integration to easily use icons from various icon libraries in our components
     iconDir: 'src/assets/icons',
-  }), markdoc(), svelte(), sitemap()],
+  }), markdoc(), svelte(), sitemap({
+      // Turns out that sitemap does not automatically pick up the i18n configuration from Astro, so we have to manually specify the locales and defaultLocale here as well. Otherwise, it will only generate the sitemap for the default locale and ignore the other locales.
+      i18n: {
+        defaultLocale: defaultLocale,
+        locales: localeRegionCodes, // Instead of a simple array of strings, sitemap needs an object with the locale as the key and the region code as the value (e.g., { en: 'en-GB', es: 'es-ES' }).
+      }
+  })],
 
   vite: {
     css: {
