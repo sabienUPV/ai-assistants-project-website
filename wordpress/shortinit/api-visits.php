@@ -1,8 +1,8 @@
 <?php
-// Custom analytics file to count anonymously unique daily visits to our platform (both the Astro and WordPress websites).
+// Custom analytics file to count anonymously unique daily visits to our platform.
 // This file should be placed in the root of the WordPress installation (next to wp-load.php) and can be accessed via https://community.ai4pid.eu/api-visits.php
 
-// This system only stores a hashed IP address of each visitor with a daily rotating salt, meaning that after 24 hours at most (specifically, at the end of each day at midnight server time) every visitor's hash will be fully anonymized and irreversible, ensuring that no personal data is stored longer than strictly necessary, and that the system is fully GDPR compliant. It also does not use cookies or any other tracking mechanism that could compromise user privacy.
+// This system only stores a hashed IP address of each visitor with a daily rotating salt, meaning that after 24 hours at most (specifically, at the end of each day at midnight UTC) every visitor's hash will be fully anonymized and irreversible, ensuring that no personal data is stored longer than strictly necessary, and that the system is fully GDPR compliant. It also does not use cookies or any other tracking mechanism that could compromise user privacy.
 
 // Configuration Constants
 define( 'AI4PID_ANALYTICS_TABLE_NAME', 'ai4pid_analytics_daily_visits' );
@@ -15,8 +15,8 @@ define( 'AI4PID_ANALYTICS_OPTION_NAME', 'ai4pid_analytics_salt_data' );
 // (this is good because both Astro and WP are part of the same project)
 $allowed_origins = [
     'https://ai4pid.eu', // prod Astro website
-    'https://community.ai4pid.eu', // WordPress website (it makes a client request as well so cached pages still count visits)
-    'http://localhost:4321' 
+    'https://community.ai4pid.eu', // WordPress website
+    'http://localhost:4321' // local development
 ];
 
 // Check who makes the request
@@ -54,22 +54,46 @@ require_once( dirname( __FILE__ ) . '/wp-load.php' );
 global $wpdb;
 
 // Get and sanitize the visited URL
-$visited_url = isset($_POST['url']) ? trim(wp_strip_all_tags($_POST['url'])) : '';
-if (empty($visited_url)) {
+$raw_url = isset($_POST['url']) ? trim(wp_strip_all_tags($_POST['url'])) : '';
+if (empty($raw_url)) {
     http_response_code(400);
     exit;
 }
 
-// Get the real IP address
+// URL Normalization & Domain Extraction (Ultra-fast string parsing)
+$parsed_url = parse_url($raw_url);
+if (!$parsed_url || empty($parsed_url['host'])) {
+    http_response_code(400);
+    exit;
+}
+
+$domain = strtolower($parsed_url['host']);
+$path = isset($parsed_url['path']) ? $parsed_url['path'] : '/';
+$clean_query = '';
+
+// Remove tracking parameters from the query string
+// (Note: For now we don't have any tracking parameters in our platform, but this is future-proofing just in case we ever need to add any in the future)
+if (!empty($parsed_url['query'])) {
+    parse_str($parsed_url['query'], $query_params);
+    $tracking_params = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid'];
+    foreach ($tracking_params as $tp) {
+        unset($query_params[$tp]);
+    }
+    if (!empty($query_params)) {
+        $clean_query = '?' . http_build_query($query_params);
+    }
+}
+$scheme = isset($parsed_url['scheme']) ? $parsed_url['scheme'] . '://' : 'https://';
+$visited_url = substr($scheme . $domain . $path . $clean_query, 0, 255);
+$db_domain = substr($domain, 0, 100);
+
+// Get IP address of the visitor (considering possible proxies)
 $ip = $_SERVER['REMOTE_ADDR'];
 if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
     $ip = $_SERVER['HTTP_CLIENT_IP'];
 } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
     $ip = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0]);
 }
-
-$today_date = date('Y-m-d');
-$today_time = date('H:i:s');
 
 // Fetch the salt data directly from wp_options
 $option_row = $wpdb->get_row(
@@ -79,13 +103,19 @@ $option_row = $wpdb->get_row(
     )
 );
 
+// We use universal UNIX timestamps (time()) for storage.
+// This decouples the tracker from WordPress timezones, making it universally accurate and faster.
+// We use the UTC day (gmdate) solely to know when to rotate the salt.
+$timestamp = time();
+$utc_date = gmdate('Y-m-d', $timestamp); 
+
 $current_salt = '';
 $regenerate_salt = false;
 
-// Check if salt exists and is from today
+// Check if salt exists and is from today (UTC)
 if ($option_row) {
     $salt_data = json_decode($option_row->option_value, true);
-    if (isset($salt_data['date']) && $salt_data['date'] === $today_date) {
+    if (isset($salt_data['date']) && $salt_data['date'] === $utc_date) {
         $current_salt = $salt_data['salt'];
     } else {
         $regenerate_salt = true; // Salt is outdated, destroy and regenerate
@@ -97,7 +127,7 @@ if ($option_row) {
 // Generate new random salt if day changed or missing
 if ($regenerate_salt) {
     $current_salt = bin2hex(random_bytes(16));
-    $new_data = wp_json_encode(['date' => $today_date, 'salt' => $current_salt]);
+    $new_data = wp_json_encode(['date' => $utc_date, 'salt' => $current_salt]);
 
     // Insert or update the option safely
     // NOTE: This overwrites the previous salt data, so once the day changes, the old salt is destroyed and a new one is generated.
@@ -114,13 +144,15 @@ if ($regenerate_salt) {
 $visitor_hash = hash('sha256', $ip . $current_salt);
 $table_name = $wpdb->prefix . AI4PID_ANALYTICS_TABLE_NAME;
 
-// Insert the visit. INSERT IGNORE prevents duplicates for the same hash + url + date
+// Insert the visit.
+// Because the salt rotates daily, the hash itself is naturally unique per day.
+// INSERT IGNORE prevents multiple rows for the same user on the same URL within the same salt cycle.
 $wpdb->query( $wpdb->prepare(
-    "INSERT IGNORE INTO $table_name (visitor_hash, url, visit_date, visit_time) VALUES (%s, %s, %s, %s)",
+    "INSERT IGNORE INTO $table_name (visitor_hash, domain, url, visit_timestamp) VALUES (%s, %s, %s, %d)",
     $visitor_hash,
+    $db_domain,
     $visited_url,
-    $today_date,
-    $today_time
+    $timestamp
 ));
 
 // Fast response to the client
