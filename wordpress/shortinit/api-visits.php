@@ -4,9 +4,6 @@
 
 // This system only stores a hashed IP address of each visitor with a daily rotating salt, meaning that after 24 hours at most (specifically, at the end of each day at midnight server time) every visitor's hash will be fully anonymized and irreversible, ensuring that no personal data is stored longer than strictly necessary, and that the system is fully GDPR compliant. It also does not use cookies or any other tracking mechanism that could compromise user privacy.
 
-// DISCLAIMER: This file is in development, and it is NOT being used in the Astro website yet (https://ai4pid.eu). Once this is fully tested, a privacy policy will be added to the Astro website in order to ensure GDPR compliance for the Astro website.
-// During development, it will be used in the WordPress website (https://community.ai4pid.eu). However, the WordPress website is also currently in development, so it is NOT considered a production website yet. Once the WordPress website is fully developed and tested and it moves into production, our Privacy Policy from the Astro website will be linked from the WordPress website as well, ensuring GDPR compliance for both websites.
-
 // Configuration Constants
 define( 'AI4PID_ANALYTICS_TABLE_NAME', 'ai4pid_analytics_daily_visits' );
 define( 'AI4PID_ANALYTICS_OPTION_NAME', 'ai4pid_analytics_salt_data' );
