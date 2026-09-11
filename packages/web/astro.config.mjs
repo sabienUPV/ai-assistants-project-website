@@ -7,6 +7,8 @@ import icon from 'astro-icon';
 import markdoc from '@astrojs/markdoc';
 import svelte from '@astrojs/svelte';
 
+import sitemap from '@astrojs/sitemap';
+
 // https://astro.build/config
 export default defineConfig({
   fonts: [
@@ -60,7 +62,7 @@ export default defineConfig({
   integrations: [icon({
     // We use the "astro-icon" integration to easily use icons from various icon libraries in our components
     iconDir: 'src/assets/icons',
-  }), markdoc(), svelte()],
+  }), markdoc(), svelte(), sitemap()],
 
   vite: {
     css: {

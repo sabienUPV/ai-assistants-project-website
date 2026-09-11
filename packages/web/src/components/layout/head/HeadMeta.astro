@@ -55,6 +55,12 @@ const absoluteImageUrl = new URL(homeNoLocale(image), siteUrl);
   />
 ))}
 
+{/*
+  Sitemap link for search engines
+  (using @astrojs/sitemap official integration to automatically generate the sitemap)
+*/}
+<link rel="sitemap" href="/sitemap-index.xml" />
+
 <meta property="og:title" content={title} />
 <meta property="og:description" content={description} />
 <meta property="og:type" content="website" />
