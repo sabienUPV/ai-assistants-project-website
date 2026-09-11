@@ -1,3 +1,5 @@
-export function getLocaleForDate(locale: string): string {
-  return locale === 'en' ? 'en-GB' : locale;
+import { localeRegionCodes, type Locale } from '@languages';
+
+export function getLocaleForDate(locale: Locale): string {
+  return localeRegionCodes[locale] || locale;
 }
