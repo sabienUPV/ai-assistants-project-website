@@ -24,6 +24,12 @@ export const COPYRIGHT_YEARS = '2026'; // Update with the actual year(s) of the 
 
 export const CONTACT_EMAIL = 'ai4pid@upv.es';
 
+// Social media links for the project
+export const SOCIAL_LINKS = {
+  linkedin: 'https://www.linkedin.com/company/AI-Assistants4pid',
+  github: 'https://github.com/sabienUPV/ai-assistants-project-website',
+};
+
 // Info for the Imprint ("Aviso Legal" in Spanish)
 
 // Coordinator: Info IAT

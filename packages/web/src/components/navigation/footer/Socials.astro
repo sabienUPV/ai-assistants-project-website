@@ -1,10 +1,15 @@
 ---
 import { Icon } from "astro-icon/components";
+import { SOCIAL_LINKS } from "@constants";
 ---
 <div class="socials"> 
-  <a href="https://www.linkedin.com/company/AI-Assistants4pid" target="_blank" rel="noopener noreferrer">
+  <a href={SOCIAL_LINKS.linkedin} target="_blank" rel="noopener noreferrer" class="social-link social-link-linkedin">
     <Icon name="linkedin" width="36" height="36" aria-hidden="true" />
     <span class="sr-only">Linkedin. {Astro.locals.t('opens_in_new_window')}</span>
+  </a>
+  <a href={SOCIAL_LINKS.github} target="_blank" rel="noopener noreferrer" class="social-link social-link-github">
+    <Icon name="github" width="36" height="36" aria-hidden="true" />
+    <span class="sr-only">GitHub. {Astro.locals.t('opens_in_new_window')}</span>
   </a>
 </div>
 
@@ -13,5 +18,17 @@ import { Icon } from "astro-icon/components";
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 1rem;
+}
+
+.social-link-github {
+  color: #24292e;
+  text-decoration: none;
+}
+
+.social-link-github :global(svg) {
+  background-color: white;
+  border-radius: 50%;
+  border: var(--color-background) 1px solid;
 }
 </style>
