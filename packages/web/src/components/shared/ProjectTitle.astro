@@ -28,14 +28,14 @@ const projectNameParts = PROJECT_NAME.split(projectNameSeparator, 2);
   {includeLogo && (
     <Image 
       src={logo} 
-      alt={t('alt_logo_template', false, PROJECT_NAME)} 
+      alt={PROJECT_NAME} 
       height="120"
       class="logo"
       style="width: auto;"
       loading={loading}
       aria-hidden="true"
     />
-    <span class="sr-only">{t('alt_logo_template', false, PROJECT_NAME_FOR_SCREEN_READERS)}</span>
+    <span class="sr-only">{PROJECT_NAME_FOR_SCREEN_READERS}</span>
   )}
   <div class="text">
     <div class="title">

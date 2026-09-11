@@ -5,7 +5,7 @@ export { getStaticPaths };
 
 const { t } = Astro.locals;
 
-import { PROJECT_NAME } from '@constants';
+import { SEO_TITLE } from '@constants';
 
 import Layout from '@layouts/Layout.astro';
 
@@ -16,7 +16,7 @@ import Documents from '@components/home/Documents.astro';
 import Contact from '@components/home/Contact.astro';
 ---
 
-<Layout title={PROJECT_NAME}>
+<Layout title={SEO_TITLE}>
 	<section id="description">
 		<Description />
 	</section>
