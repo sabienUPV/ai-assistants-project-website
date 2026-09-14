@@ -13,16 +13,24 @@ const imprintUrl = `${homeLocale()}imprint`;
   <main class="privacy-container">
     <h1>{t('privacy_title')}</h1>
 
+    {/* 
+      Using set:html to render HTML content with glossaries and bolded text:
+      - intro_text: Glossary for "GDPR".
+      - analytics_text1: Uses "<strong>" for referencing cookies, and glossary for "cookies" as well.
+      - analytics_text2 and analytics_text3: Glossary for "IP address".
+      - rights_text: Glossary for "GDPR".
+    */}
+
     <section class="privacy-section">
       <h2>{t('privacy_intro_title')}</h2>
-      <p>{t('privacy_intro_text')}</p>
+      <p set:html={t('privacy_intro_text', true)}></p>
     </section>
 
     <section class="privacy-section">
       <h2>{t('privacy_analytics_title')}</h2>
       <p set:html={t('privacy_analytics_text1', true)} />
-      <p>{t('privacy_analytics_text2')}</p>
-      <p>{t('privacy_analytics_text3_geoip')}</p>
+      <p set:html={t('privacy_analytics_text2', true)} />
+      <p set:html={t('privacy_analytics_text3_geoip', true)} />
       <p>{t('privacy_analytics_text4')}</p>
     </section>
 
@@ -34,7 +42,7 @@ const imprintUrl = `${homeLocale()}imprint`;
     <section class="privacy-section">
       <h2>{t('privacy_rights_title')}</h2>
       <p>
-        {t('privacy_rights_text')} <a href={imprintUrl}>{t('imprint_title')}</a>.
+        <Fragment set:html={t('privacy_rights_text', true)} /> <a href={imprintUrl}>{t('imprint_title')}</a>.
       </p>
     </section>
   </main>
