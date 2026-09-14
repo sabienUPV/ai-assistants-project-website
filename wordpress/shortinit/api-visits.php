@@ -154,14 +154,53 @@ if ($regenerate_salt) {
 $visitor_hash = hash('sha256', $ip . $current_salt);
 $table_name = $wpdb->prefix . AI4PID_ANALYTICS_TABLE_NAME;
 
+// 4. Local GeoIP Resolution
+// We use the MaxMind GeoLite2 database (stored locally to comply with GDPR, downloaded manually) to resolve the country code from the visitor's IP address.
+// Source repo: https://github.com/wp-statistics/GeoLite2-Country
+// Download link: https://cdn.jsdelivr.net/npm/geolite2-country/GeoLite2-Country.mmdb.gz
+$country_code = null;
+
+$geoip_dir = dirname( __FILE__ ) . '/wp-content/uploads/ai4pid-geoip';
+$geoip_file = $geoip_dir . '/GeoLite2-Country.mmdb';
+
+if (file_exists($geoip_file)) {
+    // Source: https://github.com/maxmind/MaxMind-DB-Reader-php
+    $mmdb_reader_file = $geoip_dir . '/MaxMind-DB-Reader-php/autoload.php';
+
+    if (file_exists($mmdb_reader_file)) {
+        require_once($mmdb_reader_file);
+        try {
+            // Resolve the optional dependency dynamically after loading its autoloader,
+            // to avoid intellisense errors about the class not being found.
+            $reader_class = '\\MaxMind\\Db\\Reader';
+            $reader = new $reader_class($geoip_file);
+            $geo_data = $reader->get($ip);
+            if (isset($geo_data['country']['iso_code'])) {
+                $country_code = strtolower($geo_data['country']['iso_code']);
+            }
+        } catch (Exception $e) {
+            // Silently fail, country will remain null.
+        } finally {
+            if (isset($reader)) {
+                // Always close the reader to free resources, even if an exception occurred.
+                $reader->close();
+            }
+        }
+    } else {
+        // If the reader file is missing, we cannot perform GeoIP lookup. Country will remain null.
+    }
+}
+
+// 5. Database Insertion
 // Insert the visit.
 // Because the salt rotates daily, the hash itself is naturally unique per day.
 // INSERT IGNORE prevents multiple rows for the same user on the same URL within the same salt cycle.
 $wpdb->query( $wpdb->prepare(
-    "INSERT IGNORE INTO $table_name (visitor_hash, domain, url, visit_timestamp) VALUES (%s, %s, %s, %d)",
+    "INSERT IGNORE INTO $table_name (visitor_hash, domain, url, country, visit_timestamp) VALUES (%s, %s, %s, %s, %d)",
     $visitor_hash,
     $db_domain,
     $visited_url,
+    $country_code,
     $timestamp
 ));
 

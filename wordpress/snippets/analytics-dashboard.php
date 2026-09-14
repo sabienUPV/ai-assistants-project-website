@@ -1,6 +1,9 @@
 <?php
 // Configuration Constants
 define( 'AI4PID_ANALYTICS_TABLE_NAME', 'ai4pid_analytics_daily_visits' );
+define( 'AI4PID_ANALYTICS_GEOIP_DIR', WP_CONTENT_DIR . '/uploads/ai4pid-geoip' );
+define( 'AI4PID_ANALYTICS_GEOIP_DB_FILE', AI4PID_ANALYTICS_GEOIP_DIR . '/GeoLite2-Country.mmdb' );
+define( 'AI4PID_ANALYTICS_GEOIP_READER_FILE', AI4PID_ANALYTICS_GEOIP_DIR . '/MaxMind-DB-Reader-php/autoload.php');
 
 // Hook to add the admin menu
 add_action( 'admin_menu', 'ai4pid_analytics_admin_menu' );
@@ -30,7 +33,8 @@ function ai4pid_analytics_process_actions() {
     
     // Preserve the current period parameter in redirects
     $current_period = isset($_GET['period']) ? sanitize_text_field($_GET['period']) : '30';
-    $base_url = add_query_arg( 'period', $current_period, admin_url( 'admin.php?page=ai4pid-analytics' ) );
+    $base_url = admin_url( 'admin.php?page=ai4pid-analytics' );
+    $base_url_with_period = add_query_arg( 'period', $current_period, $base_url );
 
     // 1. INIT TABLE
     if ( isset( $_POST['ai4pid_analytics_setup_submit'] ) && check_admin_referer( 'ai4pid_analytics_setup', 'ai4pid_analytics_nonce' ) ) {
@@ -43,11 +47,13 @@ function ai4pid_analytics_process_actions() {
             visitor_hash varchar(64) NOT NULL,
             domain varchar(100) NOT NULL,
             url varchar(255) NOT NULL,
+            country varchar(2) DEFAULT NULL,
             visit_timestamp bigint(20) unsigned NOT NULL,
             PRIMARY KEY  (id),
             UNIQUE KEY unique_hash_url (visitor_hash, url),
             KEY timestamp_idx (visit_timestamp),
-            KEY domain_idx (domain)
+            KEY domain_idx (domain),
+            KEY country_idx (country)
         ) $charset_collate;";
 
         dbDelta( $sql );
@@ -59,7 +65,7 @@ function ai4pid_analytics_process_actions() {
         // This fixes old rows having a timestamp of '0' (1970) which excluded them from "Last 30 Days" queries.
         $wpdb->query("UPDATE $table_name SET visit_timestamp = UNIX_TIMESTAMP(CONCAT(visit_date, ' ', visit_time)) WHERE visit_timestamp = 0 AND visit_date IS NOT NULL");
 
-        wp_safe_redirect( add_query_arg( 'msg', 'initialized', $base_url ) );
+        wp_safe_redirect( add_query_arg( 'msg', 'initialized', $base_url_with_period ) );
         exit;
     }
 
@@ -71,7 +77,7 @@ function ai4pid_analytics_process_actions() {
         } else {
             $msg = 'clear_mismatch';
         }
-        wp_safe_redirect( add_query_arg( 'msg', $msg, $base_url ) );
+        wp_safe_redirect( add_query_arg( 'msg', $msg, $base_url_with_period ) );
         exit;
     }
 
@@ -83,7 +89,63 @@ function ai4pid_analytics_process_actions() {
         } else {
             $msg = 'destroy_mismatch';
         }
-        wp_safe_redirect( add_query_arg( 'msg', $msg, admin_url( 'admin.php?page=ai4pid-analytics' ) ) ); // Remove period arg on destroy
+        wp_safe_redirect( add_query_arg( 'msg', $msg, $base_url ) ); // Remove period arg on destroy (using $base_url instead of $base_url_with_period)
+        exit;
+    }
+
+    // 4. SETUP GEOIP
+    if ( isset( $_POST['ai4pid_geoip_setup_submit'] ) && check_admin_referer( 'ai4pid_geoip_setup', 'ai4pid_geoip_nonce' ) ) {
+        // Create the directory if it doesn't exist, ensuring proper permissions
+        if ( ! file_exists( AI4PID_ANALYTICS_GEOIP_DIR ) ) {
+            wp_mkdir_p( AI4PID_ANALYTICS_GEOIP_DIR );
+        }
+
+        // Generate security files (index.php and .htaccess) automatically to prevent direct access
+        file_put_contents( AI4PID_ANALYTICS_GEOIP_DIR . '/index.php', "<?php\n// Silence is golden.\n" );
+        file_put_contents( AI4PID_ANALYTICS_GEOIP_DIR . '/.htaccess', "<IfModule mod_authz_core.c>\n    Require all denied\n</IfModule>\n<IfModule !mod_authz_core.c>\n    Order deny,allow\n    Deny from all\n</IfModule>\n" );
+
+        $upload_error = false;
+
+        // 1. Process the GeoIP database (.mmdb)
+        if ( ! empty( $_FILES['mmdb_file']['tmp_name'] ) ) {
+            $mmdb_name = $_FILES['mmdb_file']['name'];
+            if ( substr( $mmdb_name, -5 ) === '.mmdb' ) {
+                move_uploaded_file( $_FILES['mmdb_file']['tmp_name'], AI4PID_ANALYTICS_GEOIP_DB_FILE );
+            } else {
+                $upload_error = true; // Probablemente subieron el .gz sin extraer
+            }
+        }
+
+        // 2. Process the reader (ZIP from GitHub)
+        if ( ! empty( $_FILES['reader_zip']['tmp_name'] ) && ! $upload_error ) {
+            require_once( ABSPATH . '/wp-admin/includes/file.php' );
+            WP_Filesystem();
+            
+            $unzip_target = AI4PID_ANALYTICS_GEOIP_DIR . '/temp_reader';
+            $result = unzip_file( $_FILES['reader_zip']['tmp_name'], $unzip_target );
+            
+            if ( ! is_wp_error( $result ) ) {
+                // GitHub ZIPs contain a root folder (e.g., MaxMind-DB-Reader-php-main). We rename it.
+                $extracted_items = glob( $unzip_target . '/*' );
+                $target_reader_dir = AI4PID_ANALYTICS_GEOIP_DIR . '/MaxMind-DB-Reader-php';
+                
+                if ( ! empty( $extracted_items ) && is_dir( $extracted_items[0] ) ) {
+                    // If the target directory already exists from a previous installation, delete it first to avoid conflicts.
+                    if ( file_exists( $target_reader_dir ) ) {
+                        global $wp_filesystem;
+                        $wp_filesystem->delete( $target_reader_dir, true );
+                    }
+                    rename( $extracted_items[0], $target_reader_dir );
+                }
+                // Remove the temporary unzip directory after moving the reader to its final location
+                rmdir( $unzip_target );
+            } else {
+                $upload_error = true;
+            }
+        }
+
+        $msg = $upload_error ? 'geoip_error' : 'geoip_success';
+        wp_safe_redirect( add_query_arg( 'msg', $msg, $base_url_with_period ) );
         exit;
     }
 }
@@ -108,9 +170,56 @@ function ai4pid_analytics_admin_page() {
         if ( $msg === 'initialized' ) echo '<div class="notice notice-success is-dismissible"><p>✅ Database table verified/created/migrated successfully.</p></div>';
         if ( $msg === 'cleared' ) echo '<div class="notice notice-success is-dismissible"><p>🧹 All analytics data cleared (table preserved).</p></div>';
         if ( $msg === 'destroyed' ) echo '<div class="notice notice-success is-dismissible"><p>💥 Analytics table destroyed successfully.</p></div>';
+        if ( $msg === 'geoip_success' ) echo '<div class="notice notice-success is-dismissible"><p>🌍 GeoIP module initialized and secured successfully.</p></div>';
         if ( $msg === 'destroy_mismatch' ) echo '<div class="notice notice-error is-dismissible"><p>❌ Destruction aborted: You must type DESTROY in uppercase.</p></div>';
         if ( $msg === 'clear_mismatch' ) echo '<div class="notice notice-error is-dismissible"><p>❌ Clear aborted: You must type CLEAR in uppercase.</p></div>';
+        if ( $msg === 'geoip_error' ) echo '<div class="notice notice-error is-dismissible"><p>❌ Failed to install GeoIP. Ensure the database is extracted (.mmdb) and the reader is a valid .zip file.</p></div>';
         if ( $msg === 'error' ) echo '<div class="notice notice-error is-dismissible"><p>❌ A database error occurred. Check logs if WP_DEBUG is enabled.</p></div>';
+    }
+
+    // Check if we are on the GeoIP setup screen
+    if ( isset($_GET['action']) && $_GET['action'] === 'setup-geoip' ) {
+        ai4pid_render_geoip_setup_page();
+        return; // Stop rendering the normal dashboard
+    }
+
+    // GeoIP Status Check (for normal dashboard)
+    $geoip_active = file_exists(AI4PID_ANALYTICS_GEOIP_DB_FILE) && file_exists(AI4PID_ANALYTICS_GEOIP_READER_FILE);
+    if ($geoip_active) {
+        $file_date = wp_date('Y-m-d', filemtime(AI4PID_ANALYTICS_GEOIP_DB_FILE));
+        echo '<div style="margin-top: 10px; display: inline-block; background: #e5f5fa; color: #007cba; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">🌍 GeoIP Active (Database from ' . $file_date . ')</div>';
+    } else {
+        echo '<div style="margin-top: 10px; display: inline-block; background: #fcf0f1; color: #d63638; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">⚠️ GeoIP Missing: Setup required to track countries.</div>';
+        echo '<div style="margin-top: 10px;">';
+        echo '<a href="' . esc_url(add_query_arg('action', 'setup-geoip')) . '" class="button button-primary">Launch GeoIP Setup Wizard</a>';
+        
+        // The manual FTP instructions are provided in a collapsible section for users who prefer not to use the wizard.
+        echo '<details style="margin-top: 10px; background: #fff; padding: 15px; border: 1px solid #ccd0d4; max-width: 650px;">';
+        echo '<summary style="cursor: pointer; font-weight: 600; color: #007cba;">Or view manual FTP instructions</summary>';
+        echo '<p style="margin-top: 15px;">If you prefer not to use the wizard, create <code>wp-content/uploads/ai4pid-geoip/</code> and place the following 4 items inside:</p>';
+        echo '<ol style="margin-bottom: 0;">';
+        
+        // 1. Database
+        echo '<li style="margin-bottom: 15px;"><code>GeoLite2-Country.mmdb</code><br><span style="font-size: 13px; color: #646970;">Extract the .gz archive (<a href="https://cdn.jsdelivr.net/npm/geolite2-country/GeoLite2-Country.mmdb.gz" target="_blank">Download Archive</a> | <a href="https://github.com/wp-statistics/GeoLite2-Country" target="_blank">View Source Repo</a>)</span></li>';
+        
+        // 2. Reader
+        echo '<li style="margin-bottom: 15px;">The extracted <code>MaxMind-DB-Reader-php</code> folder<br><span style="font-size: 13px; color: #646970;">Extract the GitHub zip (<a href="https://github.com/maxmind/MaxMind-DB-Reader-php/archive/refs/heads/main.zip" target="_blank">Download ZIP</a> | <a href="https://github.com/maxmind/MaxMind-DB-Reader-php" target="_blank">View Source</a>).<br><span style="color: #8a6d3b; font-weight: 600;">⚠️ Note:</span> The extracted folder is typically named <code>MaxMind-DB-Reader-php-main</code>. You must rename it to exactly <code>MaxMind-DB-Reader-php</code> in your FTP folder for this to work.</span></li>';
+        
+        // 3. index.php
+        echo '<li style="margin-bottom: 15px;">An <code>index.php</code> file containing ONLY this exact line of code:<br>';
+        echo '<code style="display:block; margin-top:5px; padding:10px; background:#f6f7f7; border-left: 3px solid #ccd0d4; color: #2271b1;">&lt;?php // Silence is golden.</code></li>';
+        
+        // 4. .htaccess
+        echo '<li style="margin-bottom: 5px;">An <code>.htaccess</code> file containing exactly this block of code:<br>';
+        echo '<pre style="margin-top:5px; padding:12px; background:#f6f7f7; border-left: 3px solid #ccd0d4; overflow-x:auto; font-size: 13px; color: #2c3338;"><code>&lt;IfModule mod_authz_core.c&gt;
+    Require all denied
+&lt;/IfModule&gt;
+&lt;IfModule !mod_authz_core.c&gt;
+    Order deny,allow
+    Deny from all
+&lt;/IfModule&gt;</code></pre></li>';
+        
+        echo '</ol></details></div>';
     }
 
     if ( $table_exists ) {
@@ -284,6 +393,26 @@ function ai4pid_analytics_admin_page() {
         } else { echo '<tr><td colspan="2">No data available.</td></tr>'; }
         echo '</tbody></table>';
 
+        // --- TOP COUNTRIES ---
+        $top_countries = $wpdb->get_results($wpdb->prepare("
+            SELECT country, COUNT(DISTINCT CONCAT(visitor_hash, FLOOR((visit_timestamp + %d) / 86400))) as visits
+            FROM $table_name
+            WHERE visit_timestamp >= %d AND country IS NOT NULL
+            GROUP BY country
+            ORDER BY visits DESC
+            LIMIT 10
+        ", $wp_offset_seconds, $filter_timestamp));
+
+        echo '<h3>Top Countries (' . esc_html($period_label) . ' Visitor-Days)</h3>';
+        echo '<table class="wp-list-table widefat fixed striped" style="margin-bottom: 30px;">';
+        echo '<thead><tr><th>Country Code</th><th>Visitor-Days</th></tr></thead><tbody>';
+        if ( $top_countries ) {
+            foreach ( $top_countries as $row ) {
+                echo '<tr><td><strong>' . esc_html( strtoupper($row->country) ) . '</strong></td><td>' . intval( $row->visits ) . '</td></tr>';
+            }
+        } else { echo '<tr><td colspan="2">No data available or GeoIP not active.</td></tr>'; }
+        echo '</tbody></table>';
+
         // Markdown Export (Passing all summary metrics and period details)
         $summary_metrics = [
             'today' => $metric_today,
@@ -368,6 +497,15 @@ function ai4pid_render_markdown_export_ui($table_name, $wp_offset, $filter_times
     if ($top_urls) {
         foreach ($top_urls as $url_row) { $md .= "| {$url_row->url} | " . intval($url_row->uniques) . " |\n"; }
     }
+    $md .= "\n";
+
+    $top_countries = $wpdb->get_results($wpdb->prepare("SELECT country, COUNT(DISTINCT CONCAT(visitor_hash, FLOOR((visit_timestamp + %d) / 86400))) as uniques FROM $table_name WHERE visit_timestamp >= %d AND country IS NOT NULL GROUP BY country ORDER BY uniques DESC LIMIT 10", $wp_offset, $filter_timestamp));
+    
+    $md .= "### Top Countries ({$period_label} Visitor-Days)\n";
+    $md .= "| Country | Visitor-Days |\n|---|---|\n";
+    if ($top_countries) {
+        foreach ($top_countries as $c_row) { $md .= "| " . strtoupper($c_row->country) . " | " . intval($c_row->uniques) . " |\n"; }
+    }
 
     ?>
     <div style="margin-top: 2rem; background: #fff; padding: 1.5rem; border: 1px solid #ccd0d4;">
@@ -389,4 +527,59 @@ function ai4pid_render_markdown_export_ui($table_name, $wp_offset, $filter_times
         </script>
     </div>
     <?php
+}
+
+// Render the GeoIP Setup Wizard Page
+function ai4pid_render_geoip_setup_page() {
+    echo '<div class="wrap">';
+    
+    echo '<div style="margin-bottom: 15px;"><a href="' . esc_url(admin_url('admin.php?page=ai4pid-analytics')) . '" class="button">← Back to Dashboard</a></div>';
+    echo '<h1 style="margin-top: 0;">GeoIP Setup Wizard</h1>';
+    
+    echo '<p style="font-size: 14px; max-width: 800px; color: #3c434a;">Upload the required files to enable local, GDPR-compliant country tracking. This wizard will automatically extract the files, create the secure directory (<code>wp-content/uploads/ai4pid-geoip/</code>), and generate the required <code>.htaccess</code> and <code>index.php</code> files to block public access.</p>';
+
+    echo '<form method="post" enctype="multipart/form-data" action="' . esc_url(admin_url('admin.php?page=ai4pid-analytics')) . '">';
+    wp_nonce_field( 'ai4pid_geoip_setup', 'ai4pid_geoip_nonce' );
+
+    echo '<div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">';
+
+    // Left Column: MaxMind Reader
+    echo '<div style="flex: 1; min-width: 300px; padding: 20px; border: 2px dashed #ccd0d4; background: #fff; text-align: center;">';
+    echo '<h3 style="margin-top: 0;">1. MaxMind DB Reader (PHP)</h3>';
+    echo '<p style="font-size: 13px; color: #646970;">The pure PHP library required to read the binary database.</p>';
+    
+    echo '<div style="margin-bottom: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">';
+    echo '<a href="https://github.com/maxmind/MaxMind-DB-Reader-php/archive/refs/heads/main.zip" target="_blank" class="button button-primary">Download GitHub ZIP</a>';
+    echo '<a href="https://github.com/maxmind/MaxMind-DB-Reader-php" target="_blank" class="button">View Source</a>';
+    echo '</div>';
+    
+    echo '<div style="text-align: left; background: #f6f7f7; padding: 10px; border: 1px solid #dcdcde;">';
+    echo '<label style="font-weight: 600; display: block; margin-bottom: 5px;">Upload the raw .zip file:</label>';
+    echo '<input type="file" name="reader_zip" accept=".zip" required>';
+    echo '</div>';
+    echo '</div>';
+
+    // Right Column: GeoLite2 Country DB
+    echo '<div style="flex: 1; min-width: 300px; padding: 20px; border: 2px dashed #ccd0d4; background: #fff; text-align: center;">';
+    echo '<h3 style="margin-top: 0;">2. GeoLite2 Country Database</h3>';
+    echo '<p style="font-size: 13px; color: #646970;">The geolocation mapping file (provided via jsDelivr CDN).</p>';
+    
+    echo '<div style="margin-bottom: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">';
+    echo '<a href="https://cdn.jsdelivr.net/npm/geolite2-country/GeoLite2-Country.mmdb.gz" target="_blank" class="button button-primary">Download .gz Archive</a>';
+    echo '<a href="https://github.com/wp-statistics/GeoLite2-Country" target="_blank" class="button">View Source Repo</a>';
+    echo '</div>';
+    
+    echo '<div style="text-align: left; background: #fcf9e8; padding: 10px; border: 1px solid #f0c33c;">';
+    echo '<p style="margin-top: 0; font-size: 12px; font-weight: 600; color: #8a6d3b;">⚠️ Important: You must extract the .gz file on your computer first.</p>';
+    echo '<label style="font-weight: 600; display: block; margin-bottom: 5px;">Upload the extracted .mmdb file:</label>';
+    echo '<input type="file" name="mmdb_file" accept=".mmdb" required>';
+    echo '</div>';
+    echo '</div>';
+
+    echo '</div>'; // End flex container
+
+    echo '<div style="margin-top: 30px;">';
+    submit_button( 'Initialize GeoIP Module', 'primary large', 'ai4pid_geoip_setup_submit', false );
+    echo '</div>';
+    echo '</form></div>';
 }
