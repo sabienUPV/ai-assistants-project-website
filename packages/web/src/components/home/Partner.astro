@@ -4,7 +4,6 @@ import { Image } from 'astro:assets';
 interface Props {
   href: string;
   logo: ImageMetadata;
-  alt: string;
   name: string;
   country: string;
   role?: string;
@@ -12,12 +11,12 @@ interface Props {
   [key: string]: any;
 }
 
-const { href, logo, alt, name, country, role, height = 60, ...attributes } = Astro.props;
+const { href, logo, name, country, role, height = 60, ...attributes } = Astro.props;
 ---
 
 <a href={href} target="_blank" rel="noopener noreferrer" {...attributes}>
   <div class="partner">
-    <Image src={logo} alt={alt} height={height} />
+    <Image src={logo} height={height} alt={null} aria-hidden="true" />
     <h3>{name}</h3>
     <span>({country})</span>
     {role && <p>{role}</p>}
