@@ -16,7 +16,7 @@ const { href, logo, name, country, role, height = 60, ...attributes } = Astro.pr
 
 <a href={href} target="_blank" rel="noopener noreferrer" {...attributes}>
   <div class="partner">
-    <Image src={logo} height={height} alt={null} aria-hidden="true" />
+    <Image src={logo} height={height} alt="" aria-hidden="true" />
     <h3>{name}</h3>
     <span>({country})</span>
     {role && <p>{role}</p>}
