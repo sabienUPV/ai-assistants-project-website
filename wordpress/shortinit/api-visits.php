@@ -45,6 +45,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// 2.5. Lightweight Bot Filter
+$user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
+
+// Check for common bot, crawler, and audit tool (e.g. Lighthouse) keywords
+if (preg_match('/(bot|crawl|spider|slurp|lighthouse|mediapartners)/i', $user_agent)) {
+    // Return 200 OK to avoid bot errors, but stop execution
+    http_response_code(200);
+    exit;
+}
+
 // 3. Load ultra-light WordPress core
 // NOTE: SHORTINIT is used to load only the essential parts of WordPress, making this script faster and more efficient for our analytics purpose than loading the full WordPress environment.
 // Apparently it has no official documentation because it is meant only for advanced developers, but it is widely used in the WordPress community for performance optimization in specific scenarios.
