@@ -36,3 +36,10 @@ export type YouTubeVideoSchema = {
    */
   title?: string;
 }
+
+export type DecisionButtonSchema = {
+  /**
+   * The number of the slide to jump to when the button is clicked (e.g., 3).
+   */
+  targetSlide: number;
+};

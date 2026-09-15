@@ -4,7 +4,7 @@ import { slideAlignValues, type SlideSchema } from "./schemas/slide";
 import type { ImageContainerSchema } from "./schemas/image";
 import type { Question } from "@core-types/quiz";
 import type { MatchingGameSchema, OrderGameSchema } from "@schemas/games";
-import type { ArasaacSchema, FlagSchema, YouTubeVideoSchema } from "@schemas/common";
+import type { ArasaacSchema, DecisionButtonSchema, FlagSchema, YouTubeVideoSchema } from "@schemas/common";
 
 type Project = 'web' | 'admin';
 type AstroTagConfig = NonNullable<AstroMarkdocConfig['tags']>[string];
@@ -175,6 +175,16 @@ export const markdocTagAttributes = {
       },
     } satisfies TagAttributes<MatchingGameSchema>,
   },
+  decisionButton: {
+    description: "An interactive button that navigates to a specific slide when clicked. It accepts any visual content inside (text, images, pictograms).",
+    attributes: {
+      targetSlide: {
+        type: Number,
+        required: true,
+        description: "The number of the slide to jump to (e.g., 3).",
+      }
+    } satisfies TagAttributes<DecisionButtonSchema>,
+  },
 } satisfies AstroMarkdocConfig['tags'];
 
 /**
@@ -287,6 +297,10 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
     matchingGame: {
       ...markdocTagAttributes.matchingGame,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/entries/courses/games/MatchingGame.astro'),
+    },
+    decisionButton: {
+      ...markdocTagAttributes.decisionButton,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/slides/DecisionButton.astro'),
     },
   } satisfies AstroMarkdocConfig['tags'] & MarkdocTagsFromAttributes;
 }

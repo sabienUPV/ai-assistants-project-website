@@ -1,0 +1,61 @@
+---
+import type { DecisionButtonSchema } from '@schemas/common';
+
+interface Props extends DecisionButtonSchema {}
+
+const { targetSlide } = Astro.props;
+
+// Convert the human number (e.g., Slide 3) to the array index (e.g., arr[2])
+const targetIndex = targetSlide - 1;
+---
+
+<button
+  class="decision-button"
+  onclick={`this.dispatchEvent(new CustomEvent('gotoslide', { bubbles: true, composed: true, detail: { index: ${targetIndex} } }))`}
+>
+  <div class="decision-content">
+    <slot />
+  </div>
+</button>
+
+<style>
+  .decision-button {
+    display: block;
+    width: 100%;
+    background-color: var(--color-background, #ffffff);
+    border: 3px solid var(--color-logo-light-blue, #cce0f5);
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 1.5rem 0;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    text-align: center;
+    color: var(--color-text);
+  }
+
+  .decision-button:hover,
+  .decision-button:focus-visible {
+    border-color: var(--color-primary, #3BA6BC);
+    background-color: #f8fafc;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+    outline: none;
+  }
+
+  /* Aseguramos que el contenido interno herede bien los clicks y no se desborde */
+  .decision-content {
+    pointer-events: none; /* Evita que clicks en imágenes hijas interfieran con el onclick del botón */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* Anulamos márgenes extraños que pueda inyectar Markdoc al primer y último elemento */
+  .decision-content :global(> *:first-child) {
+    margin-top: 0;
+  }
+  .decision-content :global(> *:last-child) {
+    margin-bottom: 0;
+  }
+</style>

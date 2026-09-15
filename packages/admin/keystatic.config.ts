@@ -9,6 +9,7 @@ import { slideAlignValues, type SlideSchema } from '@schemas/slide';
 import type { ImageContainerSchema } from '@schemas/image';
 import type { MatchingGameSchema, OrderGameSchema } from '@schemas/games';
 import type { MatchingGamePair, OrderGameItem } from '@core-types/games';
+import type { DecisionButtonSchema } from '@schemas/common';
 
 // 1. CREAMOS EL TIPO MAPEADO
 // Le exigimos a TS que este objeto tenga obligatoriamente todas las keys de tu Post de Zod.
@@ -499,6 +500,71 @@ const createComponents = (collectionName: string) => ({
       );
     }
   }),
+  decisionButton: wrapper({
+    label: 'Decision Button',
+    description: markdocTagAttributes.decisionButton.description,
+    schema: {
+      targetSlide: fields.integer({
+        label: 'Target Slide Number',
+        description: markdocTagAttributes.decisionButton.attributes.targetSlide.description,
+        validation: {
+          isRequired: true,
+          min: 1
+        }
+      }),
+    } satisfies Record<keyof DecisionButtonSchema, ComponentSchema>,
+    ContentView: (props) => {
+      const { targetSlide } = props.value || {};
+      
+      return React.createElement(
+        'div',
+        { style: { border: '2px solid #e0e0e0', borderRadius: '8px', marginBottom: '16px', backgroundColor: '#fff', overflow: 'hidden' } },
+        // 1. La cabecera con el título (Visible sin tener que editar)
+        React.createElement(
+          'div', 
+          {
+            contentEditable: false, // Evita que el usuario edite el título directamente en la cabecera
+            style: {
+              userSelect: 'none', // Evita que el usuario seleccione el texto por error
+              backgroundColor: '#f0fff1',
+              padding: '12px 12px',
+              borderBottom: '1px solid #e0e0e0',
+              fontWeight: 'bold',
+              color: '#0a6b27',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              lineHeight: 1.1, // Adjusted line height manually so that the title and the align metadata align vertically as centered as possible
+            } 
+          },
+          React.createElement('span', {}, '[Go to Slide: ' + (targetSlide || 'NOT SET') + ']'),
+          React.createElement('span', { style: { fontWeight: 'normal', fontStyle: 'italic', fontSize: '0.8em', color: '#64748b' } }, '(Place text or any content you want inside this button below)'),
+        ),
+        // 2. El contenido
+        React.createElement('div', { style: { padding: '12px' } }, props.children)
+      );
+    }
+  }),
+  // decisionButton: wrapper({
+  //   label: 'Decision Button',
+  //   description: 'Un botón interactivo que navega a una diapositiva específica al hacer clic.',
+  //   schema: {
+  //     targetSlide: fields.integer({
+  //       label: 'Número de Diapositiva Destino',
+  //       description: 'El número de la diapositiva a la que saltará al hacer clic (ej. 3).',
+  //       validation: {
+  //         isRequired: true,
+  //         min: 1
+  //       }
+  //     }),
+  //     // Este campo es crucial en Keystatic para decirle que este componente envuelve a otros
+  //     content: fields.child({
+  //       kind: 'block',
+  //       placeholder: 'Añade aquí el texto, imágenes o pictogramas del botón...',
+  //       links: 'inherit',
+  //     }),
+  //   }
+  // }),
 });
 
 // Select storage kind based on environment variable:
