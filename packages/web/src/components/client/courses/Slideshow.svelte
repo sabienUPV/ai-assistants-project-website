@@ -19,6 +19,7 @@
   let slidesCount = $state(0);
 
   let isCurrentSlideLocked = $state(false);
+  let isNavHidden = $state(false);
 
   // Referencia al contenedor HTML
   let container: HTMLElement;
@@ -43,16 +44,16 @@
   }
 
   // Función que lee el DOM para saber si la diapositiva actual está bloqueada
-  function checkLockStatus() {
+  function checkSlideState() {
     if (!container || slidesCount === 0) return;
     const slides = container.querySelectorAll('.markdoc-slide');
     const currentSlide = slides[currentIndex] as HTMLElement;
-    updateLockStatus(currentSlide);
+    updateSlideState(currentSlide);
   }
 
-  function updateLockStatus(currentSlide: HTMLElement | null) {
-    // Solo bloqueamos si el atributo existe y es explícitamente "true"
+  function updateSlideState(currentSlide: HTMLElement | null) {
     isCurrentSlideLocked = currentSlide?.dataset.locked === 'true';
+    isNavHidden = currentSlide?.dataset.hideNav === 'true';
   }
 
   // Escuchamos la petición de viajar a una diapositiva concreta
@@ -103,19 +104,16 @@
       if (index === currentIndex) {
         el.classList.add('slide-visible');
         el.classList.remove('slide-hidden');
-        updateLockStatus(el);
+        updateSlideState(el); // Update slide state (e.g. lock status, show/hide navigation) for the current slide to the initial value
       } else {
         el.classList.add('slide-hidden');
         el.classList.remove('slide-visible');
       }
     });
 
-    // Comprobamos el estado inicial al montar
-    checkLockStatus();
-
     // Añadimos un listener para escuchar los eventos de respuesta del Quiz
     // y actualizar el estado de bloqueo de la diapositiva actual cuando el usuario responde
-    container.addEventListener('slidelockchange', checkLockStatus);
+    container.addEventListener('slidestatechanged', checkSlideState);
 
     // También escuchamos un evento personalizado para avanzar a la siguiente diapositiva
     // (nos sirve para que la portada del Quiz (QuizCover) pueda avanzar cuando el usuario pulsa "Play")
@@ -128,7 +126,7 @@
     // Limpieza de los listeners al desmontar el componente
     // (muy importante para evitar memory leaks)
     return () => {
-      container.removeEventListener('slidelockchange', checkLockStatus);
+      container.removeEventListener('slidestatechanged', checkSlideState);
       container.removeEventListener('requestnextslide', next);
       container.removeEventListener('gotoslide', handleGoToSlide);
     };
@@ -144,7 +142,7 @@
     {@render children?.()}
   </div>
 
-  {#if slidesCount > 0}
+  {#if slidesCount > 0 && !isNavHidden}
     <div class="navigation">
       <button 
         onclick={prev} 

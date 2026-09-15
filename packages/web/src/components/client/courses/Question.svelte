@@ -47,7 +47,7 @@
     }));
 
     // Disparamos evento para avisar al Slideshow de que esta slide ya no está bloqueada
-    container.dispatchEvent(new CustomEvent('slidelockchange', { 
+    container.dispatchEvent(new CustomEvent('slidestatechanged', { 
       bubbles: true, 
       composed: true 
     }));
