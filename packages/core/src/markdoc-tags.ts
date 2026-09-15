@@ -192,27 +192,27 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
       // so redefining the flag property does NOT merge the original flag object with the new one, it replaces it entirely,
       // which is why we need to re-include its attributes
       ...markdocTagAttributes.flag,
-      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Flag.astro'),
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/Flag.astro'),
     },
     slideshow: {
       ...markdocTagAttributes.slideshow,
-      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Slideshow.astro'),
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/slides/Slideshow.astro'),
     },
     slide: {
       ...markdocTagAttributes.slide,
-      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Slide.astro'),
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/slides/Slide.astro'),
     },
     columns: {
       ...markdocTagAttributes.columns,
-      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Columns.astro'),
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/columns/Columns.astro'),
     },
     column: {
       ...markdocTagAttributes.column,
-      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Column.astro'),
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/columns/Column.astro'),
     },
     imageContainer: {
       ...markdocTagAttributes.imageContainer,
-      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Image.astro'),
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/Image.astro'),
       transform(node, config) {
         // Obtain the attributes that the user configured in Keystatic (width, cropTop, etc.)
         const attributes = node.transformAttributes(config);
@@ -266,11 +266,11 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
     },
     quiz: {
       ...markdocTagAttributes.quiz,
-      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Quiz.astro'),
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/quiz/Quiz.astro'),
     },
     question: {
       ...markdocTagAttributes.question,
-      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/Question.astro'),
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/quiz/Question.astro'),
     },
     arasaac: {
       ...markdocTagAttributes.arasaac,
@@ -278,7 +278,7 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
     },
     youtubeVideo: {
       ...markdocTagAttributes.youtubeVideo,
-      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/Markdoc/YouTubeVideo.astro'),
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/YouTubeVideo.astro'),
     },
     orderGame: {
       ...markdocTagAttributes.orderGame,
