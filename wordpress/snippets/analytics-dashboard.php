@@ -57,6 +57,7 @@ function ai4pid_analytics_process_actions() {
             domain varchar(100) NOT NULL,
             url varchar(255) NOT NULL,
             country varchar(2) DEFAULT NULL,
+            is_mobile tinyint(1) NOT NULL DEFAULT 0,
             visit_timestamp bigint(20) unsigned NOT NULL,
             PRIMARY KEY  (id),
             UNIQUE KEY unique_hash_url (visitor_hash, url),
@@ -362,6 +363,45 @@ function ai4pid_analytics_admin_page() {
             echo '<p>No data available for this period.</p>';
         }
 
+        // --- DEVICE TYPES (CSS Pie Chart) ---
+        $device_stats = $wpdb->get_row($wpdb->prepare("
+            SELECT 
+                SUM(is_mobile) as mobile_visits,
+                COUNT(is_mobile) - SUM(is_mobile) as desktop_visits,
+                COUNT(is_mobile) as total_visits
+            FROM (
+                SELECT MAX(CAST(is_mobile AS UNSIGNED)) as is_mobile
+                FROM $table_name
+                WHERE visit_timestamp >= %d
+                GROUP BY CONCAT(visitor_hash, FLOOR((visit_timestamp + %d) / 86400))
+            ) as daily_uniques
+        ", $filter_timestamp, $wp_offset_seconds));
+
+        $mobile = intval($device_stats->mobile_visits);
+        $desktop = intval($device_stats->desktop_visits);
+        $total = $mobile + $desktop;
+        
+        $mobile_pct = $total > 0 ? round(($mobile / $total) * 100, 1) : 0;
+        $desktop_pct = $total > 0 ? round(($desktop / $total) * 100, 1) : 0;
+
+        echo '<div style="background: #fff; padding: 20px; border: 1px solid #ccd0d4; display: flex; align-items: center; gap: 30px; margin-bottom: 20px;">';
+        echo '<div><h4 style="margin: 0 0 15px 0; color: #646970;">Devices (' . esc_html($period_label) . ')</h4>';
+        
+        if ($total > 0) {
+            // CSS Conic Gradient Pie Chart
+            echo '<div style="width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(#d63638 0% ' . $mobile_pct . '%, #007cba ' . $mobile_pct . '% 100%);"></div>';
+            echo '</div>';
+            
+            // Legend
+            echo '<div style="display: flex; flex-direction: column; gap: 10px;">';
+            echo '<div style="display: flex; align-items: center; gap: 8px;"><div style="width: 12px; height: 12px; background: #d63638; border-radius: 2px;"></div> <strong>Mobile:</strong> ' . $mobile_pct . '% (' . $mobile . ')</div>';
+            echo '<div style="display: flex; align-items: center; gap: 8px;"><div style="width: 12px; height: 12px; background: #007cba; border-radius: 2px;"></div> <strong>Desktop / Other:</strong> ' . $desktop_pct . '% (' . $desktop . ')</div>';
+            echo '</div>';
+        } else {
+            echo '<p>No data yet.</p></div>';
+        }
+        echo '</div>';
+
         // --- TOP DOMAINS ---
         $unique_domains = $wpdb->get_results($wpdb->prepare("
             SELECT domain, COUNT(DISTINCT CONCAT(visitor_hash, FLOOR((visit_timestamp + %d) / 86400))) AS visits
@@ -472,7 +512,11 @@ function ai4pid_analytics_admin_page() {
             'yesterday' => $metric_yesterday,
             '7d' => $metric_7d,
             '30d' => $metric_30d,
-            'all' => $metric_all
+            'all' => $metric_all,
+            'mobile_pct' => $mobile_pct,
+            'desktop_pct' => $desktop_pct,
+            'mobile' => $mobile,
+            'desktop' => $desktop,
         ];
         ai4pid_render_markdown_export_ui($table_name, $wp_offset_seconds, $filter_timestamp, $period_label, $summary_metrics);
 
@@ -547,6 +591,8 @@ function ai4pid_render_markdown_export_ui($table_name, $wp_offset, $filter_times
     $md .= "- **Visitor-Days (Last 7 Days):** " . intval($metrics['7d']) . "\n";
     $md .= "- **Visitor-Days (Last 30 Days):** " . intval($metrics['30d']) . "\n";
     $md .= "- **Visitor-Days (All Time):** " . intval($metrics['all']) . "\n\n";
+    $md .= "- **Mobile Visits:** " . $metrics['mobile_pct'] . "% (" . $metrics['mobile'] . ")\n";
+    $md .= "- **Desktop / Other Visits:** " . $metrics['desktop_pct'] . "% (" . $metrics['desktop'] . ")\n\n";
 
     $daily_visits = $wpdb->get_results($wpdb->prepare("SELECT FLOOR((visit_timestamp + %d) / 86400) as day_id, COUNT(DISTINCT visitor_hash) as uniques FROM $table_name WHERE visit_timestamp >= %d GROUP BY day_id ORDER BY day_id ASC", $wp_offset, $filter_timestamp));
     $md .= "### Daily Unique Visitors ({$period_label})\n";

@@ -191,17 +191,37 @@ if (file_exists($geoip_file)) {
     }
 }
 
+// 4.5 Mobile Detection (Standalone version for SHORTINIT - wp_is_mobile() is not available in SHORTINIT)
+$is_mobile = false;
+
+if ( isset( $_SERVER['HTTP_SEC_CH_UA_MOBILE'] ) ) {
+    // Modern browsers Client Hints
+    $is_mobile = ( '?1' === $_SERVER['HTTP_SEC_CH_UA_MOBILE'] );
+} elseif ( ! empty( $user_agent ) ) {
+    // Classic User-Agent parsing
+    if ( str_contains( $user_agent, 'Mobile' )
+        || str_contains( $user_agent, 'Android' )
+        || str_contains( $user_agent, 'Silk/' )
+        || str_contains( $user_agent, 'Kindle' )
+        || str_contains( $user_agent, 'BlackBerry' )
+        || str_contains( $user_agent, 'Opera Mini' )
+        || str_contains( $user_agent, 'Opera Mobi' ) ) {
+            $is_mobile = true;
+    }
+}
+
 // 5. Database Insertion
 // Insert the visit.
 // Because the salt rotates daily, the hash itself is naturally unique per day.
 // INSERT IGNORE prevents multiple rows for the same user on the same URL within the same salt cycle.
 $wpdb->query( $wpdb->prepare(
-    "INSERT IGNORE INTO $table_name (visitor_hash, domain, url, country, visit_timestamp) VALUES (%s, %s, %s, %s, %d)",
+    "INSERT IGNORE INTO $table_name (visitor_hash, domain, url, country, visit_timestamp, is_mobile) VALUES (%s, %s, %s, %s, %d, %d)",
     $visitor_hash,
     $db_domain,
     $visited_url,
     $country_code,
-    $timestamp
+    $timestamp,
+    $is_mobile ? 1 : 0 // Store as 1 for mobile, 0 for desktop (tinyint(1) in the database)
 ));
 
 // Fast response to the client
