@@ -101,6 +101,11 @@ const createComponents = (collectionName: string) => ({
         options: slideAlignValues.map(value => ({ label: value.charAt(0).toUpperCase() + value.slice(1), value })),
         defaultValue: markdocTagAttributes.slide.attributes.align.default,
       }),
+      hideNavigation: fields.checkbox({
+        label: 'Hide Navigation',
+        description: markdocTagAttributes.slide.attributes.hideNavigation.description,
+        defaultValue: markdocTagAttributes.slide.attributes.hideNavigation.default,
+      }),
     } satisfies Record<keyof SlideSchema, ComponentSchema>, // Ensure all Slide fields are present
     ContentView: (props) => {
       const { title, align } = props.value || {};

@@ -55,6 +55,11 @@ export const markdocTagAttributes = {
         default: "center",
         matches: [...slideAlignValues],
       },
+      hideNavigation: {
+        type: Boolean,
+        description: "If true, the navigation buttons will be hidden for this slide.",
+        default: false,
+      },
     } satisfies TagAttributes<SlideSchema>,
   },
   columns: {
