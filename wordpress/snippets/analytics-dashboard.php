@@ -443,11 +443,12 @@ function ai4pid_analytics_admin_page() {
         echo '</tbody></table>';
 
         // --- TOP COUNTRIES ---
+        // Note: We use NULLIF to merge NULL and empty strings ('') into a single group
         $top_countries = $wpdb->get_results($wpdb->prepare("
-            SELECT country, COUNT(DISTINCT CONCAT(visitor_hash, FLOOR((visit_timestamp + %d) / 86400))) as visits
+            SELECT NULLIF(country, '') as country, COUNT(DISTINCT CONCAT(visitor_hash, FLOOR((visit_timestamp + %d) / 86400))) as visits
             FROM $table_name
-            WHERE visit_timestamp >= %d AND country IS NOT NULL
-            GROUP BY country
+            WHERE visit_timestamp >= %d
+            GROUP BY NULLIF(country, '')
             ORDER BY visits DESC
             LIMIT 10
         ", $wp_offset_seconds, $filter_timestamp));
@@ -457,51 +458,64 @@ function ai4pid_analytics_admin_page() {
         echo '<thead><tr><th>Country</th><th>Visitor-Days</th></tr></thead><tbody>';
         if ( $top_countries ) {
             foreach ( $top_countries as $row ) {
-                $code = strtolower($row->country);
-                $upper_code = strtoupper($code);
-                
-                // 1. Get Country Name
-                $country_name = ai4pid_get_country_name($upper_code);
+                if ( empty( $row->country ) ) {
+                    echo '<tr>';
+                    echo '<td>';
+                    echo '<div style="display: flex; align-items: center; gap: 10px;">';
+                    // Grey placeholder for unknown country (instead of a flag)
+                    echo '<div style="width: 24px; height: 16px; background: #e2e4e7; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #8c8f94; box-shadow: 0 0 2px rgba(0,0,0,0.3);">?</div>';
+                    echo '<span><strong>Unknown</strong> <span style="color: #646970; font-size: 12px;">(N/A)</span></span>';
+                    echo '</div>';
+                    echo '</td>';
+                    echo '<td>' . intval( $row->visits ) . '</td>';
+                    echo '</tr>';
+                } else {
+                    $code = strtolower($row->country);
+                    $upper_code = strtoupper($code);
+                    
+                    // 1. Get Country Name
+                    $country_name = ai4pid_get_country_name($upper_code);
 
-                // 2. SVG Flag Caching Logic
-                $flag_filename = esc_attr($code) . '.svg';
-                $local_flag_path = AI4PID_ANALYTICS_GEOIP_FLAGS_DIR . '/' . $flag_filename;
-                $local_flag_url = content_url(AI4PID_ANALYTICS_GEOIP_FLAGS_CONTENT_DIR . '/' . $flag_filename);
-                $cdn_flag_url = 'https://flagcdn.com/' . esc_attr($code) . '.svg';
-                
-                $final_flag_url = $cdn_flag_url; // Default fallback
+                    // 2. SVG Flag Caching Logic
+                    $flag_filename = esc_attr($code) . '.svg';
+                    $local_flag_path = AI4PID_ANALYTICS_GEOIP_FLAGS_DIR . '/' . $flag_filename;
+                    $local_flag_url = content_url(AI4PID_ANALYTICS_GEOIP_FLAGS_CONTENT_DIR . '/' . $flag_filename);
+                    $cdn_flag_url = 'https://flagcdn.com/' . esc_attr($code) . '.svg';
+                    
+                    $final_flag_url = $cdn_flag_url; // Default fallback
 
-                // Override parent .htaccess to allow public access to the SVGs
-                $flags_htaccess_file = AI4PID_ANALYTICS_GEOIP_FLAGS_DIR . '/.htaccess';
-                if (!file_exists($flags_htaccess_file)) {
-                    $htaccess_content = "<IfModule mod_authz_core.c>\n    Require all granted\n</IfModule>\n<IfModule !mod_authz_core.c>\n    Order allow,deny\n    Allow from all\n</IfModule>\n";
-                    file_put_contents($flags_htaccess_file, $htaccess_content);
-                }
-
-                // Check and download if missing
-                if (!file_exists($local_flag_path)) {
-                    if (!file_exists(AI4PID_ANALYTICS_GEOIP_FLAGS_DIR)) { 
-                        wp_mkdir_p(AI4PID_ANALYTICS_GEOIP_FLAGS_DIR);
+                    // Override parent .htaccess to allow public access to the SVGs
+                    $flags_htaccess_file = AI4PID_ANALYTICS_GEOIP_FLAGS_DIR . '/.htaccess';
+                    if (!file_exists($flags_htaccess_file)) {
+                        $htaccess_content = "<IfModule mod_authz_core.c>\n    Require all granted\n</IfModule>\n<IfModule !mod_authz_core.c>\n    Order allow,deny\n    Allow from all\n</IfModule>\n";
+                        file_put_contents($flags_htaccess_file, $htaccess_content);
                     }
-                    // Fetch from CDN with a fast 2-second timeout so the dashboard never hangs
-                    $response = wp_remote_get($cdn_flag_url, ['timeout' => 2]);
-                    if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
-                        file_put_contents($local_flag_path, wp_remote_retrieve_body($response));
+
+                    // Check and download if missing
+                    if (!file_exists($local_flag_path)) {
+                        if (!file_exists(AI4PID_ANALYTICS_GEOIP_FLAGS_DIR)) { 
+                            wp_mkdir_p(AI4PID_ANALYTICS_GEOIP_FLAGS_DIR);
+                        }
+                        // Fetch from CDN with a fast 2-second timeout so the dashboard never hangs
+                        $response = wp_remote_get($cdn_flag_url, ['timeout' => 2]);
+                        if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+                            file_put_contents($local_flag_path, wp_remote_retrieve_body($response));
+                            $final_flag_url = $local_flag_url;
+                        }
+                    } else {
                         $final_flag_url = $local_flag_url;
                     }
-                } else {
-                    $final_flag_url = $local_flag_url;
-                }
 
-                echo '<tr>';
-                echo '<td>';
-                echo '<div style="display: flex; align-items: center; gap: 10px;">';
-                echo '<img src="' . esc_url($final_flag_url) . '" width="24" alt="' . $upper_code . ' Flag" style="border-radius: 2px; box-shadow: 0 0 2px rgba(0,0,0,0.3); height: auto;">';
-                echo '<span><strong>' . esc_html($country_name) . '</strong> <span style="color: #646970; font-size: 12px;">(' . $upper_code . ')</span></span>';
-                echo '</div>';
-                echo '</td>';
-                echo '<td>' . intval( $row->visits ) . '</td>';
-                echo '</tr>';
+                    echo '<tr>';
+                    echo '<td>';
+                    echo '<div style="display: flex; align-items: center; gap: 10px;">';
+                    echo '<img src="' . esc_url($final_flag_url) . '" width="24" alt="' . $upper_code . ' Flag" style="border-radius: 2px; box-shadow: 0 0 2px rgba(0,0,0,0.3); height: auto;">';
+                    echo '<span><strong>' . esc_html($country_name) . '</strong> <span style="color: #646970; font-size: 12px;">(' . $upper_code . ')</span></span>';
+                    echo '</div>';
+                    echo '</td>';
+                    echo '<td>' . intval( $row->visits ) . '</td>';
+                    echo '</tr>';
+                }
             }
         } else { echo '<tr><td colspan="2">No data available or GeoIP not active.</td></tr>'; }
         echo '</tbody></table>';
@@ -610,12 +624,17 @@ function ai4pid_render_markdown_export_ui($table_name, $wp_offset, $filter_times
     }
     $md .= "\n";
 
-    $top_countries = $wpdb->get_results($wpdb->prepare("SELECT country, COUNT(DISTINCT CONCAT(visitor_hash, FLOOR((visit_timestamp + %d) / 86400))) as uniques FROM $table_name WHERE visit_timestamp >= %d AND country IS NOT NULL GROUP BY country ORDER BY uniques DESC LIMIT 10", $wp_offset, $filter_timestamp));
+    // Note: We use NULLIF to merge NULL and empty strings ('') into a single group for Markdown export
+    $top_countries = $wpdb->get_results($wpdb->prepare("SELECT NULLIF(country, '') as country, COUNT(DISTINCT CONCAT(visitor_hash, FLOOR((visit_timestamp + %d) / 86400))) as uniques FROM $table_name WHERE visit_timestamp >= %d GROUP BY NULLIF(country, '') ORDER BY uniques DESC LIMIT 10", $wp_offset, $filter_timestamp));
     
     $md .= "### Top Countries ({$period_label} Visitor-Days)\n";
     $md .= "| Country | Country Code | Visitor-Days |\n|---|---|---|\n";
     if ($top_countries) {
-        foreach ($top_countries as $c_row) { $md .= "| " . ai4pid_get_country_name($c_row->country) . " | " . strtoupper($c_row->country) . " | " . intval($c_row->uniques) . " |\n"; }
+        foreach ($top_countries as $c_row) { 
+            $c_name = empty($c_row->country) ? 'Unknown' : ai4pid_get_country_name($c_row->country);
+            $c_code = empty($c_row->country) ? 'N/A' : strtoupper($c_row->country);
+            $md .= "| " . $c_name . " | " . $c_code . " | " . intval($c_row->uniques) . " |\n"; 
+        }
     }
 
     ?>
