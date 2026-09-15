@@ -2,11 +2,21 @@ import { component, Markdoc, type AstroMarkdocConfig } from "@astrojs/markdoc/co
 import type { SchemaAttribute } from "@markdoc/markdoc";
 import { slideAlignValues, type SlideSchema } from "./schemas/slide";
 import type { ImageContainerSchema } from "./schemas/image";
+import type { Question } from "@core-types/quiz";
+import type { MatchingGameSchema, OrderGameSchema } from "@schemas/games";
+import type { ArasaacSchema, FlagSchema, YouTubeVideoSchema } from "@schemas/common";
 
 type Project = 'web' | 'admin';
 type AstroTagConfig = NonNullable<AstroMarkdocConfig['tags']>[string];
 type MarkdocTagsFromAttributes = {
   [K in keyof typeof markdocTagAttributes]: AstroTagConfig;
+};
+// Iterate over each property of the schema (K in keyof TSchema)
+export type TagAttributes<TSchema> = {
+  [K in keyof TSchema]: Omit<SchemaAttribute, 'default'> & {
+    // Force the default to be exactly of the type of that property in the schema
+    default?: TSchema[K];
+  };
 };
 
 /**
@@ -23,7 +33,7 @@ export const markdocTagAttributes = {
         required: true,
         description: "The country code: 'eu', 'es', etc. You can find a list of supported country codes here: https://icon-sets.iconify.design/circle-flags/",
       }
-    },
+    } satisfies TagAttributes<FlagSchema>,
   },
   notranslate: {
     description: "Mark content to be ignored by the LLM translation process, and preserved as-is in any translated versions.",
@@ -42,10 +52,10 @@ export const markdocTagAttributes = {
       align: {
         type: String,
         description: "The alignment of the slide.",
-        default: "center" as const satisfies SlideSchema['align'],
+        default: "center",
         matches: [...slideAlignValues],
       },
-    } satisfies Record<keyof SlideSchema, SchemaAttribute>,
+    } satisfies TagAttributes<SlideSchema>,
   },
   columns: {
     description: "Render a columns layout component with the provided column children.",
@@ -74,9 +84,8 @@ export const markdocTagAttributes = {
       crop: {
         type: Object, // Note: Markdoc does not support nested objects in attributes, so we define it as an Object type here, but the actual structure is defined in the ImageContainerSchema interface, and validation is made by both Keystatic and the Image.astro component.
         description: "Cropping options for the image.",
-        default: {},
       },
-    } satisfies Record<keyof ImageContainerSchema, SchemaAttribute>,
+    } satisfies TagAttributes<ImageContainerSchema>,
   },
   quiz: {
     description: "Render a quiz component with the provided questions.",
@@ -95,7 +104,7 @@ export const markdocTagAttributes = {
         required: true,
         description: "The possible answers to the question.",
       },
-    },
+    } satisfies TagAttributes<Question>,
   },
   arasaac: {
     description: "Render an ARASAAC pictogram dynamically directly from their API.",
@@ -125,7 +134,7 @@ export const markdocTagAttributes = {
           return []; // An empty array means no validation errors
         }
       }
-    }
+    } satisfies TagAttributes<ArasaacSchema>,
   },
   youtubeVideo: {
     description: "Insert a YouTube video into the content.",
@@ -133,13 +142,13 @@ export const markdocTagAttributes = {
       videoId: {
         type: String,
         required: true,
-        description: "The unique identifier for the YouTube video (e.g., 'dQw4w9WgXcQ'). The ID can be found at the end of the URL of the video.",
+        description: "The unique identifier (ID) for the YouTube video (e.g., 'dQw4w9WgXcQ'). The ID can be found at the end of the URL of the video.",
       },
       title: {
         type: String,
         description: "The title of the YouTube video for accessibility purposes.",
       },
-    }
+    } satisfies TagAttributes<YouTubeVideoSchema>,
   },
   orderGame: {
     description: "Render an order game component with the provided items.",
@@ -149,7 +158,7 @@ export const markdocTagAttributes = {
         required: true,
         description: "The items to be ordered in the game.",
       },
-    }
+    } satisfies TagAttributes<OrderGameSchema>,
   },
   matchingGame: {
     description: "Render a matching game component with the provided pairs.",
@@ -159,7 +168,7 @@ export const markdocTagAttributes = {
         required: true,
         description: "The pairs of items to be matched in the game.",
       },
-    }
+    } satisfies TagAttributes<MatchingGameSchema>,
   },
 } satisfies AstroMarkdocConfig['tags'];
 

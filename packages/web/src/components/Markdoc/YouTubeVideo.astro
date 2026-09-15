@@ -3,11 +3,9 @@
 import 'lite-youtube-embed/src/lite-yt-embed.css';
 
 import { getImage } from 'astro:assets';
+import type { YouTubeVideoSchema } from '@schemas/common';
 
-interface Props {
-  videoId: string;
-  title?: string;
-}
+interface Props extends YouTubeVideoSchema {}
 
 const { t } = Astro.locals;
 

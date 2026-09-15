@@ -1,13 +1,10 @@
 ---
+import type { ArasaacSchema } from '@schemas/common';
 import { Image } from 'astro:assets';
 import fs from 'node:fs';
 import path from 'node:path';
 
-interface Props {
-  id: string | number;
-  alt: string;
-  size?: number;
-}
+interface Props extends ArasaacSchema {}
 
 const { id, alt, size = 300 } = Astro.props;
 
