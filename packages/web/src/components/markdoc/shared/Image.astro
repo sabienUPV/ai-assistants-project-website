@@ -12,9 +12,10 @@ const { cropTop = 0, cropRight = 0, cropBottom = 0, cropLeft = 0 } = crop && cro
 
 // Astro's <Image /> component requires the actual imported file object for local files in the `src` directory, not just a string path.
 // We use import.meta.glob to dynamically find the image object based on the string path Keystatic gives us.
+// Note: import.meta.glob does NOT allow for dynamic paths, so to find the correct path, we make it relative to the project root (by starting the path with "/") and then go back only one level to the packages folder of the monorepo to reach the admin project. This way, if we move this component file to another folder, it should not break the import.meta.glob path anymore (if we use relative paths, i.e. starting with "../", it will break if we move this file to another folder).
 let imagePromise;
 if (imageSrc) {
-  const images = import.meta.glob<{ default: ImageMetadata }>('../../../../admin/src/assets/images/**/*.{jpeg,jpg,png,gif,webp}');
+  const images = import.meta.glob<{ default: ImageMetadata }>('/../admin/src/assets/images/**/*.{jpeg,jpg,png,gif,webp}');
 
   // Make sure the path matches what Keystatic outputs (you might need to adjust this depending on how publicPath is resolving)
   // If Keystatic outputs "@admin-assets/images/...", you'll map that to the actual file path.
