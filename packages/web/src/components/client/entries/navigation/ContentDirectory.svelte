@@ -21,7 +21,7 @@
 
 <script lang="ts">
   import { onMount } from 'svelte';
-  import ContentNotInLanguagePill from '@components/client/shared/ContentNotInLanguagePill.svelte';
+  import ContentNotInLanguagePill from '@components/client/entries/ContentNotInLanguagePill.svelte';
   import { getUrlFriendlyVersionOfString } from '@utils/url';
 
   interface Props {
