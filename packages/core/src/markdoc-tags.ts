@@ -4,7 +4,7 @@ import { slideAlignValues, type SlideSchema } from "./schemas/slide";
 import type { ImageContainerSchema } from "./schemas/image";
 import type { Question } from "@core-types/quiz";
 import type { MatchingGameSchema, OrderGameSchema } from "@schemas/games";
-import type { ArasaacSchema, DecisionButtonSchema, FlagSchema, YouTubeVideoSchema } from "@schemas/common";
+import type { ArasaacSchema, DecisionButtonSchema, FlagSchema, TextInputSchema, YouTubeVideoSchema } from "@schemas/common";
 
 type Project = 'web' | 'admin';
 type AstroTagConfig = NonNullable<AstroMarkdocConfig['tags']>[string];
@@ -185,6 +185,15 @@ export const markdocTagAttributes = {
       }
     } satisfies TagAttributes<DecisionButtonSchema>,
   },
+  textInput: {
+    description: "A text input area for users to practice writing prompts or answer open questions. Can be enhanced with AI feedback.",
+    attributes: {
+      contextForAI: {
+        type: String,
+        description: "Hidden instructions (in English) for the AI to evaluate the user's input (e.g., 'Check if the user included time, place, and budget'). This is only used if the AI integration is enabled at a project level.",
+      },
+    } satisfies TagAttributes<TextInputSchema>,
+  },
 } satisfies AstroMarkdocConfig['tags'];
 
 /**
@@ -301,6 +310,10 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
     decisionButton: {
       ...markdocTagAttributes.decisionButton,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/slides/DecisionButton.astro'),
+    },
+    textInput: {
+      ...markdocTagAttributes.textInput,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/TextInput.astro'),
     },
   } satisfies AstroMarkdocConfig['tags'] & MarkdocTagsFromAttributes;
 }

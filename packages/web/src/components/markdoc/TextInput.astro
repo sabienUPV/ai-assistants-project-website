@@ -1,0 +1,22 @@
+---
+import type { TextInputSchema } from '@schemas/common';
+import TextInputSvelte from '@components/client/shared/TextInput.svelte';
+
+interface Props extends TextInputSchema {
+  maxCharacters?: number;
+}
+
+const { contextForAI, maxCharacters = 500 } = Astro.props;
+const { t } = Astro.locals;
+---
+
+<TextInputSvelte
+  client:visible
+  contextForAI={contextForAI}
+  maxCharacters={maxCharacters}
+  placeholderText={t('ai_integration_text_input_placeholder')}
+  buttonText={t('ai_integration_text_input_check_response_button')}
+  loadingMessage={t('ai_integration_api_call_loading_message')}
+  errorMessage={t('ai_integration_api_call_error_message')}
+  tooLongMessage={t('ai_integration_text_input_too_long_message')}
+/>

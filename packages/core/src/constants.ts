@@ -27,6 +27,10 @@ export const SOCIAL_LINKS = {
   github: 'https://github.com/sabienUPV/ai-assistants-project-website',
 };
 
+// AI / LLM related constants
+// Note: If AI_LLM_API_URL is set to null, it indicates that the actual API URL for the AI/LLM service is not available or not provided. In such cases, the application should handle this gracefully, possibly by disabling features that rely on the AI/LLM service or providing alternative functionality.
+export const AI_LLM_API_URL = null; // Set to the actual API URL if available, otherwise null
+
 // Info for the Imprint ("Aviso Legal" in Spanish)
 
 // Coordinator: Info IAT

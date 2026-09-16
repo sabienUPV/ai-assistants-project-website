@@ -43,3 +43,11 @@ export type DecisionButtonSchema = {
    */
   targetSlide: number;
 };
+
+export type TextInputSchema = {
+  /**
+   * Hidden instructions or context for the AI to evaluate the user's input.
+   * Only used if the AI integration is enabled.
+   */
+  contextForAI?: string;
+};

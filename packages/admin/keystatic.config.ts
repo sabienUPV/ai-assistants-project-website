@@ -9,7 +9,7 @@ import { slideAlignValues, type SlideSchema } from '@schemas/slide';
 import type { ImageContainerSchema } from '@schemas/image';
 import type { MatchingGameSchema, OrderGameSchema } from '@schemas/games';
 import type { MatchingGamePair, OrderGameItem } from '@core-types/games';
-import type { DecisionButtonSchema } from '@schemas/common';
+import type { DecisionButtonSchema, TextInputSchema } from '@schemas/common';
 
 // 1. CREAMOS EL TIPO MAPEADO
 // Le exigimos a TS que este objeto tenga obligatoriamente todas las keys de tu Post de Zod.
@@ -116,7 +116,7 @@ const createComponents = (collectionName: string) => ({
         { style: { border: '2px solid #e0e0e0', borderRadius: '8px', marginBottom: '16px', backgroundColor: '#fff', overflow: 'hidden' } },
         // 1. La cabecera con el título (Visible sin tener que editar)
         React.createElement(
-          'div', 
+          'div',
           {
             contentEditable: false, // Evita que el usuario edite el título directamente en la cabecera
             style: {
@@ -545,26 +545,33 @@ const createComponents = (collectionName: string) => ({
       );
     }
   }),
-  // decisionButton: wrapper({
-  //   label: 'Decision Button',
-  //   description: 'Un botón interactivo que navega a una diapositiva específica al hacer clic.',
-  //   schema: {
-  //     targetSlide: fields.integer({
-  //       label: 'Número de Diapositiva Destino',
-  //       description: 'El número de la diapositiva a la que saltará al hacer clic (ej. 3).',
-  //       validation: {
-  //         isRequired: true,
-  //         min: 1
-  //       }
-  //     }),
-  //     // Este campo es crucial en Keystatic para decirle que este componente envuelve a otros
-  //     content: fields.child({
-  //       kind: 'block',
-  //       placeholder: 'Añade aquí el texto, imágenes o pictogramas del botón...',
-  //       links: 'inherit',
-  //     }),
-  //   }
-  // }),
+  textInput: block({
+    label: 'Text Input',
+    description: markdocTagAttributes.textInput.description,
+    schema: {
+      contextForAI: fields.text({ label: 'Context for AI', multiline: true }),
+    } satisfies Record<keyof TextInputSchema, ComponentSchema>,
+    ContentView: (props) => {
+      const { contextForAI } = props.value || {};
+
+      // Non-editable preview in grey of the context for AI
+      return React.createElement(
+        'div',
+        {
+          contentEditable: false, // Evita que el usuario edite el título directamente en la cabecera
+          style: {
+            userSelect: 'none', // Evita que el usuario seleccione el texto por error
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+            color: '#64748b',
+          }
+        },
+        React.createElement('span', { style: { fontWeight: 'bold' } }, 'Context for AI:'),
+        React.createElement('span', {}, contextForAI || '[No context provided]'),
+      );
+    }
+  }),
 });
 
 // Select storage kind based on environment variable:
