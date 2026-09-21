@@ -1,27 +1,24 @@
 ---
 import FilterInterceptor from '@components/client/entries/navigation/FilterInterceptor.svelte';
 import FiltersUI from './FiltersUI.astro';
-import { getAbsoluteUrlFromRelativePathWithoutPageNumber } from '@utils/url';
 import { type FilterGroups } from './FiltersUI.astro';
 
 interface Props {
+  actionUrlPath: string; // (Required) The URL path to which the filters form should submit. This is typically the canonical path of the current page (see getCanonicalPath() from @utils/url), with "search" appended to it (e.g. /en/courses/search). This ensures that the form submission will always go to the correct search endpoint, regardless of the current locale, page number, if it's from /en/courses/ or /en/courses/list/, etc.
   filterGroups?: FilterGroups;
   isSearchEnabled?: boolean; // If true, show a search input field above the filters.
-  actionRelativePath?: string; // e.g. "search"
   isClient?: boolean; // If true, use Svelte to intercept the form submission and handle it client-side. If false, use a standard HTML form that navigates to /search.
 }
 
-const { filterGroups, isSearchEnabled = false, actionRelativePath = "search", isClient = false } = Astro.props;
-
-const actionUrl = getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro.url.pathname, actionRelativePath);
+const { filterGroups, isSearchEnabled = false, actionUrlPath, isClient = false } = Astro.props;
 ---
 
 {isClient ? (
-  <FilterInterceptor client:idle fallbackAction={actionUrl}>
+  <FilterInterceptor client:idle fallbackAction={actionUrlPath}>
     <FiltersUI filterGroups={filterGroups} isSearchEnabled={isSearchEnabled} />
   </FilterInterceptor>
 ) : (
-  <form action={actionUrl} method="GET" class="astro-static-form">
+  <form action={actionUrlPath} method="GET" class="astro-static-form">
     <FiltersUI filterGroups={filterGroups} isSearchEnabled={isSearchEnabled} />
   </form>
 )}

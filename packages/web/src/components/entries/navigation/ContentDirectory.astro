@@ -3,6 +3,7 @@ import ContentDirectorySvelte, { type DirectoryItem, type FilterConfig as Filter
 import Filters from '@components/entries/navigation/Filters.astro';
 import PageNavigation from '@components/entries/navigation/PageNavigation.astro';
 import Dropdown from '@components/shared/Dropdown.astro';
+import { getCanonicalPath } from '@utils/url';
 import type { Page } from 'astro';
 
 // We re-export the types so that the parent page can use them to type its data without having to import the Svelte component directly.
@@ -18,14 +19,16 @@ export type FilterConfig<T extends Record<string, any>> = FilterConfigBase & {
 interface Props {
   items: DirectoryItem[];
   isClient?: boolean; // If true, use Svelte to render the directory and handle filtering client-side. If false, use a standard HTML form that navigates to /search.
-  actionRelativePath?: string; // The relative path to the search endpoint. Defaults to "search".
   filterConfig?: FilterConfigBase;
   readMoreLabel?: string;
   page?: Page; // The Astro page object, required to render static pagination when isClient is false.
 }
 
+// The action URL for the filters form is always the canonical path of the current page, with "search" appended to it. This ensures that the form submission will always go to the correct search endpoint, regardless of the current locale, page number, if it's from /content or /content/list/, etc.
+const actionUrlPath = `${getCanonicalPath(Astro.url.pathname)}search`;
+
 const { t } = Astro.locals;
-const { items, isClient, actionRelativePath, filterConfig, readMoreLabel, page } = Astro.props;
+const { items, isClient, filterConfig, readMoreLabel, page } = Astro.props;
 
 const filterGroups = filterConfig?.arrayFilters?.concat(filterConfig.exactFilters || [])?.reduce((acc, filter) => {
   const uniqueValues = new Set(items.flatMap(item => {
@@ -51,7 +54,7 @@ const translations = {
     {/* Setup only search bar if only search is enabled */}
     {isSearchEnabled && !hasFilters && (
       <div class="directory-search-bar">
-        <Filters actionRelativePath={actionRelativePath} isClient={isClient} filterGroups={filterGroups} isSearchEnabled={isSearchEnabled} />
+        <Filters actionUrlPath={actionUrlPath} isClient={isClient} filterGroups={filterGroups} isSearchEnabled={isSearchEnabled} />
       </div>
     )}
 
@@ -94,7 +97,7 @@ const translations = {
         position="left"
       >
         <li class="filters-dropdown-container">
-          <Filters actionRelativePath={actionRelativePath} isClient={isClient} filterGroups={filterGroups} isSearchEnabled={isSearchEnabled} />
+          <Filters actionUrlPath={actionUrlPath} isClient={isClient} filterGroups={filterGroups} isSearchEnabled={isSearchEnabled} />
         </li>
       </Dropdown>
     </div>

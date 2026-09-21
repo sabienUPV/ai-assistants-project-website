@@ -2,7 +2,7 @@
 import Layout from '@layouts/Layout.astro';
 import { getCollectionWithFallbacks, getSlugFromEntryId } from '@utils/dynamicContent';
 import ContentDirectory, { type DirectoryItem, type FilterConfig } from '@components/entries/navigation/ContentDirectory.astro';
-import { getAbsoluteUrlFromRelativePathWithoutPageNumber } from '@utils/url';
+import { getAbsolutePathFromRelativePathWithoutPageNumber } from '@utils/url';
 import type { AiSolution } from '@schemas/ai-solutions';
 import type { Page } from 'astro';
 
@@ -23,7 +23,7 @@ const directoryItems : DirectoryItem[] = allSolutions.map(solution => ({
   excerpt: solution.data.description,
   isMissingTranslation: missingSolutionIds?.includes(solution.id) || false,
   // Note: We need the '../' prefix because the post URL is relative to the current page, which is /[locale]/ai-solutions/list/[page].astro, and we want to go up one level to /[locale]/ai-solutions/[slug].astro
-  url: getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro.url.pathname, '../' + getSlugFromEntryId(solution.id)),
+  url: getAbsolutePathFromRelativePathWithoutPageNumber(Astro.url.pathname, '../' + getSlugFromEntryId(solution.id)),
   keywords: solution.data.keywords || [],
   rawData: solution.data,
 }));
@@ -51,7 +51,6 @@ const paginatedItems = page ? directoryItems.slice((page.currentPage - 1) * page
       items={paginatedItems}
       isClient={isClient}
       page={page}
-      actionRelativePath="../search"
       filterConfig={filterConfig}
       readMoreLabel={t('ai_solutions_card_view_details')}
     />

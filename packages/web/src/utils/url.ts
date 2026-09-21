@@ -90,13 +90,13 @@ export function getSiblingUrl(astroUrlPathName: string, relativePath: string): s
  * @example
  * // Usage in an Astro page/component
  * // Astro.url.pathname = "/es/courses/1"
- * getAbsoluteUrlFromRelativePathWithoutPageNumber(Astro.url.pathname, "unit-2") // => "/es/courses/unit-2"
+ * getAbsolutePathFromRelativePathWithoutPageNumber(Astro.url.pathname, "unit-2") // => "/es/courses/unit-2"
  * 
  * @param astroUrlPathName The value of `Astro.url.pathname` (you can access it from your Astro page or component)
  * @param relativePath The relative path to the child page you want to link to (e.g., "unit-2" or "unit-3")
  * @returns The absolute URL path to the child page, preserving the current locale and any other path segments
  */
-export function getAbsoluteUrlFromRelativePathWithoutPageNumber(astroUrlPathName: string, relativePath: string): string {
+export function getAbsolutePathFromRelativePathWithoutPageNumber(astroUrlPathName: string, relativePath: string): string {
   return applyRelativePathToCurrentUrlPath(astroUrlPathName, relativePath, (segments) => {
     // If the last segment is a number (indicating a page number), we want to replace it with the new relative path
     const lastSegment = segments[segments.length - 1];
@@ -160,4 +160,37 @@ export function getUrlFriendlyVersionOfString(input: string): string {
     .replace(/[^a-z0-9-]/g, '') // Remove any non-alphanumeric characters (except hyphens)
     .replace(/--+/g, '-') // Replace multiple hyphens with a single hyphen
     .replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
+}
+
+/**
+ * Builds the canonical path for SEO optimization.
+ * 
+ * SEO Best Practices for Pagination:
+ * - We canonicalize the first page of results (/list/, /list/1/, /search/) back to the root directory (e.g., /blog/).
+ * - We keep deeper paginated pages (/list/2/, /list/3/) as self-referencing canonicals.
+ * If we canonicalized ALL pages to the root, search engines would drop deeper pages from the index
+ * and stop crawling older articles, causing a severe drop in discoverability.
+ * 
+ * @param astroUrlPathname The current pathname from Astro.url.pathname
+ * @returns The clean, canonicalized path always ending with a trailing slash
+ */
+export function getCanonicalPath(astroUrlPathname: string): string {
+  // 1. Force a trailing slash to standardize the path and avoid double-slash issues
+  let canonicalPath = astroUrlPathname.endsWith('/') 
+    ? astroUrlPathname 
+    : `${astroUrlPathname}/`;
+
+  // 2. Canonicalize the search page back to the root
+  // Turns "/es/blog/search/" into "/es/blog/"
+  canonicalPath = canonicalPath.replace(/\/search\/$/, '/');
+
+  // 3. Canonicalize the first page of the list back to the root
+  // Turns both "/es/blog/list/" and "/es/blog/list/1/" into "/es/blog/"
+  // The regex matches "/list/" optionally followed by "1/", but ignores "2/", "3/", etc.
+  canonicalPath = canonicalPath.replace(/\/list\/(1\/)?$/, '/');
+
+  // Any other page (like "/es/blog/list/2/") will pass through untouched,
+  // creating the correct self-referencing canonical for deep pagination.
+  
+  return canonicalPath;
 }
