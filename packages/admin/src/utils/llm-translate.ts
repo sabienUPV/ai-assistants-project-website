@@ -140,10 +140,11 @@ function isSafeMarkdownBlockNode(node: MarkdocNode): boolean {
     && !containsUnsafeNode(node) // Ensure the node does not contain any custom tags (like {% flag country="eu" /%});
 }
 
-// Recursive search to find any custom tags or links (URLs) hidden in the hierarchy (e.g. {% flag country="eu" /%}, [link](https://ai4pid.eu)).
+// Recursive search to find any unsafe nodes, such as custom tags, links (URLs), images, and code blocks, hidden in the hierarchy (e.g. {% flag country="eu" /%}, [link](https://ai4pid.eu), ![](image.jpg)).
 // We consider these nodes "unsafe" because the LLM may not understand them and could potentially remove or alter them during translation, which would break the document's structure or meaning.
+const unsafeNodeTypes: MarkdocNode['type'][] = ['tag', 'link', 'image', 'code'];
 function containsUnsafeNode(node: MarkdocNode): boolean {
-  if (node.type === 'tag' || node.type === 'link') return true;
+  if (unsafeNodeTypes.includes(node.type)) return true;
   return getSlotsAndChildren(node).some(child => containsUnsafeNode(child));
 }
 
