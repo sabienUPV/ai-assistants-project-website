@@ -1,7 +1,7 @@
 ---
 import { defaultLocale } from '@languages';
 import { getSlugFromEntryId, type CourseEntry } from '@utils/dynamicContent';
-import { getSiblingUrl } from '@utils/url';
+import { getSiblingUrlPath } from '@utils/url';
 import { getCollection } from 'astro:content';
 
 const { locale, t } = Astro.locals;
@@ -56,7 +56,7 @@ const sortedCourses = courses.sort((a, b) => {
             style={`--depth: ${depth};`}
           >
             <a 
-              href={getSiblingUrl(Astro.url.pathname, getSlugFromEntryId(course.id))} 
+              href={getSiblingUrlPath(Astro.url.pathname, getSlugFromEntryId(course.id))} 
               class="toc-link" 
               aria-current={isActive ? 'page' : undefined}
             >

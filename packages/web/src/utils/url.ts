@@ -50,18 +50,18 @@ export function tryRemoveBaseUrlFromPath(path: string): string {
  * return Astro.rewrite(getFirstPageRewriteUrlPath(Astro.url.pathname, "list"));
  * ---
  * 
- * @param astroUrlPathname The value of `Astro.url.pathname` (you can access it from your Astro page or component)
- * @param subpath Optional subpath to append to the URL (e.g., "list"). If provided, the function will return the URL to the first page of that subpath (e.g., for "/en/courses", "/en/courses/list/1"). If not provided, it will return the URL to the first page of the main content (e.g., "/en/courses/1").
- * @returns The URL object pointing to the first page of the main content (e.g., "/en/courses/1") for the current locale, for use with Astro.rewrite
+ * @param baseUrlPath The base URL path. Typically, the current URL path, obtained with `Astro.url.pathname` in an Astro page or component. It should be a string that starts with a slash (e.g., "/es/courses/unidad-1").
+ * @param subpath Optional subpath to append to the URL (e.g., "list"). If provided, the function will return the URL to the first page of that subpath (e.g., for "/es/courses", "/es/courses/list/1"). If not provided, it will return the URL to the first page of the main content (e.g., "/es/courses/1").
+ * @returns A string representing the URL pointing to the first page of the main content (e.g., "/en/courses/1") for the current locale, for use with Astro.rewrite
  */
-export function getFirstPageRewriteUrlPath(astroUrlPathname: string, subpath?: string): string {
-  // Si nos pasan un subpath, le quitamos las barras iniciales o finales por seguridad
+export function getFirstPageRewriteUrlPath(baseUrlPath: string, subpath?: string): string {
+  // If there is a subpath, we clean it up by removing any leading or trailing slashes for safety
   const cleanSubpath = subpath ? subpath.replace(/^\/+|\/+$/g, '') : '';
-  
-  // Construimos el path relativo dependiendo de si hay subpath o no
+
+  // We build the relative path depending on whether there is a subpath or not
   const targetPath = cleanSubpath ? `${cleanSubpath}/1` : "1";
   
-  return applyRelativePathToCurrentUrlPath(astroUrlPathname, targetPath, 'append');
+  return applyRelativePathToBaseUrlPath(baseUrlPath, targetPath, 'append');
 }
 
 /**
@@ -72,46 +72,39 @@ export function getFirstPageRewriteUrlPath(astroUrlPathname: string, subpath?: s
  * @example
  * // Usage in an Astro page/component
  * // Astro.url.pathname = "/es/courses/unidad-1"
- * getSiblingUrl(Astro.url.pathname, "unidad-2") // => "/es/courses/unidad-2"
+ * getSiblingUrlPath(Astro.url.pathname, "unidad-2") // => "/es/courses/unidad-2"
  * 
- * @param astroUrlPathName The value of `Astro.url.pathname` (you can access it from your Astro page or component)
+ * @param baseUrlPath The base URL path. Typically, the current URL path, obtained with `Astro.url.pathname` in an Astro page or component. It should be a string that starts with a slash (e.g., "/es/courses/unidad-1").
  * @param relativePath The relative path to the sibling page you want to link to (e.g., "unit-2" or "unit-3")
  * @returns The absolute URL path to the sibling page, preserving the current locale and any other path segments
  */
-export function getSiblingUrl(astroUrlPathName: string, relativePath: string): string {
-  return applyRelativePathToCurrentUrlPath(astroUrlPathName, relativePath, 'replace');
+export function getSiblingUrlPath(baseUrlPath: string, relativePath: string): string {
+  return applyRelativePathToBaseUrlPath(baseUrlPath, relativePath, 'replace');
 }
 
 /**
- * Get the absolute URL path to a child page, preserving the current locale and any other path segments.
+ * Get the absolute URL path to a child page, appending it to the current path segments.
  * 
- * This function handles cases where the current URL ends with a page number (e.g., "/es/courses/1") by replacing that number with the new relative path (e.g., "/es/courses/unit-2"), to prevent the wrong URL (e.g., "/es/courses/1/unit-2") from being inferred by the browser from the relative path.
- * 
- * @example
- * // Usage in an Astro page/component
- * // Astro.url.pathname = "/es/courses/1"
- * getAbsolutePathFromRelativePathWithoutPageNumber(Astro.url.pathname, "unit-2") // => "/es/courses/unit-2"
- * 
- * @param astroUrlPathName The value of `Astro.url.pathname` (you can access it from your Astro page or component)
- * @param relativePath The relative path to the child page you want to link to (e.g., "unit-2" or "unit-3")
- * @returns The absolute URL path to the child page, preserving the current locale and any other path segments
+ * @param baseUrlPath The base URL path. Typically, the current URL path, obtained with `Astro.url.pathname` in an Astro page or component. It should be a string that starts with a slash (e.g., "/es/courses/unidad-1").
+ * @param relativePath The relative path to the child page you want to link to (e.g., "unidad-2" or "unidad-3").
+ * @returns The absolute URL path to the child page, preserving the current locale and any other path segments.
  */
-export function getAbsolutePathFromRelativePathWithoutPageNumber(astroUrlPathName: string, relativePath: string): string {
-  return applyRelativePathToCurrentUrlPath(astroUrlPathName, relativePath, (segments) => {
-    // If the last segment is a number (indicating a page number), we want to replace it with the new relative path
-    const lastSegment = segments[segments.length - 1];
-    if (/^\d+$/.test(lastSegment)) {
-      return 'replace';
-    }
-    // Otherwise, we want to append the new relative path as a new segment
-    return 'append';
-  });
+export function getChildUrlPath(baseUrlPath: string, relativePath: string): string {
+  return applyRelativePathToBaseUrlPath(baseUrlPath, relativePath, 'append');
 }
 
 type RelativePathOperation = 'replace' | 'append';
-function applyRelativePathToCurrentUrlPath(astroUrlPathName: string, relativePath: string, operationValueOrFn: RelativePathOperation | ((segments: string[]) => RelativePathOperation)): string {
-  // Remove any trailing slash from the current URL path to avoid double slashes when joining
-  const cleanPath = astroUrlPathName.replace(/\/$/, '');
+
+/**
+ * Applies a relative path to a base URL path, either replacing the last segment or appending the new path.
+ * @param baseUrlPath The base URL path. Typically, the current URL path, obtained with `Astro.url.pathname` in an Astro page or component. It should be a string that starts with a slash (e.g., "/es/courses/unidad-1").
+ * @param relativePath The relative path to apply (e.g., "unidad-2" or "unidad-3").
+ * @param operationValueOrFn The operation to perform. It can be a string ('replace' or 'append') or a function that takes the segments and returns the operation.
+ * @returns The new URL path with the relative path applied, always ending with a trailing slash (e.g., "/es/courses/unidad-2/").
+ */
+function applyRelativePathToBaseUrlPath(baseUrlPath: string, relativePath: string, operationValueOrFn: RelativePathOperation | ((segments: string[]) => RelativePathOperation)): string {
+  // Remove any trailing slash from the base URL path to avoid double slashes when joining
+  const cleanPath = baseUrlPath.replace(/\/$/, '');
   
   // Break down the URL into segments: ['', 'es', 'courses', 'unit-1']
   const segments = cleanPath.split('/');
@@ -120,19 +113,13 @@ function applyRelativePathToCurrentUrlPath(astroUrlPathName: string, relativePat
   const newRelativePath = relativePath.startsWith('/') ? relativePath.slice(1) : relativePath;
 
   if (segments.length < 2) {
-    // If there are no segments (or only the root ('/')), just return the new slug with a leading slash
-    return `/${newRelativePath}`;
+    // If there are no segments (or only the root ('/')), just return the new slug with a leading slash and trailing slash
+    return `/${newRelativePath}/`;
   }
 
   // We allow two modes: either saying the operation directly, or providing a function that takes the segments and returns the operation.
   // This allows for more complex logic (such as, in getAbsoluteUrlFromRelativePathWithoutPageNumber, where we only want to replace the last segment if it is a page number, otherwise we want to append the new relative path).
-  let actualOperation;
-  if (typeof operationValueOrFn === 'function') {
-    actualOperation = operationValueOrFn(segments);
-  }
-  else {
-    actualOperation = operationValueOrFn;
-  }
+  const actualOperation = typeof operationValueOrFn === 'function' ? operationValueOrFn(segments) : operationValueOrFn;
 
   switch (actualOperation) {
     case 'replace':
@@ -147,8 +134,32 @@ function applyRelativePathToCurrentUrlPath(astroUrlPathName: string, relativePat
       throw new Error(`Unsupported operation: ${actualOperation}`);
   }
   
-  // Join the segments back together to form the new URL path (e.g., "/es/courses/unidad-2")
-  return segments.join('/');
+  // Join the segments back together to form the new URL path, guaranteeing a trailing slash (e.g., "/es/courses/unidad-2/")
+  return `${segments.join('/')}/`;
+}
+
+/**
+ * Extracts the base content directory path by stripping any search or pagination suffixes.
+ * Useful for building absolute URLs for child entries (like posts or courses).
+ * Example: "/es/blog/list/2/" -> "/es/blog/"
+ * 
+ * @example
+ * // Usage in an Astro page/component
+ * // Astro.url.pathname = "/es/courses/unidad-1"
+ * const basePath = getBaseDirectoryPath(Astro.url.pathname); // => "/es/courses/"
+ * const postUrl = getChildUrlPath(basePath, getSlugFromEntryId(post.id)); // => "/es/courses/unit-1"
+ * 
+ * @see getChildUrlPath for building child entry URLs based on this base path.
+ * @param astroUrlPathname The current pathname from Astro.url.pathname
+ * @returns The base content directory path, always ending with a trailing slash
+ */
+export function getBaseDirectoryPath(astroUrlPathname: string): string {
+  let basePath = astroUrlPathname.endsWith('/') ? astroUrlPathname : `${astroUrlPathname}/`;
+  
+  // Strip both /search/ and ANY /list/.../ suffix completely
+  return basePath
+    .replace(/\/search\/$/, '/')
+    .replace(/\/list(\/\d+)?\/?$/, '/');
 }
 
 export function getUrlFriendlyVersionOfString(input: string): string {
