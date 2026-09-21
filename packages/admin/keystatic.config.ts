@@ -1,7 +1,7 @@
 import { config, fields, collection, type Config, type ComponentSchema } from '@keystatic/core';
 import { block, inline, repeating, wrapper } from '@keystatic/core/content-components';
 import type { Post } from '@schemas/posts';
-import { type Course, courseUnitRegex, courseUnitValidationMessage } from '@schemas/courses';
+import { type Course } from '@schemas/courses';
 import { markdocTagAttributes } from '@markdoc-tags';
 import React from 'react';
 import { locales, type Locale } from '@languages';
@@ -10,6 +10,7 @@ import type { ImageContainerSchema } from '@schemas/image';
 import type { MatchingGameSchema, OrderGameSchema } from '@schemas/games';
 import type { MatchingGamePair, OrderGameItem } from '@core-types/games';
 import type { DecisionButtonSchema, TextInputSchema } from '@schemas/common';
+import { slugReservedKeywordsRegex, slugReservedKeywordsMessage, courseUnitRegex, courseUnitValidationMessage } from '@schemas/validation';
 
 // 1. CREAMOS EL TIPO MAPEADO
 // Le exigimos a TS que este objeto tenga obligatoriamente todas las keys de tu Post de Zod.
@@ -591,7 +592,15 @@ const createPostCollection = (locale: Locale) => {
     path: `src/content/${locale}/posts/*`,
     format: { contentField: 'content' },
     schema: {
-      title: fields.slug({ name: { label: 'Title' } }),
+      title: fields.slug({ name: {
+        label: 'Title',
+        validation: {
+          pattern: {
+            regex: slugReservedKeywordsRegex, 
+            message: slugReservedKeywordsMessage
+          }
+        }
+      } }),
       pubDate: fields.date({ label: 'Date', defaultValue: { kind: 'today' } }),
       description: fields.text({ label: 'Description' }),
       author: fields.text({ label: 'Author' }),
@@ -634,6 +643,7 @@ const createCourseCollection = (locale: Locale) => {
         name: {
           label: 'Unit',
           validation: {
+            // Note: Course units should also not be reserved keywords, but because units cannot be actual keywords because their format is stricter, we can just use the unit regex to account for both the format and reserved keywords in one go. This way, we avoid having to check for reserved keywords separately.
             pattern: {
               regex: courseUnitRegex,
               message: courseUnitValidationMessage,
@@ -642,7 +652,7 @@ const createCourseCollection = (locale: Locale) => {
         },
         slug: {
           generate: (unit) => unit.replace(/\./g, '-'), // Replace dots with dashes for the slug (e.g. "1.2" becomes "1-2")
-        }  
+        }
       }),
       title: fields.text({ label: 'Title' }),
       description: fields.text({ label: 'Description' }),
