@@ -3,7 +3,7 @@ import ContentDirectorySvelte, { type DirectoryItem, type FilterConfig as Filter
 import Filters from '@components/entries/navigation/Filters.astro';
 import PageNavigation from '@components/entries/navigation/PageNavigation.astro';
 import Dropdown from '@components/shared/Dropdown.astro';
-import { getCanonicalPath } from '@utils/url';
+import { getCanonicalUrlPath } from '@utils/url';
 import type { Page } from 'astro';
 
 // We re-export the types so that the parent page can use them to type its data without having to import the Svelte component directly.
@@ -25,7 +25,7 @@ interface Props {
 }
 
 // The action URL for the filters form is always the canonical path of the current page, with "search" appended to it. This ensures that the form submission will always go to the correct search endpoint, regardless of the current locale, page number, if it's from /content or /content/list/, etc.
-const actionUrlPath = `${getCanonicalPath(Astro.url.pathname)}search`;
+const actionUrlPath = `${getCanonicalUrlPath(Astro.url.pathname)}search`;
 
 const { t } = Astro.locals;
 const { items, isClient, filterConfig, readMoreLabel, page } = Astro.props;

@@ -2,7 +2,7 @@
 import { SEO_IMAGE } from '@constants';
 import { getPlainPathNoLocale, getAbsoluteLocaleUrlFromOrigin} from '@utils/localizedUrl.ts';
 import { locales, defaultLocale } from '@languages';
-import { getCanonicalPath, homeNoLocale } from '@utils/url.ts';
+import { getCanonicalUrlPath, homeNoLocale } from '@utils/url.ts';
 
 interface Props {
   title?: string;
@@ -32,7 +32,7 @@ const plainPathNoLocale = getPlainPathNoLocale(Astro.url.pathname, locale);
 
 // Build the canonical URL (without extra parameters, forcing how we want it to be read)
 // Astro.url.pathname gives us the current path
-const canonicalUrl = new URL(getCanonicalPath(Astro.url.pathname), siteUrl);
+const canonicalUrl = new URL(getCanonicalUrlPath(Astro.url.pathname), siteUrl);
 
 // Absolute Image URL:
 // homeNoLocale(image) gives us "/social-preview.png" (it is in the /public folder),

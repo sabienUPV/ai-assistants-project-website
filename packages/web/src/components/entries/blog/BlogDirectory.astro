@@ -2,7 +2,7 @@
 import Layout from '@layouts/Layout.astro';
 import { getCollectionWithFallbacks, getExcerptFromBody, getSlugFromEntryId } from '@utils/dynamicContent';
 import ContentDirectory, { type DirectoryItem, type FilterConfig } from '@components/entries/navigation/ContentDirectory.astro';
-import { getBaseDirectoryPath, getChildUrlPath } from '@utils/url';
+import { getBaseDirectoryUrlPath, getChildUrlPath } from '@utils/url';
 import type { Post } from '@schemas/posts';
 import type { Page } from 'astro';
 import { getLocaleForDate } from '@utils/date';
@@ -24,7 +24,7 @@ const sortedPosts = allPosts.sort((a, b) => {
   return dateB - dateA;
 });
 
-const baseDirectoryPath = getBaseDirectoryPath(Astro.url.pathname); // Get the base directory path without any slug or page number
+const baseDirectoryPath = getBaseDirectoryUrlPath(Astro.url.pathname); // Get the base directory path without any slug or page number
 
 const directoryItems : DirectoryItem[] = sortedPosts.map(post => ({
   id: post.id,

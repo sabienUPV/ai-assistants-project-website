@@ -2,7 +2,7 @@
 import Layout from '@layouts/Layout.astro';
 import { getFirstLevelCourses, getExcerptFromBody, getSlugFromEntryId } from '@utils/dynamicContent';
 import ContentDirectory, { type DirectoryItem, type FilterConfig } from '@components/entries/navigation/ContentDirectory.astro';
-import { getBaseDirectoryPath, getChildUrlPath } from '@utils/url';
+import { getBaseDirectoryUrlPath, getChildUrlPath } from '@utils/url';
 import type { Course } from '@schemas/courses';
 import type { Page } from 'astro';
 
@@ -26,7 +26,7 @@ const courseUnits = firstLevelCourses.sort((a, b) => {
   return a.data.title.localeCompare(b.data.title);
 });
 
-const baseDirectoryPath = getBaseDirectoryPath(Astro.url.pathname); // Get the base directory path without any slug or page number
+const baseDirectoryPath = getBaseDirectoryUrlPath(Astro.url.pathname); // Get the base directory path without any slug or page number
 
 const directoryItems : DirectoryItem[] = courseUnits.map(course => ({
   id: course.id,

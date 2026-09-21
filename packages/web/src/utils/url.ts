@@ -146,14 +146,14 @@ function applyRelativePathToBaseUrlPath(baseUrlPath: string, relativePath: strin
  * @example
  * // Usage in an Astro page/component
  * // Astro.url.pathname = "/es/courses/unidad-1"
- * const basePath = getBaseDirectoryPath(Astro.url.pathname); // => "/es/courses/"
+ * const basePath = getBaseDirectoryUrlPath(Astro.url.pathname); // => "/es/courses/"
  * const postUrl = getChildUrlPath(basePath, getSlugFromEntryId(post.id)); // => "/es/courses/unit-1"
  * 
  * @see getChildUrlPath for building child entry URLs based on this base path.
- * @param astroUrlPathname The current pathname from Astro.url.pathname
+ * @param astroUrlPathname The current pathname from `Astro.url.pathname`
  * @returns The base content directory path, always ending with a trailing slash
  */
-export function getBaseDirectoryPath(astroUrlPathname: string): string {
+export function getBaseDirectoryUrlPath(astroUrlPathname: string): string {
   let basePath = astroUrlPathname.endsWith('/') ? astroUrlPathname : `${astroUrlPathname}/`;
   
   // Strip both /search/ and ANY /list/.../ suffix completely
@@ -182,10 +182,10 @@ export function getUrlFriendlyVersionOfString(input: string): string {
  * If we canonicalized ALL pages to the root, search engines would drop deeper pages from the index
  * and stop crawling older articles, causing a severe drop in discoverability.
  * 
- * @param astroUrlPathname The current pathname from Astro.url.pathname
+ * @param astroUrlPathname The current pathname from `Astro.url.pathname`
  * @returns The clean, canonicalized path always ending with a trailing slash
  */
-export function getCanonicalPath(astroUrlPathname: string): string {
+export function getCanonicalUrlPath(astroUrlPathname: string): string {
   // 1. Force a trailing slash to standardize the path and avoid double-slash issues
   let canonicalPath = astroUrlPathname.endsWith('/') 
     ? astroUrlPathname 
