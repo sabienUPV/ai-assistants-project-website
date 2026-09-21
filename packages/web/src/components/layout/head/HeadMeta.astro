@@ -2,7 +2,7 @@
 import { SEO_IMAGE } from '@constants';
 import { getPlainPathNoLocale, getAbsoluteLocaleUrlFromOrigin} from '@utils/localizedUrl.ts';
 import { locales, defaultLocale } from '@languages';
-import { getCanonicalUrlPath, homeNoLocale } from '@utils/url.ts';
+import { getAstroOriginUrl, getAstroSiteUrl, getCanonicalUrlPath, homeNoLocale } from '@utils/url.ts';
 
 interface Props {
   title?: string;
@@ -23,9 +23,9 @@ const {
   image = SEO_IMAGE,
 } = Astro.props;
 
-const siteUrl = Astro.site || Astro.url.origin;
+const siteUrl = getAstroSiteUrl(Astro); // Get the base site URL from Astro's config or fallback to the current request's origin
+const origin = getAstroOriginUrl(Astro); // Get the base site origin from Astro's config or fallback to the current request's origin
 const locale = Astro.currentLocale || defaultLocale;
-const origin = Astro.site ? Astro.site.origin : Astro.url.origin;
 
 // Get the locale-agnostic path (e.g., 'contact' instead of '/en/contact' or '/my-repo/en/contact')
 const plainPathNoLocale = getPlainPathNoLocale(Astro.url.pathname, locale);

@@ -1,3 +1,5 @@
+import type { AstroGlobal } from "astro";
+
 /**
  * Base path for the site, normalized to be always WITHOUT a trailing slash to ensure consistent URL construction
  */
@@ -31,6 +33,30 @@ export function tryRemoveBaseUrlFromPath(path: string): string {
     return path.slice(baseUrlPath.length);
   }
   return path;
+}
+
+type AstroUrlProperties = Pick<AstroGlobal, 'site' | 'url'>;
+
+export function getAstroSiteUrl(Astro: AstroUrlProperties): string | URL {
+  // If Astro.site is defined, use it; otherwise, fall back to the origin of the current URL
+  return Astro.site || Astro.url.origin;
+}
+
+export function getAstroOriginUrl(Astro: AstroUrlProperties): string {
+  // If Astro.site is defined, use its origin; otherwise, fall back to the origin of the current URL
+  return Astro.site ? Astro.site.origin : Astro.url.origin;
+}
+
+/**
+ * Get a URL object for a given path, using the base site URL from Astro's config or the current request's origin as the base.
+ * This is useful for constructing absolute URLs for links, etc. including query parameters without having to add them manually to the string (e.g. /my-page?param=value)
+ * Note: If your path is based on Astro.url.pathname, you can pass it as it is. However, if you are constructing a path manually, you should use either homeNoLocale() or getAbsoluteLocaleUrlFromOrigin() to ensure the path is correct for the current deployment (e.g., GitHub Pages subfolder).
+ * @param Astro The Astro global object, which provides access to the current request's URL and site configuration.
+ * @param path The path for which to create a URL object.
+ * @returns A URL object for the given path.
+ */
+export function getUrlObjectFromPath(Astro: AstroUrlProperties, path: string): URL {
+  return new URL(path, getAstroSiteUrl(Astro));
 }
 
 /**

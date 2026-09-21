@@ -3,6 +3,7 @@ import Layout from '@layouts/Layout.astro';
 import { locales } from '@languages';
 import { getCollectionWithFallbacks, getEntryOrFallbackFromSlug, getSlugFromEntryId } from '@utils/dynamicContent';
 import ContentNotInLanguagePill from '@components/entries/ContentNotInLanguagePill.astro';
+import { getSiblingUrlPath, getUrlFriendlyVersionOfString, getUrlObjectFromPath } from '@utils/url';
 
 export const prerender = true;
 
@@ -25,6 +26,14 @@ if (!slug) throw new Error('Slug not found');
 const { entry: solution, isFallback } = await getEntryOrFallbackFromSlug('ai-solutions', locale, slug);
 
 if (!solution) throw new Error('No AI solution found for this slug');
+
+const searchUrl = getUrlObjectFromPath(Astro, getSiblingUrlPath(Astro.url.pathname, 'search'));
+const keywordsParamName = getUrlFriendlyVersionOfString(t('ai_solutions_entry_keywords_label'));
+function getSearchUrlForKeyword(keyword: string) {
+  const url = new URL(searchUrl); // We clone the searchUrl to avoid mutating the original URL object
+  url.searchParams.set(keywordsParamName, getUrlFriendlyVersionOfString(keyword));
+  return url.toString();
+}
 ---
 
 <Layout title={solution.data.name}>
@@ -90,7 +99,7 @@ if (!solution) throw new Error('No AI solution found for this slug');
       <section class="info-block">
         <h3>{t('ai_solutions_entry_keywords_label')}</h3>
         <div class="tag-list">
-          {solution.data.keywords.map(keyword => <span class="tag">{keyword}</span>)}
+          {solution.data.keywords.map(keyword => <a href={getSearchUrlForKeyword(keyword)} class="tag">{keyword}</a>)}
         </div>
       </section>
     </div>
