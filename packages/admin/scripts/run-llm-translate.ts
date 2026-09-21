@@ -22,11 +22,19 @@ program
   .option('--url <url>', 'ollama api url', DEFAULT_OLLAMA_URL)
   .option('-m, --model <model>', 'llm model name', DEFAULT_LLM_MODEL)
   .option('-g, --glob <glob-pattern>', 'glob pattern to match files (optional)')
-  .option('-l, --locales <locales...>', 'list of locales to translate to, separated by commas (,). Unsupported locales will be ignored (optional, defaults to all supported locales)', (value: string, _: unknown) => value.split(',').map(locale => locale.trim()).filter(locale => locales.includes(locale as Locale)), locales.join(','));
+  .option(
+    '-l, --locales <locales...>', 
+    '(Optional) Specify locales separating them with spaces (e.g. "-l es de"). Unsupported locales will be ignored.', 
+    [...locales]
+  );
 
 program.parse(process.argv);
 
 const options = program.opts<CliOptions>();
+
+// We need to filter the locales to only include those that are supported
+// (since Commander by default does not do that, and will accept any string, even if the TypeScript type is Locale)
+options.locales = options.locales.filter(locale => locales.includes(locale));
 
 if (options.debug) {
   console.log('🔍 Debug mode enabled');
@@ -51,8 +59,6 @@ const run = async () => {
   
   // Read the directory using native Node.js fs module
   const files = await fs.readdir(postsDir);
-  
-  
 
   // Convert the glob pattern to a regex pattern
   // - Escape special regex characters (like ., ?, +, etc.)
@@ -69,6 +75,10 @@ const run = async () => {
   const mdocFiles = files.filter(file => 
     file.endsWith('.mdoc') && (!globToRegex || globToRegex.test(file)));
 
+  // Log the locales being processed
+  console.log(`🌐 Translating to locales: [${options.locales.join(', ')}]`);
+  console.log(`📄 Found ${mdocFiles.length} .mdoc file${mdocFiles.length === 1 ? '' : 's'} to process.\n`);
+
   for (const filename of mdocFiles) {
     const inputFile = path.join(postsDir, filename);
 
@@ -82,7 +92,7 @@ const run = async () => {
         `${path.sep}${defaultLocale}${path.sep}`, 
         `${path.sep}${lang}${path.sep}`
       );
-      
+
       await processDocument(inputFile, outputFile, defaultLocale, lang, options.url, options.model);
     }
   }
