@@ -592,15 +592,17 @@ const createPostCollection = (locale: Locale) => {
     path: `src/content/${locale}/posts/*`,
     format: { contentField: 'content' },
     schema: {
-      title: fields.slug({ name: {
-        label: 'Title',
-        validation: {
-          pattern: {
-            regex: slugReservedKeywordsRegex, 
-            message: slugReservedKeywordsMessage
+      title: fields.slug({
+        name: { label: 'Title' }, 
+        slug: {
+          validation: {
+            pattern: {
+              regex: slugReservedKeywordsRegex, 
+              message: slugReservedKeywordsMessage
+            }
           }
         }
-      } }),
+      }),
       pubDate: fields.date({ label: 'Date', defaultValue: { kind: 'today' } }),
       description: fields.text({ label: 'Description' }),
       author: fields.text({ label: 'Author' }),
@@ -643,7 +645,6 @@ const createCourseCollection = (locale: Locale) => {
         name: {
           label: 'Unit',
           validation: {
-            // Note: Course units should also not be reserved keywords, but because units cannot be actual keywords because their format is stricter, we can just use the unit regex to account for both the format and reserved keywords in one go. This way, we avoid having to check for reserved keywords separately.
             pattern: {
               regex: courseUnitRegex,
               message: courseUnitValidationMessage,
@@ -652,6 +653,13 @@ const createCourseCollection = (locale: Locale) => {
         },
         slug: {
           generate: (unit) => unit.replace(/\./g, '-'), // Replace dots with dashes for the slug (e.g. "1.2" becomes "1-2")
+          validation: {
+            // Note: Course units should also not be reserved keywords, but because units cannot be actual keywords because their format is stricter, we can just use the unit regex to account for both the format and reserved keywords in one go. This way, we avoid having to check for reserved keywords separately.
+            pattern: {
+              regex: courseUnitRegex,
+              message: courseUnitValidationMessage,
+            }
+          }
         }
       }),
       title: fields.text({ label: 'Title' }),
