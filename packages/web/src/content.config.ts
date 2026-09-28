@@ -88,17 +88,24 @@ const aiSolutions = locales.reduce((acc, locale) => {
     ? defineCollection({
       // Load the CSV and parse it into rows
       loader: file(csvFilePath, {
-        parser: (text) => parseCsv(text, {
-          // Get the keys of the schema as an array of strings, so that the first column matches the first header, and so on
-          // This way, we do not need to have the header names in the CSV match the schema keys exactly, and we can have a more user-friendly header in the CSV.
-          // The only caveat: We need to ensure that the order of the columns in the CSV matches the order of the keys in the schema, otherwise the data will be misaligned. This is a trade-off for having more user-friendly headers in the CSV.
-          columns: aiSolutionSchema.keyof().options,
-          skip_empty_lines: true,
-          trim: true,
-          // Skip the first 2 rows (header name and description) and start parsing from the actual data
-          // Row 1: header name, Row 3: header description, Row 3: actual data
-          from_line: 3,
-        }),
+        parser: (text) => {
+          try {
+            return parseCsv(text, {
+              // Get the keys of the schema as an array of strings, so that the first column matches the first header, and so on
+              // This way, we do not need to have the header names in the CSV match the schema keys exactly, and we can have a more user-friendly header in the CSV.
+              // The only caveat: We need to ensure that the order of the columns in the CSV matches the order of the keys in the schema, otherwise the data will be misaligned. This is a trade-off for having more user-friendly headers in the CSV.
+              columns: aiSolutionSchema.keyof().options,
+              skip_empty_lines: true,
+              trim: true,
+              // Skip the first 2 rows (header name and description) and start parsing from the actual data
+              // Row 1: header name, Row 3: header description, Row 3: actual data
+              from_line: 3,
+            });
+          } catch (error) {
+            console.error(`\nError parsing ai-solutions CSV for locale ${locale}:\n`, error);
+            throw error; // Rethrow the error to fail the build if parsing fails
+          }
+        },
       }),
       schema: aiSolutionSchema,
     })
