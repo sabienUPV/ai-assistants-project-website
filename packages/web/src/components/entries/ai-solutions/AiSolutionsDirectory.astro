@@ -33,11 +33,12 @@ const directoryItems : DirectoryItem[] = allSolutions.map(solution => ({
 const filterConfig: FilterConfig<AiSolution> = {
   searchFields: ['name', 'description'],
   arrayFilters: [
-    { position: 1, paramName: t('ai_solutions_entry_thematic_areas_label'), dataKey: 'thematicAreas' },
-    { position: 3, paramName: t('ai_solutions_entry_keywords_label'), dataKey: 'keywords' }
+    { position: 1, paramName: t('ai_solutions_entry_supported_languages_label'), dataKey: 'availableLanguages' },
+    { position: 2, paramName: t('ai_solutions_entry_thematic_areas_label'), dataKey: 'thematicAreas' },
+    { position: 4, paramName: t('ai_solutions_entry_keywords_label'), dataKey: 'keywords' }
   ],
   exactFilters: [
-    { position: 2, paramName: t('ai_solutions_entry_type_label'), dataKey: 'type' }
+    { position: 3, paramName: t('ai_solutions_entry_type_label'), dataKey: 'type' }
   ]
 };
 
