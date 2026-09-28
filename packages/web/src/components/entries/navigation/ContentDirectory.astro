@@ -12,14 +12,14 @@ export type { DirectoryItem };
 // Export FilterConfig now as a generic type that can be used to type the filterConfig prop in the parent page, while still being compatible with the Svelte component's FilterConfig type.
 export type FilterConfig<T extends Record<string, any>> = FilterConfigBase & {
   searchFields: (keyof T)[];
-  arrayFilters?: { paramName: string; dataKey: keyof T }[]; // For arrays like thematicArea
-  exactFilters?: { paramName: string; dataKey: keyof T }[]; // For exact matches like type
+  arrayFilters?: { position?: number; paramName: string; dataKey: keyof T }[]; // For arrays like thematicArea
+  exactFilters?: { position?: number; paramName: string; dataKey: keyof T }[]; // For exact matches like type
 };
 
 interface Props {
   items: DirectoryItem[];
   isClient?: boolean; // If true, use Svelte to render the directory and handle filtering client-side. If false, use a standard HTML form that navigates to /search.
-  filterConfig?: FilterConfigBase;
+  filterConfig?: FilterConfig<Record<string, any>>; // The configuration for the filters, including which fields to search and which filters to show. If not provided, no filters will be shown.
   readMoreLabel?: string;
   page?: Page; // The Astro page object, required to render static pagination when isClient is false.
 }
@@ -30,7 +30,10 @@ const actionUrlPath = `${getCanonicalUrlPath(Astro.url.pathname)}search`;
 const { t } = Astro.locals;
 const { items, isClient, filterConfig, readMoreLabel, page } = Astro.props;
 
-const filterGroups = filterConfig?.arrayFilters?.concat(filterConfig.exactFilters || [])?.reduce((acc, filter) => {
+const filterGroups =[...(filterConfig?.exactFilters || []), ...(filterConfig?.arrayFilters || [])]
+  ?.map((filter, index) => ({ ...filter, position: filter.position ?? index }))
+  ?.sort((a, b) => a.position - b.position)
+  ?.reduce((acc, filter) => {
   const uniqueValues = new Set(items.flatMap(item => {
     const rawValue = item.rawData[filter.dataKey];
     return Array.isArray(rawValue) ? rawValue : [rawValue];
