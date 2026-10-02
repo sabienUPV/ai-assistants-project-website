@@ -654,10 +654,9 @@ const createCourseCollection = (locale: Locale) => {
         slug: {
           generate: (unit) => unit.replace(/\./g, '-'), // Replace dots with dashes for the slug (e.g. "1.2" becomes "1-2")
           validation: {
-            // Note: Course units should also not be reserved keywords, but because units cannot be actual keywords because their format is stricter, we can just use the unit regex to account for both the format and reserved keywords in one go. This way, we avoid having to check for reserved keywords separately.
             pattern: {
-              regex: courseUnitRegex,
-              message: courseUnitValidationMessage,
+              regex: slugReservedKeywordsRegex, 
+              message: slugReservedKeywordsMessage
             }
           }
         }
