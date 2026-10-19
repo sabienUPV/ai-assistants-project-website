@@ -9,8 +9,9 @@
     "admin:dev": "npm run -w @sabien-upv-astro-cms/admin dev",
     "web:build": "npm run -w @sabien-upv-astro-cms/web build",
     "admin:build": "npm run -w @sabien-upv-astro-cms/admin build",
-    "admin:llm-translate": "npm run -w @sabien-upv-astro-cms/admin llm-translate --",
     "translate": "npm run -w @sabien-upv-astro-cms/core translate --",
+    "translate:posts": "npm run translate -- -i packages/admin/src/content/en/posts -g \"*.mdoc\"",
+    "translate:ai-solutions": "npm run translate -- -i packages/web/src/content/ai-solutions/ai-solutions_en.csv",
     "web:sync-arasaac": "npm run -w @sabien-upv-astro-cms/web sync:arasaac"
   }
 }

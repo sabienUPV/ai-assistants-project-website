@@ -31,28 +31,8 @@ export async function processMarkdocDocument(
   outputPath: string,
   sourceLang: Locale,
   targetLang: Locale,
-  options?: TranslateOptions,
-): Promise<void>;
-export async function processMarkdocDocument(
-  inputPath: string,
-  outputPath: string,
-  sourceLang: Locale,
-  targetLang: Locale,
-  ollamaUrl?: string,
-  llmModel?: string,
-): Promise<void>;
-export async function processMarkdocDocument(
-  inputPath: string,
-  outputPath: string,
-  sourceLang: Locale,
-  targetLang: Locale,
-  optionsOrUrl?: TranslateOptions | string,
-  legacyModel?: string,
+  options: TranslateOptions = {},
 ): Promise<void> {
-  const options: TranslateOptions =
-    typeof optionsOrUrl === 'string'
-      ? { ollamaUrl: optionsOrUrl, llmModel: legacyModel }
-      : optionsOrUrl ?? {};
   const ollamaUrl = options.ollamaUrl ?? DEFAULT_OLLAMA_URL;
   const llmModel = options.llmModel ?? DEFAULT_LLM_MODEL;
 

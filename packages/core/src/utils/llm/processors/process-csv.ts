@@ -59,28 +59,8 @@ export async function processCsvDocument(
   outputPath: string,
   sourceLang: Locale,
   targetLang: Locale,
-  options?: CsvTranslateOptions,
-): Promise<void>;
-export async function processCsvDocument(
-  inputPath: string,
-  outputPath: string,
-  sourceLang: Locale,
-  targetLang: Locale,
-  ollamaUrl?: string,
-  llmModel?: string,
-): Promise<void>;
-export async function processCsvDocument(
-  inputPath: string,
-  outputPath: string,
-  sourceLang: Locale,
-  targetLang: Locale,
-  optionsOrUrl?: CsvTranslateOptions | string,
-  legacyModel?: string,
+  options: CsvTranslateOptions = {},
 ): Promise<void> {
-  const options: CsvTranslateOptions =
-    typeof optionsOrUrl === 'string'
-      ? { ollamaUrl: optionsOrUrl, llmModel: legacyModel }
-      : optionsOrUrl ?? {};
   const ollamaUrl = options.ollamaUrl ?? DEFAULT_OLLAMA_URL;
   const llmModel = options.llmModel ?? DEFAULT_LLM_MODEL;
 

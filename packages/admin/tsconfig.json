@@ -8,7 +8,6 @@
       "@styles/*": ["./src/styles/*"],
       "@languages": ["../core/src/languages.ts"],
       "@constants": ["../core/src/constants.ts"],
-      "@utils/*": ["./src/utils/*"],
       "@schemas/*": ["../core/src/schemas/*"],
       "@markdoc-tags": ["../core/src/markdoc-tags.ts"],
       "@core-utils/*": ["../core/src/utils/*"],

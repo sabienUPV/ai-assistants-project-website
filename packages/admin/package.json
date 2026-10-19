@@ -24,12 +24,10 @@
     "build": "astro build",
     "preview": "astro preview",
     "start": "node ./dist/server/entry.mjs",
-    "astro": "astro",
-    "llm-translate": "tsx scripts/run-llm-translate.ts"
+    "astro": "astro"
   },
   "devDependencies": {
     "@types/node": "^26.0.1",
-    "commander": "^11.1.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   }
