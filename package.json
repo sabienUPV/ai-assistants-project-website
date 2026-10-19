@@ -12,6 +12,9 @@
     "translate": "npm run -w @sabien-upv-astro-cms/core translate --",
     "translate:posts": "npm run translate -- -i packages/admin/src/content/en/posts -g \"*.mdoc\"",
     "translate:ai-solutions": "npm run translate -- -i packages/web/src/content/ai-solutions/ai-solutions_en.csv --skip-columns \"Name\" \"Company/ Responsible Entity / Creator\"",
-    "web:sync-arasaac": "npm run -w @sabien-upv-astro-cms/web sync:arasaac"
+    "web:sync-arasaac": "npm run -w @sabien-upv-astro-cms/web sync:arasaac",
+    "web:i18n-import-excel": "npm run -w @sabien-upv-astro-cms/web i18n-import-excel",
+    "web:extract-and-convert-eu-logos": "npm run -w @sabien-upv-astro-cms/web extract-and-convert-eu-logos",
+    "web:generate-icons": "npm run -w @sabien-upv-astro-cms/web generate-icons"
   }
 }
