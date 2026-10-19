@@ -4,7 +4,19 @@
   "type": "module",
   "main": "./src/index.ts",
   "private": true,
+  "scripts": {
+    "translate": "tsx src/utils/llm/cli.ts",
+    "test": "tsx test/llm.test.ts"
+  },
   "dependencies": {
-    "astro": "^6.0.4"
+    "@markdoc/markdoc": "^0.5.7",
+    "astro": "^6.0.4",
+    "commander": "^11.1.0",
+    "csv-parse": "^6.1.0",
+    "csv-stringify": "^6.5.2",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "tsx": "^4.22.4"
   }
 }

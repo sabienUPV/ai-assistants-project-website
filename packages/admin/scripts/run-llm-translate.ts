@@ -1,101 +1,14 @@
-import fs from 'node:fs/promises';
+#!/usr/bin/env node
 import path from 'node:path';
-import { fileURLToPath } from 'node:url'; // Required to convert URL to path
-import { DEFAULT_LLM_MODEL, DEFAULT_OLLAMA_URL, processDocument } from '@utils/llm-translate.js';
-import { locales, defaultLocale, type Locale } from '@languages';
-import { Command } from 'commander';
+import { fileURLToPath } from 'node:url';
+import { defaultLocale } from '@languages';
+import { runCli } from '@core-utils/llm/cli.js';
 
-const program = new Command();
-
-interface CliOptions {
-  debug: boolean;
-  url: string;
-  model: string;
-  glob?: string;
-  locales: Locale[];
-}
-
-program
-  .name('llm-translate')
-  .description('Translate all .mdoc files in the posts directory to all supported locales using LLM.')
-  .option('-d, --debug', 'enable debug logs', false)
-  .option('--url <url>', 'ollama api url', DEFAULT_OLLAMA_URL)
-  .option('-m, --model <model>', 'llm model name', DEFAULT_LLM_MODEL)
-  .option('-g, --glob <glob-pattern>', 'glob pattern to match files (optional)')
-  .option(
-    '-l, --locales <locales...>', 
-    '(Optional) Specify locales separating them with spaces (e.g. "-l es de"). Unsupported locales will be ignored.', 
-    [...locales]
-  );
-
-program.parse(process.argv);
-
-const options = program.opts<CliOptions>();
-
-// We need to filter the locales to only include those that are supported
-// (since Commander by default does not do that, and will accept any string, even if the TypeScript type is Locale)
-options.locales = options.locales.filter(locale => locales.includes(locale));
-
-if (options.debug) {
-  console.log('🔍 Debug mode enabled');
-}
-else {
-  console.debug = () => {}; // Disable debug logs if not in debug mode
-}
-
-console.debug('CLI Options:', options);
-
-// Get the directory name of the current script file
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ==========================================
-// SCRIPT EXECUTION
-// ==========================================
-const run = async () => {
-  // Resolve relative to the current script's location
-  // to the posts directory in the default locale
-  const postsDir = path.resolve(__dirname, '..', 'src', 'content', defaultLocale, 'posts');
-  
-  // Read the directory using native Node.js fs module
-  const files = await fs.readdir(postsDir);
+// Default to the admin posts directory in the default locale
+const defaultPostsDir = path.resolve(__dirname, '..', 'src', 'content', defaultLocale, 'posts');
 
-  // Convert the glob pattern to a regex pattern
-  // - Escape special regex characters (like ., ?, +, etc.)
-  // - Convert '*' to '.*' (which means "anything" in regex)
-  // - Anchor to the start '^' and end '$'
-  let globToRegex: RegExp | undefined;
-  if (options.glob) {
-    console.log(`🎯 Using glob pattern: ${options.glob}`);
-    const escapedPattern = options.glob.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*');
-    globToRegex = new RegExp(`^${escapedPattern}$`);
-  }
-
-  // Filter the results to keep only the .mdoc files, and apply the glob pattern if provided
-  const mdocFiles = files.filter(file => 
-    file.endsWith('.mdoc') && (!globToRegex || globToRegex.test(file)));
-
-  // Log the locales being processed
-  console.log(`🌐 Translating to locales: [${options.locales.join(', ')}]`);
-  console.log(`📄 Found ${mdocFiles.length} .mdoc file${mdocFiles.length === 1 ? '' : 's'} to process.\n`);
-
-  for (const filename of mdocFiles) {
-    const inputFile = path.join(postsDir, filename);
-
-    for (const lang of options.locales) {
-      // Prevent translating the base language into itself and overwriting the original file
-      if (lang === defaultLocale) continue; 
-
-      // Replace the locale segment in the file path (e.g., /en/ -> /es/)
-      // using the OS-specific path separator (path.sep) to ensure cross-platform compatibility
-      const outputFile = inputFile.replace(
-        `${path.sep}${defaultLocale}${path.sep}`, 
-        `${path.sep}${lang}${path.sep}`
-      );
-
-      await processDocument(inputFile, outputFile, defaultLocale, lang, options.url, options.model);
-    }
-  }
-};
-
-run();
+// Delegate execution to the unified core translation CLI
+runCli(process.argv, { defaultInputDir: defaultPostsDir });
