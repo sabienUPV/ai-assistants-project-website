@@ -96,7 +96,14 @@ export async function runCli(argv: string[] = process.argv, overrides: RunCliOpt
 
   console.debug('CLI Options:', options);
 
-  const targetPath = path.resolve(options.inputDir);
+  // Use the original execution directory (or cwd as a fallback)
+  // Note: INIT_CWD is set by npm/yarn when running scripts, but not when running directly with tsx.
+  // This ensures that relative paths are resolved correctly regardless of how the script is invoked.
+  // (e.g., when running it from the monorepo's root package.json scripts section,
+  // INIT_CWD will point to the root, not the package,
+  // making relative paths resolve from the root instead of this script's directory)
+  const baseDir = process.env.INIT_CWD || process.cwd();
+  const targetPath = path.resolve(baseDir, options.inputDir);
 
   let inputDir: string;
   let candidateFiles: string[];
