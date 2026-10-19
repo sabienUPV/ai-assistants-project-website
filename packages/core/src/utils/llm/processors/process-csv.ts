@@ -22,9 +22,15 @@ export interface CsvTranslateOptions extends TranslateOptions {
    * Explicit list of column headers whose values should be translated.
    * When omitted **all** text columns are translated except those whose
    * lower-cased, trimmed header matches one of the entries in
-   * {@link DEFAULT_SKIP_COLUMNS}.
+   * {@link DEFAULT_SKIP_COLUMNS} or {@link CsvTranslateOptions.skipColumns}.
    */
   columnsToTranslate?: string[];
+
+  /**
+   * Additional column headers to skip/exclude from translation.
+   * Matching is performed case-insensitively after trimming whitespace.
+   */
+  skipColumns?: string[];
 }
 
 /**
@@ -96,7 +102,7 @@ export async function processCsvDocument(
 
   // 3. Determine which columns to translate
   const allHeaders = Object.keys(records[0]);
-  const translatableHeaders = resolveTranslatableHeaders(allHeaders, options.columnsToTranslate);
+  const translatableHeaders = resolveTranslatableHeaders(allHeaders, options.columnsToTranslate, options.skipColumns);
 
   console.log(`🔤 Translatable columns: [${translatableHeaders.join(', ')}]`);
 
@@ -137,17 +143,33 @@ export async function processCsvDocument(
 /**
  * Given all headers, returns the subset that should be translated.
  *
+ * Combines {@link DEFAULT_SKIP_COLUMNS} with any supplied `skipColumns`.
  * If `explicit` is provided (non-empty array) those headers are used
- * directly.  Otherwise every header *not* in {@link DEFAULT_SKIP_COLUMNS}
- * is selected.
+ * (excluding any in the skip set). Otherwise every header *not* in
+ * the combined skip set is selected.
  */
-function resolveTranslatableHeaders(allHeaders: string[], explicit?: string[]): string[] {
+export function resolveTranslatableHeaders(
+  allHeaders: string[],
+  explicit?: string[],
+  skipColumns?: string[],
+): string[] {
+  const combinedSkip = new Set(DEFAULT_SKIP_COLUMNS);
+  if (skipColumns) {
+    for (const col of skipColumns) {
+      combinedSkip.add(col.trim().toLowerCase());
+    }
+  }
+
   if (explicit && explicit.length > 0) {
     // Validate that the caller-supplied names actually exist in the file
+    // and are not in the combined skip set
     const headerSet = new Set(allHeaders);
     const valid = explicit.filter(h => {
       if (!headerSet.has(h)) {
         console.warn(`⚠️  Requested column "${h}" not found in CSV headers — skipping.`);
+        return false;
+      }
+      if (combinedSkip.has(h.trim().toLowerCase())) {
         return false;
       }
       return true;
@@ -156,5 +178,5 @@ function resolveTranslatableHeaders(allHeaders: string[], explicit?: string[]): 
   }
 
   // Auto-detect: include every column whose normalised name is NOT in the skip-list
-  return allHeaders.filter(h => !DEFAULT_SKIP_COLUMNS.has(h.trim().toLowerCase()));
+  return allHeaders.filter(h => !combinedSkip.has(h.trim().toLowerCase()));
 }

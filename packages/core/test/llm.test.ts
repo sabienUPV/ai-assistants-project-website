@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import {
   PROTECTED_PATTERNS,
   DEFAULT_SKIP_COLUMNS,
+  resolveTranslatableHeaders,
 } from '../src/utils/llm/index.js';
 import { processCsvDocument } from '../src/utils/llm/processors/process-csv.js';
 import { processMarkdocDocument } from '../src/utils/llm/processors/process-markdoc.js';
@@ -100,6 +101,58 @@ Keep this text exactly as is.
   assert(generatedMdoc.includes('title: Original Title'), 'Frontmatter keys preserved on fallback');
   assert(generatedMdoc.includes('Keep this text exactly as is'), 'notranslate block preserved');
   console.log('✅ Test 4 Passed: Markdoc processing handles AST, frontmatter, notranslate, and fallback.');
+
+  // 5. Verify CSV skipColumns Option
+  console.log('\n--- Test 5: CSV skipColumns Option ---');
+  const sampleHeaders = ['ID', 'Name', 'Company/ Responsible Entity / Creator', 'Brief Description', 'Link/URL'];
+
+  // 5a. resolveTranslatableHeaders with skipColumns in auto mode
+  const autoResolved = resolveTranslatableHeaders(sampleHeaders, undefined, ['Name', 'Company/ Responsible Entity / Creator']);
+  assert.deepStrictEqual(
+    autoResolved,
+    ['Brief Description'],
+    'skipColumns and DEFAULT_SKIP_COLUMNS should both be excluded in auto mode',
+  );
+
+  // 5b. resolveTranslatableHeaders with skipColumns in explicit mode (case-insensitive & trimmed)
+  const explicitResolved = resolveTranslatableHeaders(sampleHeaders, ['Name', 'Brief Description'], ['  name  ']);
+  assert.deepStrictEqual(
+    explicitResolved,
+    ['Brief Description'],
+    'skipColumns should exclude columns even when explicitly requested',
+  );
+
+  // 5c. processCsvDocument with skipColumns option
+  const testCsvSkipInput = path.join(testDir, 'test_skip_en.csv');
+  const testCsvSkipOutput = path.join(testDir, 'test_skip_es.csv');
+  const skipCsvContent = `"ID","Name","Brief Description"
+"1","Skip Me","Translate Me"
+`;
+  await fs.writeFile(testCsvSkipInput, skipCsvContent, 'utf-8');
+
+  const loggedErrors: string[] = [];
+  const originalError = console.error;
+  console.error = (...args: any[]) => {
+    loggedErrors.push(args.join(' '));
+    originalError(...args);
+  };
+
+  try {
+    await processCsvDocument(testCsvSkipInput, testCsvSkipOutput, 'en', 'es', {
+      ollamaUrl: 'http://localhost:9999',
+      llmModel: 'dummy',
+      skipColumns: ['Name'],
+    });
+  } finally {
+    console.error = originalError;
+  }
+
+  const generatedSkipCsv = await fs.readFile(testCsvSkipOutput, 'utf-8');
+  assert(generatedSkipCsv.includes('"Skip Me"'), 'Skipped column value preserved');
+  assert(generatedSkipCsv.includes('"Translate Me"'), 'Processed column value preserved');
+  assert(loggedErrors.some(e => e.includes('Translate Me')), 'Unskipped column should be processed for translation');
+  assert(!loggedErrors.some(e => e.includes('Skip Me')), 'Skipped column (Name) should NOT be processed for translation');
+  console.log('✅ Test 5 Passed: skipColumns correctly prevents specified columns from being processed.');
 
   // Cleanup test directory
   await fs.rm(testDir, { recursive: true, force: true });

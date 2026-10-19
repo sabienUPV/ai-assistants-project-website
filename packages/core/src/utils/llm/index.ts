@@ -14,7 +14,12 @@ export {
 
 // Format-specific processors
 export { processMarkdocDocument } from './processors/process-markdoc.js';
-export { processCsvDocument, DEFAULT_SKIP_COLUMNS, type CsvTranslateOptions } from './processors/process-csv.js';
+export {
+  processCsvDocument,
+  DEFAULT_SKIP_COLUMNS,
+  resolveTranslatableHeaders,
+  type CsvTranslateOptions,
+} from './processors/process-csv.js';
 
 // CLI and path resolution
 export {

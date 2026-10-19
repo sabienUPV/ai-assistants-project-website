@@ -11,7 +11,7 @@
     "admin:build": "npm run -w @sabien-upv-astro-cms/admin build",
     "translate": "npm run -w @sabien-upv-astro-cms/core translate --",
     "translate:posts": "npm run translate -- -i packages/admin/src/content/en/posts -g \"*.mdoc\"",
-    "translate:ai-solutions": "npm run translate -- -i packages/web/src/content/ai-solutions/ai-solutions_en.csv",
+    "translate:ai-solutions": "npm run translate -- -i packages/web/src/content/ai-solutions/ai-solutions_en.csv --skip-columns \"Name\" \"Company/ Responsible Entity / Creator\"",
     "web:sync-arasaac": "npm run -w @sabien-upv-astro-cms/web sync:arasaac"
   }
 }

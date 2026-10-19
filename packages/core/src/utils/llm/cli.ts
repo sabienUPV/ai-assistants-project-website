@@ -33,6 +33,7 @@ export interface CliOptions {
   locales: Locale[];
   inputDir: string;
   columns?: string[];
+  skipColumns?: string[];
 }
 
 export interface RunCliOptions {
@@ -45,7 +46,12 @@ type FileProcessor = (
   outputPath: string,
   sourceLang: Locale,
   targetLang: Locale,
-  options: { ollamaUrl: string; llmModel: string; columnsToTranslate?: string[] },
+  options: {
+    ollamaUrl: string;
+    llmModel: string;
+    columnsToTranslate?: string[];
+    skipColumns?: string[];
+  },
 ) => Promise<void>;
 
 const PROCESSORS: Record<string, FileProcessor> = {
@@ -79,7 +85,8 @@ export async function runCli(argv: string[] = process.argv, overrides: RunCliOpt
       [...locales],
     )
     .option('-i, --input-dir <path>', 'source directory or file containing the files to translate', overrides.defaultInputDir ?? '.')
-    .option('--columns <columns...>', 'specific columns to translate for CSV files (optional)');
+    .option('--columns <columns...>', 'specific columns to translate for CSV files (optional)')
+    .option('--skip-columns <columns...>', 'additional columns to skip/exclude from translation for CSV files (optional)');
 
   program.parse(argv);
 
@@ -152,6 +159,7 @@ export async function runCli(argv: string[] = process.argv, overrides: RunCliOpt
     ollamaUrl: options.url,
     llmModel: options.model,
     columnsToTranslate: options.columns,
+    skipColumns: options.skipColumns,
   };
 
   for (const filename of matchedFiles) {
