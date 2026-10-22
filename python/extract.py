@@ -15,7 +15,8 @@ LOCAL_IMG_DIR = os.path.join(INPUT_DIR, "extracted_images")
 ASSETS_DIR = "../packages/admin/src/assets/images/courses"
 CONTENT_DIR = "../packages/admin/src/content/en/courses"
 
-LOGO_Y_THRESHOLD = 0.15  # Upper 15% of the slide to filter out header logos
+LOGO_Y_THRESHOLD_TITLE = 0.15  # Upper 15% of the slide to filter out header logos in title slide (first slide)
+LOGO_Y_THRESHOLD_CONTENT = 0.05  # Upper 5% of the slide to filter out header logos in content slides (subsequent slides)
 
 # Configurable keywords to identify and skip redundant slides (case-insensitive)
 SKIP_SLIDE_KEYWORDS = [
@@ -120,6 +121,8 @@ def extract_pptx_data():
             slide_height = prs.slide_height
 
             for i, slide in enumerate(prs.slides):
+                # Determine logo filter threshold based on slide index
+                logo_threshold = LOGO_Y_THRESHOLD_TITLE if i == 0 else LOGO_Y_THRESHOLD_CONTENT
                 
                 # --- 1. PRE-SCAN: Check for skip keywords ---
                 def get_full_slide_text(shape):
@@ -177,7 +180,7 @@ def extract_pptx_data():
                     text_content = extract_rich_text(shape)
                     
                     # LOGO FILTER: Ignore visual elements in the upper threshold (using absolute top)
-                    if top_y < LOGO_Y_THRESHOLD and not text_content:
+                    if top_y < logo_threshold and not text_content:
                         return
                         
                     if text_content:
