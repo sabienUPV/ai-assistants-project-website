@@ -121,6 +121,13 @@ a:hover {
   text-decoration: underline;
 }
 
+hr {
+  width: 100%;
+  border: none;
+  border-top: 1px solid var(--color-primary);
+  margin: 1.5rem 0;
+}
+
 /* Help people using screen readers with visual context */
 .sr-only {
   position: absolute;
