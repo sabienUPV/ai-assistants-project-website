@@ -3,6 +3,7 @@ import glob
 import re
 import sys
 import shutil
+from urllib.request import urlopen
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 
@@ -88,8 +89,8 @@ def extract_pptx_data():
         print(f"⚠️ No valid .pptx files found in '{INPUT_DIR}'.", file=sys.stderr)
         return
 
-    # Regex to enforce the pattern: "8.2 - Course Name.pptx"
-    filename_pattern = re.compile(r'^(?P<unit>\d+\.\d+)\s*-\s*(?P<title>.+)\.pptx$')
+    # Regex to enforce patterns like: "8 - Name.pptx", "8.2 - Name.pptx", "8.2.1 - Name.pptx", etc.
+    filename_pattern = re.compile(r'^(?P<unit>\d+(?:\.\d+)*)\s*-\s*(?P<title>.+)\.pptx$')
 
     for pptx_path in pptx_files:
         filename = os.path.basename(pptx_path)
@@ -248,6 +249,19 @@ def extract_pptx_data():
             continue
             
         # --- GENERATE PROMPT (stdout) ---
+        schema_url = "https://ai4pid.eu/llms.txt"
+        schema_fallback = "[MANUALLY PASTE THE CONTENT OF YOUR llms.txt HERE]"
+        schema_found = False
+        try:
+            with urlopen(schema_url, timeout=10) as response:
+                schema_content = response.read().decode("utf-8").strip()
+            if not schema_content:
+                raise ValueError("The llms.txt response was empty")
+            schema_found = True
+        except Exception as e:
+            print(f"⚠️ Could not retrieve llms.txt ({e}); using the manual placeholder.", file=sys.stderr)
+            schema_content = schema_fallback
+
         prompt_text = f"""System Role:
 You are an expert frontend developer and content architect. Your task is to convert a spatial coordinate map extracted from PowerPoint slides into a structured Markdoc (.mdoc) file for an e-training platform.
 
@@ -255,7 +269,7 @@ Context & Schema:
 Below is the schema and custom tags you must use. 
 
 <schema>
-[MANUALLY PASTE THE CONTENT OF YOUR llms.txt HERE]
+{schema_content}
 </schema>
 
 Spatial Mapping Rules:
@@ -270,6 +284,7 @@ You must apply these logical rules to build the Markdoc layout:
 3. Paragraph Splitting (The Y Axis) - CRITICAL RULE: Often, a single text block contains multiple paragraphs separated by ` \\n `. If you see multiple images stacked vertically on one side (different Y values), and a single multi-paragraph text block on the other side, you must split the text block by `\\n` and pair each individual paragraph with its corresponding image (based on similar Y heights) inside separate {{% columns %}} blocks.
 4. Rich Text Preservation: If you see markdown bold (`**text**`) or bullets (`- text`) in the raw text elements, preserve them exactly as they are in the final output.
 5. Images: Render images using standard markdown syntax based on the input data. Do not alter the filenames.
+6. Title Deduplication: Once a text block is extracted as the slide's `title` attribute, DO NOT repeat it inside the slide body (e.g., do NOT write `### Title` or `**Title**` at the top of the content).
 
 Input Data:
 Process the following slides and generate the clean Markdoc code. Do not include explanations, just output the .mdoc code.
@@ -281,7 +296,11 @@ Process the following slides and generate the clean Markdoc code. Do not include
 
         print("\n" + "="*60, file=sys.stderr)
         print("✅ Parsing complete! Generated prompt for LLM.", file=sys.stderr)
-        print("Copy the text below (stdout), including the content of llms.txt manually from the website, and paste it into your LLM.", file=sys.stderr)
+        print("Copy the text below (stdout) and paste it into your LLM.", file=sys.stderr)
+        if schema_found:
+            print("The schema was successfully retrieved from " + schema_url, file=sys.stderr)
+        else:
+            print("⚠️ The schema could not be retrieved; You need to manually paste it into the prompt BEFORE submitting it to the LLM.", file=sys.stderr)
         print("="*60 + "\n", file=sys.stderr)
         
         # Only print the actual prompt to stdout
@@ -293,11 +312,11 @@ Process the following slides and generate the clean Markdoc code. Do not include
         # --- WAIT FOR USER INPUT ---
         print("\n" + "="*60, file=sys.stderr)
         print("📥 Paste the LLM's Markdoc response here.", file=sys.stderr)
-        print("Press Ctrl+D (Linux/macOS) or Ctrl+Z then Enter (Windows) when finished.", file=sys.stderr)
+        print("Press Ctrl+D (Linux/macOS) or Ctrl+Z twice then Enter (Windows) when finished.", file=sys.stderr)
         print("="*60, file=sys.stderr)
         
-        # Read input, strip whitespace, and remove leftover Windows EOF characters (Ctrl+Z)
-        llm_output = sys.stdin.read().strip().replace('\x1a', '')
+        # Read input, remove leftover Windows EOF characters (Ctrl+Z), and strip whitespace
+        llm_output = sys.stdin.read().replace('\x1a', '').strip()
         
         if not llm_output:
             print("⚠️ No output provided. Skipping post-processing for this file.", file=sys.stderr)
@@ -308,15 +327,40 @@ Process the following slides and generate the clean Markdoc code. Do not include
         # --- POST-PROCESSING ---
         
         # 1. Resolve Image Paths via Regex
-        # Looks for ![filename.ext]() and replaces it with the full Astro asset path
+        # Looks for ![filename.ext](anything_or_nothing) and replaces it with the full Astro asset path
         astro_asset_path = f"@admin-assets/images/courses/{unit_folder}"
         processed_mdoc = re.sub(
-            r'!\[([^\]]+)\]\(\)', 
+            r'!\[([^\]]+)\]\([^\)]*\)', 
             rf'![\1]({astro_asset_path}/\1)', 
             llm_output
         )
+
+        # 2. Remove Redundant Slide Titles
+        # The LLM may have repeated the slide title at the top of the slide content.
+        def clean_slide(match):
+            full_slide = match.group(0)
+            title = match.group(1).strip()
+            
+            # Regex to match either titles (e.g., ### Title) or emphasized/bolded titles (e.g., **Title**) at the start of the slide content, allowing for optional whitespace and newlines
+            # Regex explanation:
+            # - (%}}\s*) : Captures the closing slide tag and any whitespace after it
+            # - (?:#|\*)* : Non-capturing group to match any number of '#' or '* characters (for titles, emphasized or bolded text)
+            # - \s*{re.escape(title)}\s* : Matches the slide title with optional whitespace around it
+            # - (?:\*)* : Optionally matches closing '*' characters (any number of them, for both '*' and '**') in case the title was bolded or emphasized
+            # - \n+ : Matches one or more newlines after the title
+            pattern = rf'(%}}\s*)(?:#|\*)*\s*{re.escape(title)}\s*(?:\*)*\s*\n+'
+            cleaned_content = re.sub(pattern, r'\1', full_slide, flags=re.IGNORECASE)
+            return cleaned_content
+
+        # Capture the entire slide block and its title for processing
+        # Regex explanation:
+        # - {%\s*slide\s+title="([^"]+)"[^%]*%} : Matches the opening slide tag and captures the title
+        # - .*? : Non-greedy match for any content inside the slide
+        # - {%\s*/slide\s*%} : Matches the closing slide tag
+        slide_pattern = r'{%\s*slide\s+title="([^"]+)"[^%]*%}.*?{%\s*/slide\s*%}'
+        processed_mdoc = re.sub(slide_pattern, clean_slide, processed_mdoc, flags=re.DOTALL)
         
-        # 2. Append Frontmatter
+        # 3. Append Frontmatter
         frontmatter = f"---\nunit: '{unit_str}'\ntitle: '{title_str}'\n---\n\n"
         final_mdoc = frontmatter + processed_mdoc
         
