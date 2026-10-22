@@ -313,7 +313,7 @@ Process the following slides and generate the clean Markdoc code. Do not include
         # --- WAIT FOR USER INPUT ---
         print("\n" + "="*60, file=sys.stderr)
         print("📥 Paste the LLM's Markdoc response here.", file=sys.stderr)
-        print("Press Ctrl+D (Linux/macOS) or Ctrl+Z twice then Enter (Windows) when finished.", file=sys.stderr)
+        print("Press Enter, then either Ctrl+D (Linux/macOS) or Ctrl+Z then Enter again (Windows) when finished.", file=sys.stderr)
         print("="*60, file=sys.stderr)
         
         # Read input, remove leftover Windows EOF characters (Ctrl+Z), and strip whitespace
