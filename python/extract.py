@@ -199,8 +199,8 @@ def extract_pptx_data():
                             blob = shape.image.blob
                             ext = getattr(shape.image, "ext", "png")
                             
-                        # 2B. Vector shape with a hidden image fill (Picture Fill)
-                        elif shape_type in [MSO_SHAPE_TYPE.FREEFORM, MSO_SHAPE_TYPE.AUTO_SHAPE]:
+                        # 2B. Vector shape with a hidden image fill (Picture Fill) OR horizontal separator line
+                        elif shape_type in [MSO_SHAPE_TYPE.FREEFORM, MSO_SHAPE_TYPE.AUTO_SHAPE, MSO_SHAPE_TYPE.LINE]:
                             if hasattr(shape, "fill") and getattr(shape.fill, "type", None) == 6:
                                 try:
                                     # Navigate XML tree to find the relation ID (rId)
@@ -219,8 +219,21 @@ def extract_pptx_data():
                                 except Exception as e:
                                     print(f"⚠️ Could not extract physical image from {name}: {e}", file=sys.stderr)
                             else:
-                                # Pure vector path without image fill
-                                elements.append({"type": "Vector", "content": f"[{name}]", "x": center_x, "y": center_y})
+                                # Check if it's a horizontal line
+                                rel_width = shape.width / slide_width
+                                rel_height = shape.height / slide_height
+
+                                # A horizontal line is usually wide (> 15% of slide) and thin (< 2% height)
+                                if rel_width > 0.15 and rel_height < 0.02:
+                                    elements.append({
+                                        "type": "Separator", 
+                                        "content": "---", 
+                                        "x": center_x, 
+                                        "y": center_y
+                                    })
+                                else:
+                                    # Pure vector path without image fill, and not a horizontal line. We just include a placeholder with the type of element for the LLM to handle.
+                                    elements.append({"type": "Vector", "content": f"[{name}]", "x": center_x, "y": center_y})
                         
                         # If a binary image was successfully extracted, save it locally first
                         if blob:
