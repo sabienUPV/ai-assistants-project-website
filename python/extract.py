@@ -285,6 +285,7 @@ You must apply these logical rules to build the Markdoc layout:
 4. Rich Text Preservation: If you see markdown bold (`**text**`) or bullets (`- text`) in the raw text elements, preserve them exactly as they are in the final output.
 5. Images: Render images using standard markdown syntax based on the input data. Do not alter the filenames.
 6. Title Deduplication: Once a text block is extracted as the slide's `title` attribute, DO NOT repeat it inside the slide body (e.g., do NOT write `### Title` or `**Title**` at the top of the content).
+7. Full-Width Interactive Components: Interactive components (e.g., `{{% textInput %}}`, `{{% quiz %}}`, etc.) and any immediate action prompt or challenge text directly preceding them (e.g., "**Your challenge:** ...") must NEVER be placed inside a `{{% column %}}`. If the slide uses `{{% columns %}}` for contextual content or images, close the `{{% columns %}}` block BEFORE rendering the action prompt and interactive component, ensuring they sit at the root slide level across the full width.
 
 Input Data:
 Process the following slides and generate the clean Markdoc code. Do not include explanations, just output the .mdoc code.
