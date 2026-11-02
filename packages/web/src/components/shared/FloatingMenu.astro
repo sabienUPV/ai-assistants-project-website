@@ -54,4 +54,16 @@ const { t } = Astro.locals;
       right: 1rem;
     }
   }
+
+  @media print {
+    .floating-menu {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .floating-menu :global(*) {
+      transition: none !important;
+    }
+  }
 </style>
