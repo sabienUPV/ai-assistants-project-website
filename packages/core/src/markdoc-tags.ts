@@ -194,6 +194,22 @@ export const markdocTagAttributes = {
       },
     } satisfies TagAttributes<TextInputSchema>,
   },
+  flashcard: {
+    description: "Render a flashcard component with an icon and a color. The content inside the flashcard can be any valid Markdoc content.",
+    attributes: {
+      icon: {
+        type: String,
+        required: false,
+        description: 'Icon or descriptive emoji for the card (e.g., "📚" for a study card, "💡" for an idea card).',
+      },
+      color: {
+        type: String,
+        required: false,
+        default: 'var(--color-primary)',
+        description: 'Primary color of the card border (HEX, name, or CSS variable).',
+      },
+    },
+  }
 } satisfies AstroMarkdocConfig['tags'];
 
 /**
@@ -314,6 +330,10 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
     textInput: {
       ...markdocTagAttributes.textInput,
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/shared/TextInput.astro'),
+    },
+    flashcard: {
+      ...markdocTagAttributes.flashcard,
+      render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/shared/Flashcard.astro'),
     },
   } satisfies AstroMarkdocConfig['tags'] & MarkdocTagsFromAttributes;
 }

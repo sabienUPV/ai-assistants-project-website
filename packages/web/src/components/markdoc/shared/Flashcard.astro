@@ -1,0 +1,65 @@
+---
+interface Props {
+  icon?: string;
+  color?: string;
+}
+
+const { icon, color = 'var(--color-primary, #2563eb)' } = Astro.props;
+---
+
+<div class="flashcard" style={`--flashcard-border-color: ${color};`}>
+  {icon && (
+    <div class="flashcard-icon" aria-hidden="true">
+      {icon}
+    </div>
+  )}
+  <div class="flashcard-content">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .flashcard {
+    border: 3px solid var(--flashcard-border-color);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    background-color: var(--flashcard-bg, #ffffff);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 1rem;
+    margin: 1.25rem 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .flashcard-icon {
+    font-size: 2.5rem;
+    line-height: 1;
+  }
+
+  .flashcard-content {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--flashcard-text, #1f2937);
+    line-height: 1.4;
+  }
+
+  /* Adaptación a impresión respetando la estructura de diapositiva */
+  @media print {
+    .flashcard {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      border: 2px dashed #000000;
+      box-shadow: none;
+      background: #ffffff !important;
+      color: #000000 !important;
+      margin: 1rem 0;
+    }
+
+    .flashcard-content {
+      color: #000000 !important;
+    }
+  }
+</style>

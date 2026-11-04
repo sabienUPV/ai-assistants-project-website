@@ -45,4 +45,34 @@ Now testing slide 2
 
   {% arasaac #38462 alt="Exam" size=500 /%}
 {% /slide %}
+
+{% slide title="A flashcard" align="center" hideNavigation=false %}
+{% flashcard icon="✋" color="var(--color-primary)" %}
+Hello!
+{% /flashcard %}
+{% /slide %}
+
+{% slide title="More flashcards!" align="center" hideNavigation=false %}
+{% columns %}
+{% column %}
+{% flashcard color="var(--color-primary)" %}
+![](@admin-assets/images/courses/2/imagen1.png)
+
+The train is late.
+{% /flashcard %}
+{% /column %}
+
+{% column %}
+{% flashcard color="var(--color-primary)" %}
+![](@admin-assets/images/courses/2/imagen2.png)You forgot the bus number.
+{% /flashcard %}
+{% /column %}
+
+{% column %}
+{% flashcard color="var(--color-primary)" %}
+![](@admin-assets/images/courses/2/imagen3.png)It starts to rain hard.
+{% /flashcard %}
+{% /column %}
+{% /columns %}
+{% /slide %}
 {% /slideshow %}

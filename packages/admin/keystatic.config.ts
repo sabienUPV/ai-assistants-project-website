@@ -573,6 +573,21 @@ const createComponents = (collectionName: string) => ({
       );
     }
   }),
+  flashcard: wrapper({
+    label: 'Flashcard',
+    description: markdocTagAttributes.flashcard.description,
+    schema: {
+      icon: fields.text({
+        label: 'Icon / Emoji',
+        description: 'Examples: ✋, 💡, 🙋‍♂️',
+      }),
+      color: fields.text({
+        label: 'Border Color',
+        description: 'Examples: green, #16a34a or var(--color-primary)',
+        defaultValue: 'var(--color-primary)',
+      }),
+    },
+  }),
 });
 
 // Select storage kind based on environment variable:
