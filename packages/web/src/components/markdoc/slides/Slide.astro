@@ -9,16 +9,25 @@ const { title, align = 'left', locked = false, hideNavigation = false } = Astro.
 
 // Mapeamos los valores de alineación para que CSS Grid los entienda
 const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'center';
+
+// 1. Renderizamos el contenido del slot a HTML en tiempo de build (SSG)
+// Aquí Astro inyectará el HTML compilado de Markdoc (negritas, listas, etc.) en la variable `html` para poder contar los <img> que haya generado cualquier tag (Arasaac, Image, markdown...)
+const html = await Astro.slots.render('default');
+
+// 2. Contamos los <img> reales que haya generado cualquier tag (Arasaac, Image, markdown...)
+// Si quieres excluir las banderas (Flag.astro), puedes filtrar por clase o dejarlo así si no usan <img>
+const imgCount = (html.match(/<img\b/gi) || []).length;
 ---
 
 {/* Svelte buscará todos los divs con la clase 'markdoc-slide' */}
-<div class="markdoc-slide" data-locked={locked ? 'true' : 'false'} data-hide-nav={hideNavigation ? 'true' : 'false'}>
+<div class="markdoc-slide"
+  data-locked={locked ? 'true' : 'false'}
+  data-img-count={imgCount}
+  data-hide-nav={hideNavigation ? 'true' : 'false'}>
   <div class="slide-container">
     {title && <h1 class="slide-title">{title}</h1>}
   
-    <div class="slide-content" style={{"place-items": gridAlign}}>
-      <slot /> {/* Aquí Astro inyecta el HTML compilado de Markdoc (negritas, listas, etc.) */}
-    </div>
+    <div class="slide-content" style={{"place-items": gridAlign}} set:html={html} />
   </div>
 </div>
 
@@ -50,7 +59,8 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
 
   .slide-content :global(img),
   .slide-content :global(.crop-wrapper) {
-    margin: 2rem auto; /* Centra la imagen y añade espacio arriba y abajo */
+    /* Solo margen vertical; el horizontal lo gestiona el layout (Grid/Columns) */
+    margin-block: 1.5rem;
 
     /* FIX: Fuerza a la imagen a encogerse si es más ancha que el móvil */
     max-width: 100%;
@@ -74,6 +84,22 @@ const gridAlign = align === 'left' ? 'start' : align === 'right' ? 'end' : 'cent
   .slide-content > :global(*) {
     max-width: 100%;
     box-sizing: border-box;
+  }
+
+  /* Reglas dinámicas según el número de imágenes en la diapositiva */
+  .markdoc-slide[data-img-count="1"] .slide-content :global(img) {
+    max-width: 300px;
+    max-height: 300px;
+  }
+
+  .markdoc-slide[data-img-count="2"] .slide-content :global(img) {
+    max-width: 200px;
+    max-height: 200px;
+  }
+
+  .markdoc-slide:not([data-img-count="0"]):not([data-img-count="1"]):not([data-img-count="2"]) .slide-content :global(img) {
+    max-width: 150px;
+    max-height: 150px;
   }
 
   /* =========================================

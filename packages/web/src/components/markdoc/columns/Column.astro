@@ -6,7 +6,25 @@
   .markdoc-column {
     display: flex;
     flex-direction: column;
-    /* Evita que los elementos internos rompan el grid */
-    min-width: 0; 
+    justify-content: center; /* Centra verticalmente respecto a la otra columna */
+    min-width: 0; /* Evita que los elementos internos rompan el grid */
+  }
+
+  /* Si la columna contiene una imagen, centramos los elementos horizontalmente dentro de ella */
+  .markdoc-column:has(img) {
+    align-items: center;
+  }
+
+  /* Quitamos el margen superior/inferior extra de las imágenes dentro de columnas para no descuadrar el centrado vertical */
+  .markdoc-column :global(img),
+  .markdoc-column :global(.crop-wrapper) {
+    margin-block: 0.5rem;
+  }
+
+  /* Si un <p> dentro de la columna solo envuelve una imagen, quitamos sus márgenes de párrafo */
+  .markdoc-column :global(p:has(> img:only-child)) {
+    margin: 0;
+    display: flex;
+    justify-content: center;
   }
 </style>
