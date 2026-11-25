@@ -24,9 +24,11 @@
     "build": "astro build",
     "preview": "astro preview",
     "start": "node ./dist/server/entry.mjs",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.12",
     "@types/node": "^26.0.1",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"

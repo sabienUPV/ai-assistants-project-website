@@ -7,6 +7,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "check": "astro check",
     "generate-icons": "node scripts/generate-icons.js",
     "i18n-import-excel": "node scripts/import-i18n-content-from-excel-to-csv.js",
     "extract-and-convert-eu-logos": "node scripts/extract-and-convert-eu-logos.js",
@@ -24,12 +25,13 @@
     "csv-parse": "^6.1.0",
     "lite-youtube-embed": "^0.3.4",
     "sass": "^1.102.0",
-    "svelte": "^5.56.4",
-    "typescript": "^6.0.3"
+    "svelte": "^5.56.4"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.12",
     "adm-zip": "^0.5.16",
     "svgo": "^4.0.0",
+    "typescript": "^6.0.3",
     "xlsx": "^0.18.5"
   }
 }

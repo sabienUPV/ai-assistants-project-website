@@ -5,6 +5,7 @@
     "packages/*"
   ],
   "scripts": {
+    "check": "npm run check --workspaces --if-present",
     "web:dev": "npm run -w @sabien-upv-astro-cms/web dev",
     "admin:dev": "npm run -w @sabien-upv-astro-cms/admin dev",
     "web:build": "npm run -w @sabien-upv-astro-cms/web build",
