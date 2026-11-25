@@ -79,6 +79,21 @@ export default defineConfig({
           additionalData: `@use '@styles/_variables.scss' as *;`
         }
       }
-    }
+    },
+    build: {
+      rollupOptions: {
+        onwarn(warning, warn) {
+          // Silence the known false positive warning from svelte/animate when running astro build.
+          // Example: [WARN] [vite] "flip" is imported from external module "svelte/animate" but never used in "src/components/client/markdoc/games/OrderGame.svelte".
+          if (
+            warning.code === 'UNUSED_EXTERNAL_IMPORT' &&
+            warning.exporter === 'svelte/animate'
+          ) {
+            return;
+          }
+          warn(warning);
+        },
+      },
+    },
   },
 });
