@@ -10,6 +10,8 @@
       prevAriaLabel?: string;
       nextAriaLabel?: string;
       numberInputLabel?: string;
+      fullscreenEnterLabel?: string;
+      fullscreenExitLabel?: string;
     };
   }
   const { children, localizedTexts } : Props = $props();
@@ -134,13 +136,115 @@
 
   function next() { jumpToSlide(currentIndex + 1); }
   function prev() { jumpToSlide(currentIndex - 1); }
+
+  // Pantalla completa: API nativa con fallback por clase CSS (iOS Safari, iframes restringidos...)
+  let isFullscreen = $state(false);
+  let isCssFullscreen = $state(false);
+  let wrapperEl: HTMLElement;
+
+  async function toggleFullscreen() {
+    if (isFullscreen) {
+      await exitFullscreen();
+      return;
+    }
+    try {
+      if (!wrapperEl.requestFullscreen) throw new Error('Fullscreen API not available');
+      await wrapperEl.requestFullscreen();
+    } catch {
+      isCssFullscreen = true;
+      isFullscreen = true;
+    }
+  }
+
+  async function exitFullscreen() {
+    isCssFullscreen = false;
+    isFullscreen = false;
+    if (document.fullscreenElement) {
+      try { await document.exitFullscreen(); } catch { /* ya no estamos en pantalla completa */ }
+    }
+  }
+
+  $effect(() => {
+    const onFullscreenChange = () => {
+      // Si hay fallback CSS activo, mantenemos el estado
+      isFullscreen = document.fullscreenElement === wrapperEl || isCssFullscreen;
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+  });
+
+  // Bloquea el scroll de la página mientras el fallback CSS está activo
+  $effect(() => {
+    if (!isCssFullscreen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
+  });
+
+  function isEditableTarget(target: EventTarget | null) {
+    const el = target as HTMLElement | null;
+    if (!el || !el.tagName) return false;
+    return ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName) || el.isContentEditable;
+  }
+
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    // Solo actuamos en pantalla completa o si el foco está dentro del slideshow
+    if (!isFullscreen && !wrapperEl?.contains(document.activeElement)) return;
+    if (isEditableTarget(e.target) || isEditableTarget(document.activeElement)) return;
+
+    switch (e.key) {
+      case 'ArrowRight':
+        if (!isCurrentSlideLocked && currentIndex < slidesCount - 1) next();
+        e.preventDefault();
+        break;
+      case 'ArrowLeft':
+        prev();
+        e.preventDefault();
+        break;
+      case 'Escape':
+        if (isFullscreen) {
+          exitFullscreen();
+          e.preventDefault();
+        }
+        break;
+    }
+  }
 </script>
 
-<div class="slideshow-wrapper">
+<svelte:window onkeydown={handleKeydown} />
+
+{#snippet fullscreenButton(extraClass: string)}
+  {@const label = isFullscreen
+    ? (localizedTexts?.fullscreenExitLabel || 'Exit fullscreen')
+    : (localizedTexts?.fullscreenEnterLabel || 'Fullscreen')}
+  <button
+    type="button"
+    class="fullscreen-btn {extraClass}"
+    onclick={toggleFullscreen}
+    aria-label={label}
+    aria-pressed={isFullscreen}
+    title={label}
+  >
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      {#if isFullscreen}
+        <path d="M9 3v4a2 2 0 0 1-2 2H3M21 9h-4a2 2 0 0 1-2-2V3M3 15h4a2 2 0 0 1 2 2v4M15 21v-4a2 2 0 0 1 2-2h4" />
+      {:else}
+        <path d="M3 9V5a2 2 0 0 1 2-2h4M15 3h4a2 2 0 0 1 2 2v4M21 15v4a2 2 0 0 1-2 2h-4M9 21H5a2 2 0 0 1-2-2v-4" />
+      {/if}
+    </svg>
+  </button>
+{/snippet}
+
+<div class="slideshow-wrapper" class:is-css-fullscreen={isCssFullscreen} bind:this={wrapperEl}>
   <!-- Contenedor estático: Astro vuelca el HTML aquí -->
   <div class="slideshow-content" bind:this={container}>
     {@render children?.()}
   </div>
+
+  {#if slidesCount > 0 && isNavHidden}
+    {@render fullscreenButton('floating')}
+  {/if}
 
   {#if slidesCount > 0 && !isNavHidden}
     <div class="navigation">
@@ -164,6 +268,7 @@
           aria-label={localizedTexts?.numberInputLabel || 'Jump to slide number'}
         /> 
         / {slidesCount}
+        {@render fullscreenButton('')}
       </div>
 
       <button 
@@ -290,6 +395,67 @@
     outline: none;
   }
 
+  .fullscreen-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-inline-start: 0.5rem;
+    padding: 0.4rem;
+    background: transparent;
+    color: var(--color-logo-dark-grey);
+    border: 2px solid #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .fullscreen-btn:hover, .fullscreen-btn:focus-visible {
+    background-color: white;
+  }
+
+  /* Botón accesible incluso cuando la navegación está oculta (portada/cierre) */
+  .fullscreen-btn.floating {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 2;
+    margin: 0;
+    background-color: rgba(255, 255, 255, 0.85);
+  }
+
+  .slideshow-wrapper {
+    position: relative;
+  }
+
+  /* --- PANTALLA COMPLETA --- */
+  @mixin fullscreen-layout {
+    width: 100vw;
+    height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    background-color: #ffffff;
+
+    .slideshow-content {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      align-items: stretch;
+    }
+  }
+
+  .slideshow-wrapper:fullscreen {
+    @include fullscreen-layout;
+  }
+
+  .slideshow-wrapper.is-css-fullscreen {
+    @include fullscreen-layout;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+  }
+
   /* --- RESPONSIVE MOBILE --- */
 
   /*
@@ -332,16 +498,20 @@
   }
 
   @media print {
-    .navigation {
+    .navigation, .fullscreen-btn {
       display: none; /* Oculta la navegación al imprimir */
     }
 
-    .slideshow-wrapper {
+    .slideshow-wrapper, .slideshow-wrapper.is-css-fullscreen {
       border: none; /* Quita el borde al imprimir */
       box-shadow: none; /* Quita la sombra al imprimir */
+      position: static;
+      width: auto;
+      height: auto;
     }
 
     .slideshow-content {
+      overflow: visible;
       display: block;
       gap: 0;
     }
