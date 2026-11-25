@@ -57,11 +57,23 @@ const glossary = defineCollection({
   }),
 });
 
+// Helper function to check if a directory contains any Markdown or Markdoc files
+function hasMarkdownFiles(dirPath: string): boolean {
+  if (!fs.existsSync(dirPath)) return false;
+  return fs.readdirSync(dirPath).some((file) => /\.(md|mdoc)$/.test(file));
+}
+
+// Content base directory, relative to the web package
+const contentBaseDir = '../admin/src/content'
+
 // Create one posts_<locale> collection for each supported locale
 const posts = locales.reduce((acc, locale) => {
+  const relativeDir = `${locale}/posts`, dir = `${contentBaseDir}/${relativeDir}`;
   acc[`posts_${locale}`] = defineCollection({
     // Load all .md and .mdoc files in the locale-specific posts directory
-    loader: glob({ pattern: `${locale}/posts/*.{md,mdoc}`, base: '../admin/src/content' }),
+    loader: hasMarkdownFiles(dir)
+      ? glob({ pattern: `${relativeDir}/*.{md,mdoc}`, base: contentBaseDir })
+      : async () => [], // Return an empty array if no Markdown files are found
     // Type-check frontmatter using the shared postSchema from core
     schema: postSchema,
   });
@@ -70,9 +82,12 @@ const posts = locales.reduce((acc, locale) => {
 
 // Create one courses_<locale> collection for each supported locale
 const courses = locales.reduce((acc, locale) => {
+  const relativeDir = `${locale}/courses`, dir = `${contentBaseDir}/${relativeDir}`;
   acc[`courses_${locale}`] = defineCollection({
     // Load all .md and .mdoc files in the locale-specific courses directory
-    loader: glob({ pattern: `${locale}/courses/*.{md,mdoc}`, base: '../admin/src/content' }),
+    loader: hasMarkdownFiles(dir)
+      ? glob({ pattern: `${relativeDir}/*.{md,mdoc}`, base: contentBaseDir })
+      : async () => [], // Return an empty array if no Markdown files are found
     // Type-check frontmatter using the shared courseSchema from core
     schema: courseSchema,
   });
