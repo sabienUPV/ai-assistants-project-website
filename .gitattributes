@@ -1,1 +1,27 @@
-*.mdoc linguist-language=Markdown
+# Normalize all text files to LF by default (ensures consistency across Windows, Linux, CI, and AI agents)
+* text=auto eol=lf
+
+# Explicitly enforce LF on project-specific text formats
+# Note: .mdoc is for Markdoc files, which are Markdown-based but not recognized by GitHub's linguist by default, so we set it to Markdown for proper syntax highlighting
+*.astro text eol=lf
+*.svelte text eol=lf
+*.mdoc text eol=lf linguist-language=Markdown
+*.csv text eol=lf
+*.py text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.svg text eol=lf
+
+# Preserve CRLF for Windows batch scripts if any are added
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Mark binary assets explicitly so Git never alters their contents
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.pptx binary
+*.pdf binary
