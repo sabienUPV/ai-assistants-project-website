@@ -1,5 +1,7 @@
 lxml==6.1.3
+openai
 pillow==12.3.0
+python-dotenv
 python-pptx==1.0.2
 typing_extensions==4.16.0
 xlsxwriter==3.2.9

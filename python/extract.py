@@ -1,9 +1,14 @@
+import argparse
+import getpass
 import os
 import glob
 import re
 import sys
 import shutil
+from pathlib import Path
 from urllib.request import urlopen
+from dotenv import load_dotenv
+from openai import APIError, OpenAI
 from pptx import Presentation
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 
@@ -24,6 +29,199 @@ SKIP_SLIDE_KEYWORDS = [
     "EACEA",
     "Consortium"
 ]
+
+
+def build_parser():
+    parser = argparse.ArgumentParser(
+        description="Extract PowerPoint slides and convert them to Markdoc."
+    )
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument("--api", action="store_true", help="Generate Markdoc using the LLM API.")
+    mode_group.add_argument("--manual", action="store_true", help="Print prompts and read responses from stdin.")
+    parser.add_argument("--api-key", help="Override LLM_API_KEY.")
+    parser.add_argument("--base-url", help="Override LLM_BASE_URL.")
+    parser.add_argument("--model", help="Override LLM_MODEL.")
+    parser.add_argument("-f", "--file", help="Process one .pptx file instead of scanning input/.")
+    parser.add_argument("-y", "--yes", action="store_true", help="Run without interactive prompts.")
+    parser.add_argument("--dry-run", action="store_true", help="Print prompts without calling the API or saving files.")
+    return parser
+
+
+def resolve_config(args):
+    script_dir = Path(__file__).resolve().parent
+    for env_path in (script_dir / ".env", script_dir.parent / ".env"):
+        if env_path.is_file():
+            load_dotenv(env_path)
+            break
+
+    return {
+        "api_key": args.api_key or os.getenv("LLM_API_KEY"),
+        "base_url": args.base_url or os.getenv("LLM_BASE_URL"),
+        "model": args.model or os.getenv("LLM_MODEL"),
+    }
+
+
+def read_stderr_input(prompt):
+    print(prompt, end="", file=sys.stderr, flush=True)
+    return sys.stdin.readline().strip()
+
+
+def interactive_menu():
+    print("\nChoose an execution mode:", file=sys.stderr)
+    print("  1. API Mode (Automated)", file=sys.stderr)
+    print("  2. Manual Mode (Copy prompt and paste response)", file=sys.stderr)
+    while True:
+        choice = read_stderr_input("Select 1 or 2: ")
+        if choice == "1":
+            return "api"
+        if choice == "2":
+            return "manual"
+        print("Please enter 1 or 2.", file=sys.stderr)
+
+
+def mask_api_key(api_key):
+    if len(api_key) <= 4:
+        return "*" * len(api_key)
+    return f"{api_key[:3]}****{api_key[-4:]}"
+
+
+def configure_api(args, config):
+    interactive = sys.stdin.isatty() and not args.yes
+    complete_config = all(config.values())
+    edit_requested = False
+
+    if interactive and complete_config:
+        print("\nResolved LLM configuration:", file=sys.stderr)
+        print(f"  API key: {mask_api_key(config['api_key'])}", file=sys.stderr)
+        print(f"  Base URL: {config['base_url']}", file=sys.stderr)
+        print(f"  Model: {config['model']}", file=sys.stderr)
+        choice = read_stderr_input(
+            "Use this configuration? [Y/n] (or 'e' to edit/override manually): "
+        ).lower()
+        if choice in ("", "y", "yes"):
+            return config
+        if choice not in ("e", "edit", "n", "no"):
+            print("Using the resolved configuration.", file=sys.stderr)
+            return config
+        edit_requested = True
+
+    if not interactive:
+        missing = [name for name in ("api_key", "model") if not config[name]]
+        if missing:
+            raise ValueError(
+                "Missing required API configuration: "
+                + ", ".join(missing)
+                + ". Set the corresponding LLM_* variable or pass a CLI override."
+            )
+        return config
+
+    if (not config["api_key"] or edit_requested) and args.api_key is None:
+        current = "configured; press Enter to keep it" if config["api_key"] else "required"
+        entered = getpass.getpass(f"LLM API key ({current}): ")
+        if entered:
+            config["api_key"] = entered
+
+    if (not config["base_url"] or edit_requested) and args.base_url is None:
+        entered = read_stderr_input(
+            f"LLM base URL [{config['base_url'] or 'OpenAI default'}]: "
+        )
+        if entered:
+            config["base_url"] = entered
+
+    if (not config["model"] or edit_requested) and args.model is None:
+        entered = read_stderr_input(f"LLM model [{config['model'] or 'required'}]: ")
+        if entered:
+            config["model"] = entered
+
+    missing = [name for name in ("api_key", "model") if not config[name]]
+    if missing:
+        raise ValueError("Missing required API configuration: " + ", ".join(missing) + ".")
+    return config
+
+
+def call_llm_api(prompt_text, config):
+    client_options = {"api_key": config["api_key"]}
+    if config["base_url"]:
+        client_options["base_url"] = config["base_url"]
+    client = OpenAI(**client_options)
+    print(f"🤖 Sending slides to {config['model']}...", file=sys.stderr)
+    response = client.chat.completions.create(
+        model=config["model"],
+        messages=[{"role": "user", "content": prompt_text}],
+        temperature=0.1,
+    )
+    content = response.choices[0].message.content
+    if not content:
+        raise ValueError("The LLM API returned an empty response.")
+
+    content = content.strip()
+    content = re.sub(r"\A```(?:markdoc|markdown)?[ \t]*\r?\n", "", content, flags=re.IGNORECASE)
+    content = re.sub(r"\r?\n?```[ \t]*\Z", "", content)
+    return content.strip()
+
+
+def postprocess_and_save(llm_output, unit_str, title_str, unit_folder, output_img_dir):
+    # --- POST-PROCESSING ---
+
+    # 1. Resolve Image Paths via Regex
+    # Looks for ![filename.ext](anything_or_nothing) and replaces it with the full Astro asset path
+    astro_asset_path = f"@admin-assets/images/courses/{unit_folder}"
+    processed_mdoc = re.sub(
+        r'!\[([^\]]+)\]\([^\)]*\)',
+        rf'![\1]({astro_asset_path}/\1)',
+        llm_output
+    )
+
+    # 2. Remove Redundant Slide Titles
+    # The LLM may have repeated the slide title at the top of the slide content.
+    def clean_slide(match):
+        full_slide = match.group(0)
+        title = match.group(1).strip()
+
+        # Regex to match either titles (e.g., ### Title) or emphasized/bolded titles (e.g., **Title**) at the start of the slide content, allowing for optional whitespace and newlines
+        # Regex explanation:
+        # - (%}}\s*) : Captures the closing slide tag and any whitespace after it
+        # - (?:#|\*)* : Non-capturing group to match any number of '#' or '* characters (for titles, emphasized or bolded text)
+        # - \s*{re.escape(title)}\s* : Matches the slide title with optional whitespace around it
+        # - (?:\*)* : Optionally matches closing '*' characters (any number of them, for both '*' and '**') in case the title was bolded or emphasized
+        # - \n+ : Matches one or more newlines after the title
+        pattern = rf'(%}}\s*)(?:#|\*)*\s*{re.escape(title)}\s*(?:\*)*\s*\n+'
+        cleaned_content = re.sub(pattern, r'\1', full_slide, flags=re.IGNORECASE)
+        return cleaned_content
+
+    # Capture the entire slide block and its title for processing
+    # Regex explanation:
+    # - {%\s*slide\s+title="([^"]+)"[^%]*%} : Matches the opening slide tag and captures the title
+    # - .*? : Non-greedy match for any content inside the slide
+    # - {%\s*/slide\s*%} : Matches the closing slide tag
+    slide_pattern = r'{%\s*slide\s+title="([^"]+)"[^%]*%}.*?{%\s*/slide\s*%}'
+    processed_mdoc = re.sub(slide_pattern, clean_slide, processed_mdoc, flags=re.DOTALL)
+
+    # 3. Append Frontmatter
+    frontmatter = f"---\nunit: '{unit_str}'\ntitle: '{title_str}'\n---\n\n"
+    final_mdoc = frontmatter + processed_mdoc
+
+    # 3. Save the final .mdoc file
+    os.makedirs(CONTENT_DIR, exist_ok=True)
+    mdoc_file_path = os.path.join(CONTENT_DIR, f"{unit_folder}.mdoc")
+    with open(mdoc_file_path, "w", encoding="utf-8") as f:
+        f.write(final_mdoc)
+    print(f"✔️ Saved final Markdoc to: {mdoc_file_path}", file=sys.stderr)
+
+    # 4. Copy images to the Astro assets directory
+    final_img_dir = os.path.join(ASSETS_DIR, unit_folder)
+    os.makedirs(final_img_dir, exist_ok=True)
+
+    copied_count = 0
+    for img_file in os.listdir(output_img_dir):
+        src_path = os.path.join(output_img_dir, img_file)
+        dest_path = os.path.join(final_img_dir, img_file)
+        shutil.copy2(src_path, dest_path)
+        copied_count += 1
+
+    print(f"✔️ Copied {copied_count} images to: {final_img_dir}", file=sys.stderr)
+    print(f"🎉 Unit {unit_str} fully processed and integrated!", file=sys.stderr)
+
 
 def extract_rich_text(shape):
     """
@@ -74,21 +272,28 @@ def extract_rich_text(shape):
     return " \\n ".join(paragraphs_text)
 
 
-def extract_pptx_data():
+def extract_pptx_data(mode, dry_run, config, selected_file=None):
     """
-    Parses PowerPoint files to extract text and physical images, 
-    mapping their relative center (X, Y) spatial coordinates for LLM processing.
-    Now acts as an interactive CLI tool for hybrid manual/automated generation.
+    Extract slide text and images, then route generated prompts through the chosen mode.
     """
     # Find all .pptx files, ignoring Microsoft Office temporary lock files (~$)
-    pptx_files = [
-        f for f in glob.glob(os.path.join(INPUT_DIR, "*.pptx")) 
-        if not os.path.basename(f).startswith("~$")
-    ]
+    if selected_file:
+        candidate = Path(selected_file)
+        if not candidate.is_file():
+            candidate = Path(INPUT_DIR) / selected_file
+        if not candidate.is_file() or candidate.suffix.lower() != ".pptx":
+            print(f"❌ Input file not found or is not a .pptx file: {selected_file}", file=sys.stderr)
+            return 1
+        pptx_files = [str(candidate)]
+    else:
+        pptx_files = [
+            f for f in glob.glob(os.path.join(INPUT_DIR, "*.pptx"))
+            if not os.path.basename(f).startswith("~$")
+        ]
 
     if not pptx_files:
         print(f"⚠️ No valid .pptx files found in '{INPUT_DIR}'.", file=sys.stderr)
-        return
+        return 0
 
     # Regex to enforce patterns like: "8 - Name.pptx", "8.2 - Name.pptx", "8.2.1 - Name.pptx", etc.
     filename_pattern = re.compile(r'^(?P<unit>\d+(?:\.\d+)*)\s*-\s*(?P<title>.+)\.pptx$')
@@ -313,94 +518,80 @@ Process the following slides and generate the clean Markdoc code. Do not include
 
         print("\n" + "="*60, file=sys.stderr)
         print("✅ Parsing complete! Generated prompt for LLM.", file=sys.stderr)
-        print("Copy the text below (stdout) and paste it into your LLM.", file=sys.stderr)
+        if mode == "manual" or dry_run:
+            print("Copy the text below (stdout) and paste it into your LLM.", file=sys.stderr)
         if schema_found:
             print("The schema was successfully retrieved from " + schema_url, file=sys.stderr)
         else:
             print("⚠️ The schema could not be retrieved; You need to manually paste it into the prompt BEFORE submitting it to the LLM.", file=sys.stderr)
         print("="*60 + "\n", file=sys.stderr)
         
-        # Only print the actual prompt to stdout
-        print(prompt_text)
-        
-        # Flush stdout to ensure the prompt prints before reading input
-        sys.stdout.flush()
+        if mode == "manual" or dry_run:
+            print(prompt_text)
+            sys.stdout.flush()
 
-        # --- WAIT FOR USER INPUT ---
-        print("\n" + "="*60, file=sys.stderr)
-        print("📥 Paste the LLM's Markdoc response here.", file=sys.stderr)
-        print("Press Enter, then either Ctrl+D (Linux/macOS) or Ctrl+Z then Enter again (Windows) when finished.", file=sys.stderr)
-        print("="*60, file=sys.stderr)
-        
-        # Read input, remove leftover Windows EOF characters (Ctrl+Z), and strip whitespace
-        llm_output = sys.stdin.read().replace('\x1a', '').strip()
+        if dry_run:
+            continue
+
+        if mode == "api":
+            try:
+                llm_output = call_llm_api(prompt_text, config)
+            except APIError as e:
+                print(f"❌ LLM API request failed for {filename}: {e}", file=sys.stderr)
+                continue
+            except ValueError as e:
+                print(f"❌ LLM response failed for {filename}: {e}", file=sys.stderr)
+                continue
+        else:
+            # --- WAIT FOR USER INPUT ---
+            print("\n" + "="*60, file=sys.stderr)
+            print("📥 Paste the LLM's Markdoc response here.", file=sys.stderr)
+            print("Press Enter, then either Ctrl+D (Linux/macOS) or Ctrl+Z then Enter again (Windows) when finished.", file=sys.stderr)
+            print("="*60, file=sys.stderr)
+
+            # Read input, remove leftover Windows EOF characters (Ctrl+Z), and strip whitespace
+            llm_output = sys.stdin.read().replace('\x1a', '').strip()
         
         if not llm_output:
             print("⚠️ No output provided. Skipping post-processing for this file.", file=sys.stderr)
             continue
             
         print("\n🔄 Starting post-processing...", file=sys.stderr)
-        
-        # --- POST-PROCESSING ---
-        
-        # 1. Resolve Image Paths via Regex
-        # Looks for ![filename.ext](anything_or_nothing) and replaces it with the full Astro asset path
-        astro_asset_path = f"@admin-assets/images/courses/{unit_folder}"
-        processed_mdoc = re.sub(
-            r'!\[([^\]]+)\]\([^\)]*\)', 
-            rf'![\1]({astro_asset_path}/\1)', 
-            llm_output
+        postprocess_and_save(llm_output, unit_str, title_str, unit_folder, output_img_dir)
+
+    return 0
+
+def main():
+    parser = build_parser()
+    cli_args = parser.parse_args()
+    resolved_config = resolve_config(cli_args)
+
+    if cli_args.api:
+        selected_mode = "api"
+    elif cli_args.manual or cli_args.dry_run:
+        selected_mode = "manual"
+    elif cli_args.yes:
+        print("--yes requires an explicit --api or --manual mode.", file=sys.stderr)
+        return 1
+    elif sys.stdin.isatty():
+        selected_mode = interactive_menu()
+    else:
+        parser.error("Choose --api or --manual when stdin is not interactive.")
+
+    try:
+        if selected_mode == "api" and not cli_args.dry_run:
+            resolved_config = configure_api(cli_args, resolved_config)
+        exit_code = extract_pptx_data(
+            selected_mode,
+            cli_args.dry_run,
+            resolved_config,
+            cli_args.file,
         )
+    except (ValueError, APIError) as error:
+        print(f"❌ {error}", file=sys.stderr)
+        exit_code = 1
+    return exit_code
 
-        # 2. Remove Redundant Slide Titles
-        # The LLM may have repeated the slide title at the top of the slide content.
-        def clean_slide(match):
-            full_slide = match.group(0)
-            title = match.group(1).strip()
-            
-            # Regex to match either titles (e.g., ### Title) or emphasized/bolded titles (e.g., **Title**) at the start of the slide content, allowing for optional whitespace and newlines
-            # Regex explanation:
-            # - (%}}\s*) : Captures the closing slide tag and any whitespace after it
-            # - (?:#|\*)* : Non-capturing group to match any number of '#' or '* characters (for titles, emphasized or bolded text)
-            # - \s*{re.escape(title)}\s* : Matches the slide title with optional whitespace around it
-            # - (?:\*)* : Optionally matches closing '*' characters (any number of them, for both '*' and '**') in case the title was bolded or emphasized
-            # - \n+ : Matches one or more newlines after the title
-            pattern = rf'(%}}\s*)(?:#|\*)*\s*{re.escape(title)}\s*(?:\*)*\s*\n+'
-            cleaned_content = re.sub(pattern, r'\1', full_slide, flags=re.IGNORECASE)
-            return cleaned_content
-
-        # Capture the entire slide block and its title for processing
-        # Regex explanation:
-        # - {%\s*slide\s+title="([^"]+)"[^%]*%} : Matches the opening slide tag and captures the title
-        # - .*? : Non-greedy match for any content inside the slide
-        # - {%\s*/slide\s*%} : Matches the closing slide tag
-        slide_pattern = r'{%\s*slide\s+title="([^"]+)"[^%]*%}.*?{%\s*/slide\s*%}'
-        processed_mdoc = re.sub(slide_pattern, clean_slide, processed_mdoc, flags=re.DOTALL)
-        
-        # 3. Append Frontmatter
-        frontmatter = f"---\nunit: '{unit_str}'\ntitle: '{title_str}'\n---\n\n"
-        final_mdoc = frontmatter + processed_mdoc
-        
-        # 3. Save the final .mdoc file
-        os.makedirs(CONTENT_DIR, exist_ok=True)
-        mdoc_file_path = os.path.join(CONTENT_DIR, f"{unit_folder}.mdoc")
-        with open(mdoc_file_path, "w", encoding="utf-8") as f:
-            f.write(final_mdoc)
-        print(f"✔️ Saved final Markdoc to: {mdoc_file_path}", file=sys.stderr)
-        
-        # 4. Copy images to the Astro assets directory
-        final_img_dir = os.path.join(ASSETS_DIR, unit_folder)
-        os.makedirs(final_img_dir, exist_ok=True)
-        
-        copied_count = 0
-        for img_file in os.listdir(output_img_dir):
-            src_path = os.path.join(output_img_dir, img_file)
-            dest_path = os.path.join(final_img_dir, img_file)
-            shutil.copy2(src_path, dest_path)
-            copied_count += 1
-            
-        print(f"✔️ Copied {copied_count} images to: {final_img_dir}", file=sys.stderr)
-        print(f"🎉 Unit {unit_str} fully processed and integrated!", file=sys.stderr)
 
 if __name__ == "__main__":
-    extract_pptx_data()
+    sys.exit(main())

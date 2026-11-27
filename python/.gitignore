@@ -5,3 +5,6 @@ __pycache__/
 
 # Ignore input folder for PowerPoint (pptx) files
 input/
+
+# Ignore .env file
+.env

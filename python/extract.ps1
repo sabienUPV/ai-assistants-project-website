@@ -12,8 +12,8 @@ Write-Host "Activating virtual environment..."
 
 # Install required packages
 Write-Host "Installing required packages..."
-pip install -r requirements.txt
+pip install -q -r requirements.txt
 
 # Run the Python script to extract data
 Write-Host "Running the data extraction script..."
-python extract.py
+python extract.py @args
