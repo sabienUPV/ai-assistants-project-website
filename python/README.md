@@ -19,7 +19,9 @@ without choosing a mode or writing final content:
 ```
 
 The `llms.txt` schema is fetched once per process and reused for all files.
-If retrieval fails, the manual placeholder is reused until the next run.
+If retrieval fails in manual or dry-run mode, the manual placeholder is reused
+until the next run. In API mode, retrieval failure aborts the run rather than
+sending the placeholder to the LLM.
 Press Ctrl+C to stop the batch, including while waiting for an LLM response.
 The in-flight request may still complete on the server.
 

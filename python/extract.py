@@ -25,6 +25,7 @@ CONTENT_DIR = "../packages/admin/src/content/en/courses"
 LLMS_SCHEMA_URL = "https://ai4pid.eu/llms.txt"
 LLMS_SCHEMA_FALLBACK = "[MANUALLY PASTE THE CONTENT OF YOUR llms.txt HERE]"
 _llms_schema_context = None
+_llms_schema_error = None
 
 LOGO_Y_THRESHOLD_TITLE = 0.15  # Upper 15% of the slide to filter out header logos in title slide (first slide)
 LOGO_Y_THRESHOLD_CONTENT = 0.05  # Upper 5% of the slide to filter out header logos in content slides (subsequent slides)
@@ -145,9 +146,9 @@ def configure_api(args, config):
     return config
 
 
-def get_llms_schema_context():
-    global _llms_schema_context
-    if _llms_schema_context is None:
+def get_llms_schema_context(allow_fallback=False):
+    global _llms_schema_context, _llms_schema_error
+    if _llms_schema_context is None and _llms_schema_error is None:
         try:
             with urlopen(LLMS_SCHEMA_URL, timeout=10) as response:
                 content = response.read().decode("utf-8").strip()
@@ -155,8 +156,21 @@ def get_llms_schema_context():
                 raise ValueError("The llms.txt response was empty")
             _llms_schema_context = (content, True)
         except Exception as error:
-            print(f"⚠️ Could not retrieve llms.txt ({error}); using the manual placeholder.", file=sys.stderr)
+            _llms_schema_error = str(error)
+
+    if _llms_schema_error is not None:
+        if not allow_fallback:
+            raise ValueError(
+                f"Could not retrieve llms.txt from {LLMS_SCHEMA_URL} ({_llms_schema_error}). "
+                "Aborting --api run so the manual placeholder is not sent to the LLM."
+            )
+        if _llms_schema_context is None:
+            print(
+                f"⚠️ Could not retrieve llms.txt ({_llms_schema_error}); using the manual placeholder.",
+                file=sys.stderr,
+            )
             _llms_schema_context = (LLMS_SCHEMA_FALLBACK, False)
+
     return _llms_schema_context
 
 
@@ -617,7 +631,9 @@ def extract_pptx_data(mode, dry_run, config, selected_file=None):
             continue
             
         # --- GENERATE PROMPT (stdout) ---
-        schema_content, schema_found = get_llms_schema_context()
+        schema_content, schema_found = get_llms_schema_context(
+            allow_fallback=(mode == "manual" or dry_run)
+        )
 
         prompt_text = f"""System Role:
 You are an expert frontend developer and content architect. Your task is to convert a spatial coordinate map extracted from PowerPoint slides into a structured Markdoc (.mdoc) file for an e-training platform.

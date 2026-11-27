@@ -20,9 +20,10 @@ import extract
 
 class ExtractTests(unittest.TestCase):
     def setUp(self):
-        cache = patch.object(extract, "_llms_schema_context", None)
-        cache.start()
-        self.addCleanup(cache.stop)
+        for name in ("_llms_schema_context", "_llms_schema_error"):
+            cache = patch.object(extract, name, None)
+            cache.start()
+            self.addCleanup(cache.stop)
 
     def test_argument_parsing_and_exclusive_modes(self):
         parser = extract.build_parser()
@@ -191,28 +192,77 @@ class ExtractTests(unittest.TestCase):
                 presentation.save(path)
                 paths.append(str(path))
 
-            for response in (b"Schema content", b"", OSError("offline")):
-                with self.subTest(response=response):
-                    extract._llms_schema_context = None
-                    stdout = io.StringIO()
-                    stderr = io.StringIO()
-                    opener = Mock(side_effect=response) if isinstance(response, Exception) else Mock(
-                        return_value=io.BytesIO(response)
-                    )
-                    with patch.object(extract, "INPUT_DIR", str(input_dir)), \
-                            patch.object(extract, "LOCAL_IMG_DIR", str(root / "images")), \
-                            patch.object(extract.glob, "glob", return_value=paths), \
-                            patch.object(extract, "urlopen", opener), \
-                            contextlib.redirect_stdout(stdout), \
-                            contextlib.redirect_stderr(stderr):
-                        result = extract.extract_pptx_data("manual", True, {})
+            for mode, dry_run in (("manual", False), ("manual", True), ("api", True)):
+                for response in (b"Schema content", b"", OSError("offline")):
+                    with self.subTest(mode=mode, dry_run=dry_run, response=response):
+                        extract._llms_schema_context = None
+                        extract._llms_schema_error = None
+                        stdout = io.StringIO()
+                        stderr = io.StringIO()
+                        opener = Mock(side_effect=response) if isinstance(response, Exception) else Mock(
+                            return_value=io.BytesIO(response)
+                        )
+                        with patch.object(extract, "INPUT_DIR", str(input_dir)), \
+                                patch.object(extract, "LOCAL_IMG_DIR", str(root / "images")), \
+                                patch.object(extract.glob, "glob", return_value=paths), \
+                                patch.object(extract, "urlopen", opener), \
+                                patch.object(extract, "postprocess_and_save"), \
+                                patch.object(sys, "stdin", Mock(read=Mock(return_value="Markdoc"))), \
+                                contextlib.redirect_stdout(stdout), \
+                                contextlib.redirect_stderr(stderr):
+                            result = extract.extract_pptx_data(mode, dry_run, {})
 
-                    self.assertEqual(result, 0)
-                    opener.assert_called_once_with(extract.LLMS_SCHEMA_URL, timeout=10)
-                    expected = "Schema content" if response == b"Schema content" else extract.LLMS_SCHEMA_FALLBACK
-                    self.assertEqual(stdout.getvalue().count(f"<schema>\n{expected}\n</schema>"), 2)
-                    if expected == extract.LLMS_SCHEMA_FALLBACK:
-                        self.assertEqual(stderr.getvalue().count("Could not retrieve llms.txt"), 1)
+                        self.assertEqual(result, 0)
+                        opener.assert_called_once_with(extract.LLMS_SCHEMA_URL, timeout=10)
+                        expected = "Schema content" if response == b"Schema content" else extract.LLMS_SCHEMA_FALLBACK
+                        self.assertEqual(stdout.getvalue().count(f"<schema>\n{expected}\n</schema>"), 2)
+                        if expected == extract.LLMS_SCHEMA_FALLBACK:
+                            self.assertEqual(stderr.getvalue().count("Could not retrieve llms.txt"), 1)
+
+    def test_api_aborts_when_schema_unavailable(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            pptx_path = root / "1 - Example.pptx"
+            presentation = Presentation()
+            presentation.slides.add_slide(presentation.slide_layouts[6])
+            presentation.save(pptx_path)
+            second_path = root / "2 - Example.pptx"
+            presentation.save(second_path)
+            config = {"api_key": "key", "base_url": None, "model": "model"}
+            for response in (OSError("offline"), b""):
+                for cached_fallback in (False, True):
+                    with self.subTest(response=response, cached_fallback=cached_fallback):
+                        extract._llms_schema_context = None
+                        extract._llms_schema_error = None
+                        opener = Mock(side_effect=response) if isinstance(response, Exception) else Mock(
+                            return_value=io.BytesIO(response)
+                        )
+                        stderr = io.StringIO()
+                        with patch.object(sys, "argv", ["extract.py", "--api", "--yes"]), \
+                                patch.object(extract, "resolve_config", return_value=config), \
+                                patch.object(extract, "LOCAL_IMG_DIR", str(root / "images")), \
+                                patch.object(extract.glob, "glob", return_value=[str(pptx_path), str(second_path)]), \
+                                patch.object(extract, "urlopen", opener), \
+                                patch.object(extract, "OpenAI") as client, \
+                                patch.object(extract, "postprocess_and_save") as save, \
+                                contextlib.redirect_stderr(stderr):
+                            if cached_fallback:
+                                self.assertEqual(
+                                    extract.get_llms_schema_context(allow_fallback=True),
+                                    (extract.LLMS_SCHEMA_FALLBACK, False),
+                                )
+                                stderr.seek(0)
+                                stderr.truncate()
+                            self.assertEqual(extract.main(), 1)
+
+                        opener.assert_called_once_with(extract.LLMS_SCHEMA_URL, timeout=10)
+                        client.assert_not_called()
+                        save.assert_not_called()
+                        self.assertIn(f"Could not retrieve llms.txt from {extract.LLMS_SCHEMA_URL}", stderr.getvalue())
+                        self.assertIn("Aborting --api run", stderr.getvalue())
+                        self.assertNotIn("using the manual placeholder", stderr.getvalue())
+                        self.assertNotIn("Processing: Unit 2", stderr.getvalue())
+                        self.assertIn("offline" if isinstance(response, Exception) else "response was empty", stderr.getvalue())
 
     def test_interrupt_during_api_wait_aborts_batch(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -364,7 +414,7 @@ class ExtractTests(unittest.TestCase):
             with patch.object(extract, "INPUT_DIR", str(input_dir)), \
                     patch.object(extract, "LOCAL_IMG_DIR", str(root / "images")), \
                     patch.object(extract.glob, "glob", return_value=paths), \
-                    patch.object(extract, "urlopen", side_effect=OSError("offline")), \
+                    patch.object(extract, "urlopen", return_value=io.BytesIO(b"Schema")), \
                     patch.object(extract, "call_llm_api", side_effect=[error, "Markdoc"]) as api, \
                     patch.object(extract, "postprocess_and_save") as save, \
                     contextlib.redirect_stdout(io.StringIO()) as stdout, \
