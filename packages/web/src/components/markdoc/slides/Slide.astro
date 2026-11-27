@@ -89,17 +89,14 @@ const imgCount = (html.match(/<img\b/gi) || []).length;
   /* Reglas dinámicas según el número de imágenes en la diapositiva */
   .markdoc-slide[data-img-count="1"] .slide-content :global(img) {
     max-width: 300px;
-    max-height: 300px;
   }
 
   .markdoc-slide[data-img-count="2"] .slide-content :global(img) {
     max-width: 200px;
-    max-height: 200px;
   }
 
   .markdoc-slide:not([data-img-count="0"]):not([data-img-count="1"]):not([data-img-count="2"]) .slide-content :global(img) {
     max-width: 150px;
-    max-height: 150px;
   }
 
   /* =========================================
