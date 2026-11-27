@@ -3,6 +3,7 @@ import io
 import os
 import sys
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -18,6 +19,11 @@ import extract
 
 
 class ExtractTests(unittest.TestCase):
+    def setUp(self):
+        cache = patch.object(extract, "_llms_schema_context", None)
+        cache.start()
+        self.addCleanup(cache.stop)
+
     def test_argument_parsing_and_exclusive_modes(self):
         parser = extract.build_parser()
         args = parser.parse_args([
@@ -147,6 +153,123 @@ class ExtractTests(unittest.TestCase):
                 contextlib.redirect_stderr(io.StringIO()):
             result = extract.call_llm_api("prompt", config)
         self.assertEqual(result, '{% slide title="Title" %}\nBody\n{% /slide %}')
+
+    def test_api_request_error_propagates_from_worker(self):
+        config = {"api_key": "key", "base_url": None, "model": "model"}
+        client = Mock()
+        error = APIError("Request failed", request=Mock(headers={}), body=None)
+        client.chat.completions.create.side_effect = error
+        with patch.object(extract, "OpenAI", return_value=client), \
+                contextlib.redirect_stderr(io.StringIO()), \
+                self.assertRaises(APIError) as raised:
+            extract.call_llm_api("prompt", config)
+        self.assertIs(raised.exception, error)
+
+    def test_api_wait_propagates_keyboard_interrupt(self):
+        config = {"api_key": "key", "base_url": None, "model": "model"}
+        worker = Mock()
+        worker.is_alive.return_value = True
+        worker.join.side_effect = KeyboardInterrupt
+        with patch.object(extract, "OpenAI"), \
+                patch.object(extract.threading, "Thread", return_value=worker) as thread, \
+                contextlib.redirect_stderr(io.StringIO()), \
+                self.assertRaises(KeyboardInterrupt):
+            extract.call_llm_api("prompt", config)
+        self.assertTrue(thread.call_args.kwargs["daemon"])
+        worker.join.assert_called_once_with(timeout=0.2)
+
+    def test_batch_fetches_schema_once_including_fallback(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            input_dir = root / "input"
+            input_dir.mkdir()
+            paths = []
+            for unit in (1, 2):
+                path = input_dir / f"{unit} - Unit {unit}.pptx"
+                presentation = Presentation()
+                presentation.slides.add_slide(presentation.slide_layouts[6])
+                presentation.save(path)
+                paths.append(str(path))
+
+            for response in (b"Schema content", b"", OSError("offline")):
+                with self.subTest(response=response):
+                    extract._llms_schema_context = None
+                    stdout = io.StringIO()
+                    stderr = io.StringIO()
+                    opener = Mock(side_effect=response) if isinstance(response, Exception) else Mock(
+                        return_value=io.BytesIO(response)
+                    )
+                    with patch.object(extract, "INPUT_DIR", str(input_dir)), \
+                            patch.object(extract, "LOCAL_IMG_DIR", str(root / "images")), \
+                            patch.object(extract.glob, "glob", return_value=paths), \
+                            patch.object(extract, "urlopen", opener), \
+                            contextlib.redirect_stdout(stdout), \
+                            contextlib.redirect_stderr(stderr):
+                        result = extract.extract_pptx_data("manual", True, {})
+
+                    self.assertEqual(result, 0)
+                    opener.assert_called_once_with(extract.LLMS_SCHEMA_URL, timeout=10)
+                    expected = "Schema content" if response == b"Schema content" else extract.LLMS_SCHEMA_FALLBACK
+                    self.assertEqual(stdout.getvalue().count(f"<schema>\n{expected}\n</schema>"), 2)
+                    if expected == extract.LLMS_SCHEMA_FALLBACK:
+                        self.assertEqual(stderr.getvalue().count("Could not retrieve llms.txt"), 1)
+
+    def test_interrupt_during_api_wait_aborts_batch(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            input_dir = root / "input"
+            input_dir.mkdir()
+            paths = []
+            for unit in (1, 2):
+                path = input_dir / f"{unit} - Unit {unit}.pptx"
+                presentation = Presentation()
+                presentation.slides.add_slide(presentation.slide_layouts[6])
+                presentation.save(path)
+                paths.append(str(path))
+
+            started = threading.Event()
+            release = threading.Event()
+            workers = []
+            original_join = threading.Thread.join
+            client = Mock()
+
+            def blocked_request(**kwargs):
+                started.set()
+                release.wait()
+                return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="Markdoc"))])
+
+            def interrupt_join(worker, timeout=None):
+                workers.append(worker)
+                self.assertTrue(started.wait(timeout=2))
+                self.assertTrue(worker.daemon)
+                self.assertEqual(timeout, 0.2)
+                raise KeyboardInterrupt
+
+            client.chat.completions.create.side_effect = blocked_request
+            stderr = io.StringIO()
+            config = {"api_key": "key", "base_url": None, "model": "model"}
+            try:
+                with patch.object(sys, "argv", ["extract.py", "--api", "--yes"]), \
+                        patch.object(extract, "resolve_config", return_value=config), \
+                        patch.object(extract, "INPUT_DIR", str(input_dir)), \
+                        patch.object(extract, "LOCAL_IMG_DIR", str(root / "images")), \
+                        patch.object(extract.glob, "glob", return_value=paths), \
+                        patch.object(extract, "urlopen", return_value=io.BytesIO(b"Schema")), \
+                        patch.object(extract, "OpenAI", return_value=client), \
+                        patch.object(extract.threading.Thread, "join", interrupt_join), \
+                        patch.object(extract, "postprocess_and_save") as save, \
+                        contextlib.redirect_stderr(stderr):
+                    self.assertEqual(extract.main(), 130)
+                self.assertEqual(client.chat.completions.create.call_count, 1)
+                save.assert_not_called()
+                self.assertIn("Extraction cancelled by user.", stderr.getvalue())
+                self.assertNotIn("Processing: Unit 2", stderr.getvalue())
+                self.assertNotIn("Traceback", stderr.getvalue())
+            finally:
+                release.set()
+                for worker in workers:
+                    original_join(worker, timeout=2)
+                    self.assertFalse(worker.is_alive())
 
     def test_card_frame_is_included_in_spatial_prompt(self):
         with tempfile.TemporaryDirectory() as temp:

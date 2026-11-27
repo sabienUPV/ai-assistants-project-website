@@ -2,9 +2,11 @@ import argparse
 import getpass
 import os
 import glob
+import queue
 import re
 import sys
 import shutil
+import threading
 from pathlib import Path
 from urllib.request import urlopen
 from dotenv import load_dotenv
@@ -19,6 +21,10 @@ LOCAL_IMG_DIR = os.path.join(INPUT_DIR, "extracted_images")
 # Astro project relative paths
 ASSETS_DIR = "../packages/admin/src/assets/images/courses"
 CONTENT_DIR = "../packages/admin/src/content/en/courses"
+
+LLMS_SCHEMA_URL = "https://ai4pid.eu/llms.txt"
+LLMS_SCHEMA_FALLBACK = "[MANUALLY PASTE THE CONTENT OF YOUR llms.txt HERE]"
+_llms_schema_context = None
 
 LOGO_Y_THRESHOLD_TITLE = 0.15  # Upper 15% of the slide to filter out header logos in title slide (first slide)
 LOGO_Y_THRESHOLD_CONTENT = 0.05  # Upper 5% of the slide to filter out header logos in content slides (subsequent slides)
@@ -139,17 +145,51 @@ def configure_api(args, config):
     return config
 
 
+def get_llms_schema_context():
+    global _llms_schema_context
+    if _llms_schema_context is None:
+        try:
+            with urlopen(LLMS_SCHEMA_URL, timeout=10) as response:
+                content = response.read().decode("utf-8").strip()
+            if not content:
+                raise ValueError("The llms.txt response was empty")
+            _llms_schema_context = (content, True)
+        except Exception as error:
+            print(f"⚠️ Could not retrieve llms.txt ({error}); using the manual placeholder.", file=sys.stderr)
+            _llms_schema_context = (LLMS_SCHEMA_FALLBACK, False)
+    return _llms_schema_context
+
+
 def call_llm_api(prompt_text, config):
     client_options = {"api_key": config["api_key"]}
     if config["base_url"]:
         client_options["base_url"] = config["base_url"]
     client = OpenAI(**client_options)
     print(f"🤖 Sending slides to {config['model']}...", file=sys.stderr)
-    response = client.chat.completions.create(
-        model=config["model"],
-        messages=[{"role": "user", "content": prompt_text}],
-        temperature=0.1,
-    )
+    results = queue.SimpleQueue()
+
+    def request():
+        try:
+            response = client.chat.completions.create(
+                model=config["model"],
+                messages=[{"role": "user", "content": prompt_text}],
+                temperature=0.1,
+            )
+        except BaseException as error:
+            # Propagate worker failures, including interrupts, on the main thread.
+            results.put((False, error))
+        else:
+            results.put((True, response))
+
+    worker = threading.Thread(target=request, daemon=True)
+    worker.start()
+    while worker.is_alive():
+        worker.join(timeout=0.2)
+
+    succeeded, response = results.get_nowait()
+    if not succeeded:
+        raise response
+
     content = response.choices[0].message.content
     if not content:
         raise ValueError("The LLM API returned an empty response.")
@@ -577,18 +617,7 @@ def extract_pptx_data(mode, dry_run, config, selected_file=None):
             continue
             
         # --- GENERATE PROMPT (stdout) ---
-        schema_url = "https://ai4pid.eu/llms.txt"
-        schema_fallback = "[MANUALLY PASTE THE CONTENT OF YOUR llms.txt HERE]"
-        schema_found = False
-        try:
-            with urlopen(schema_url, timeout=10) as response:
-                schema_content = response.read().decode("utf-8").strip()
-            if not schema_content:
-                raise ValueError("The llms.txt response was empty")
-            schema_found = True
-        except Exception as e:
-            print(f"⚠️ Could not retrieve llms.txt ({e}); using the manual placeholder.", file=sys.stderr)
-            schema_content = schema_fallback
+        schema_content, schema_found = get_llms_schema_context()
 
         prompt_text = f"""System Role:
 You are an expert frontend developer and content architect. Your task is to convert a spatial coordinate map extracted from PowerPoint slides into a structured Markdoc (.mdoc) file for an e-training platform.
@@ -632,7 +661,7 @@ Process the following slides and generate the clean Markdoc code. Do not include
         if mode == "manual" or dry_run:
             print("Copy the text below (stdout) and paste it into your LLM.", file=sys.stderr)
         if schema_found:
-            print("The schema was successfully retrieved from " + schema_url, file=sys.stderr)
+            print("The schema was successfully retrieved from " + LLMS_SCHEMA_URL, file=sys.stderr)
         else:
             print("⚠️ The schema could not be retrieved; You need to manually paste it into the prompt BEFORE submitting it to the LLM.", file=sys.stderr)
         print("="*60 + "\n", file=sys.stderr)
@@ -673,23 +702,23 @@ Process the following slides and generate the clean Markdoc code. Do not include
     return 0
 
 def main():
-    parser = build_parser()
-    cli_args = parser.parse_args()
-    resolved_config = resolve_config(cli_args)
-
-    if cli_args.api:
-        selected_mode = "api"
-    elif cli_args.manual or cli_args.dry_run:
-        selected_mode = "manual"
-    elif cli_args.yes:
-        print("--yes requires an explicit --api or --manual mode.", file=sys.stderr)
-        return 1
-    elif sys.stdin.isatty():
-        selected_mode = interactive_menu()
-    else:
-        parser.error("Choose --api or --manual when stdin is not interactive.")
-
     try:
+        parser = build_parser()
+        cli_args = parser.parse_args()
+        resolved_config = resolve_config(cli_args)
+
+        if cli_args.api:
+            selected_mode = "api"
+        elif cli_args.manual or cli_args.dry_run:
+            selected_mode = "manual"
+        elif cli_args.yes:
+            print("--yes requires an explicit --api or --manual mode.", file=sys.stderr)
+            return 1
+        elif sys.stdin.isatty():
+            selected_mode = interactive_menu()
+        else:
+            parser.error("Choose --api or --manual when stdin is not interactive.")
+
         if selected_mode == "api" and not cli_args.dry_run:
             resolved_config = configure_api(cli_args, resolved_config)
         exit_code = extract_pptx_data(
@@ -698,6 +727,9 @@ def main():
             resolved_config,
             cli_args.file,
         )
+    except KeyboardInterrupt:
+        print("\n⚠️ Extraction cancelled by user.", file=sys.stderr)
+        exit_code = 130
     except (ValueError, APIError) as error:
         print(f"❌ {error}", file=sys.stderr)
         exit_code = 1
@@ -705,4 +737,8 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        print("\n⚠️ Extraction cancelled by user.", file=sys.stderr)
+        sys.exit(130)
