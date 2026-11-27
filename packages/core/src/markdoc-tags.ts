@@ -43,7 +43,7 @@ export const markdocTagAttributes = {
   },
   slideshow: {
     description: "Render a slideshow component with the provided slides.",
-    children: ['slide']
+    children: ['slide', 'quiz']
   },
   slide: {
     description: "Define a single slide for a slideshow component.",
@@ -98,11 +98,18 @@ export const markdocTagAttributes = {
   quiz: {
     description: "Render a quiz component with the provided questions.",
     contextForLLM: "Place quiz directly inside slideshow (never nested inside a slide tag, because each question renders its own locked slide). When consecutive slides form a quiz, merge each question and answer slide pair into one question inside a single quiz block.",
-    children: ['question']
+    children: ['question'],
+    attributes: {
+      embedded: {
+        type: Boolean,
+        render: 'embedded',
+        default: false,
+      },
+    },
   },
   question: {
     description: "Define a single question for a quiz component.",
-    contextForLLM: "For sequential 'Question N' or 'True or False N' and 'Answer N' slides, combine each pair into one question inside a quiz block placed directly inside slideshow (not inside a slide tag). Use image for the question's main illustration, answer image fields for distinct pictograms beside choices, isCorrect according to the answer slide, and explanation on the correct answer for any extra feedback.",
+    contextForLLM: "For sequential 'Question N' or 'True or False N' and 'Answer N' slides, combine each pair into one question inside a quiz block placed directly inside slideshow (not inside a slide tag). Use image for the question's main illustration and set isCorrect according to the answer slide. Never attach an image from an 'Answer N' slide to only one answer choice, because that reveals the correct answer before the learner clicks. Only set answers[].image when every option has a corresponding choice pictogram, such as using the shared True and False icons from the instructions slide for every option with that text; otherwise omit answers[].image for all options. Put any extra feedback in the correct answer's explanation.",
     attributes: {
       prompt: {
         type: String,
@@ -245,6 +252,19 @@ export function getMarkdocTags(fromProject: Project = 'web'): AstroMarkdocConfig
     },
     slideshow: {
       ...markdocTagAttributes.slideshow,
+      transform(node, config) {
+        for (const child of node.children) {
+          if (child.tag === 'quiz') {
+            child.attributes.embedded = true;
+          }
+        }
+
+        return new Markdoc.Tag(
+          config.tags?.slideshow?.render,
+          node.transformAttributes(config),
+          node.transformChildren(config)
+        );
+      },
       render: component(getPathPrefixAcrossProjects(fromProject, 'web') + 'src/components/markdoc/slides/Slideshow.astro'),
     },
     slide: {

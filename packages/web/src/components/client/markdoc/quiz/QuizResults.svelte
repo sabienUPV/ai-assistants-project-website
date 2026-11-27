@@ -17,7 +17,7 @@
   $effect(() => {
     if (!container) return;
 
-    // Escuchamos si la nota cambia en tiempo real
+    // Listen for real-time score updates.
     const handleScoreUpdate = (e: Event) => {
       const customEvent = e as CustomEvent<{score: number, total: number}>;
       score = customEvent.detail.score;
@@ -25,7 +25,7 @@
     };
     container.addEventListener('scorechanged', handleScoreUpdate);
 
-    // Pedimos la nota actual inmediatamente enviando un callback hacia arriba
+    // Request the current score immediately through a callback.
     container.dispatchEvent(new CustomEvent('requestscore', {
       bubbles: true,
       composed: true,
@@ -38,14 +38,22 @@
   });
 
   function restartGame() {
-    // 1. Avisamos al Quiz de que ponga los marcadores a 0
     container.dispatchEvent(new Event('resetquiz', { bubbles: true, composed: true }));
-    
-    // 2. Avisamos al Slideshow de que nos lleve a la diapositiva 0 (la portada)
+
+    const quizWrapper = container.closest<HTMLElement>('.quiz-wrapper');
+    const targetSlide = quizWrapper?.dataset.embedded === 'true'
+      ? quizWrapper.querySelector('.question-container')?.closest<HTMLElement>('.markdoc-slide')
+      : quizWrapper?.querySelector<HTMLElement>('.quiz-cover-slide .markdoc-slide');
+    const slideshowContent = targetSlide?.closest<HTMLElement>('.slideshow-content');
+    if (!targetSlide || !slideshowContent) return;
+
+    const slideIndex = Array.from(slideshowContent.querySelectorAll('.markdoc-slide')).indexOf(targetSlide);
+    if (slideIndex < 0) return;
+
     container.dispatchEvent(new CustomEvent('gotoslide', {
       bubbles: true, 
       composed: true, 
-      detail: { index: 0 }
+      detail: { index: slideIndex }
     }));
   }
 </script>

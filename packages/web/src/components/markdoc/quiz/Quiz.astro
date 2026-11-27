@@ -5,27 +5,34 @@ import QuizCover from './QuizCover.astro';
 import QuizResults from './QuizResults.astro';
 
 const { t } = Astro.locals;
+const { embedded = false } = Astro.props;
 
 const localizedTexts = {
   scoreLabel: t('quiz_score_label'),
 }
 --- 
 
-<QuizApp client:load localizedTexts={localizedTexts}>
-  <Slideshow>
-    {/* The cover of the quiz (the first slide) */}
-    <div class="quiz-cover-slide">
-      <QuizCover />
-    </div>
+<QuizApp client:load localizedTexts={localizedTexts} embedded={embedded}>
+  {embedded ? (
+    <>
+      <slot />
+      <div class="quiz-results-slide">
+        <QuizResults />
+      </div>
+    </>
+  ) : (
+    <Slideshow>
+      <div class="quiz-cover-slide">
+        <QuizCover />
+      </div>
 
-    {/* The questions that come from Markdoc */}
-    <slot />
+      <slot />
 
-    {/* The results of the quiz (the last slide) */}
-    <div class="quiz-results-slide">
-      <QuizResults />
-    </div>
-  </Slideshow>
+      <div class="quiz-results-slide">
+        <QuizResults />
+      </div>
+    </Slideshow>
+  )}
 </QuizApp>
 
 <style>

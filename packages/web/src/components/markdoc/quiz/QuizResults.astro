@@ -11,7 +11,7 @@ const localizedTexts = {
 };
 ---
 
-<!-- No la bloqueamos para que no dé problemas al llegar -->
+<!-- Keep the results slide unlocked so navigation can reach it. -->
 <Slide title={t('quiz_final_score_label') || 'Final Score'} locked={false}>
-  <QuizResultsInteractive client:visible localizedTexts={localizedTexts} />
+  <QuizResultsInteractive client:load localizedTexts={localizedTexts} />
 </Slide>

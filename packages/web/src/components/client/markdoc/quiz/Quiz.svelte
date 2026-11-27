@@ -3,32 +3,33 @@
 
   interface Props {
     children?: Snippet;
+    embedded?: boolean;
     localizedTexts?: {
       scoreLabel?: string;
     };
   }
-  let { children, localizedTexts }: Props = $props();
+  let { children, embedded = false, localizedTexts }: Props = $props();
 
-  // Estado del juego con Svelte 5
+  // Quiz state is managed with Svelte 5.
   let score = $state(0);
   let totalAnswered = $state(0);
 
-  // 1. Creamos una referencia al elemento del DOM
+  // Reference to the quiz wrapper element.
   let wrapper: HTMLElement;
 
-  // 2. Usamos $effect para añadir el listener cuando el componente se monta
+  // Add event listeners when the component mounts.
   $effect(() => {
     if (!wrapper) return;
 
-    // Nuestro manejador tipado
+    // Handle the typed custom event.
     const handleQuizAnswer = (event: Event) => {
-      // Casteamos el evento genérico al nuestro personalizado
+      // Cast the generic event to its custom event type.
       const customEvent = event as CustomEvent<{ isCorrect: boolean }>;
       
       totalAnswered++;
       if (customEvent.detail.isCorrect) score++;
 
-      // Emitimos hacia abajo (a los resultados) que la puntuación ha cambiado
+      // Notify the results component that the score changed.
       wrapper.querySelectorAll('.quiz-results-container').forEach(el => {
         el.dispatchEvent(new CustomEvent('scorechanged', {
           detail: { score, total: totalAnswered }
@@ -36,34 +37,34 @@
       });
     };
 
-    // Responder a la petición de nota usando el callback
+    // Respond to score requests through the supplied callback.
     const handleRequestScore = (event: Event) => {
       const customEvent = event as CustomEvent<{ callback: (s: number, t: number) => void }>;
       customEvent.detail.callback(score, totalAnswered);
     };
 
-    // Resetear todo el cuestionario
+    // Reset the quiz state.
     const handleResetQuiz = () => {
       score = 0;
       totalAnswered = 0;
       
-      // Lanzamos un evento hacia abajo a todas las preguntas para que se limpien
+      // Notify every question to reset its state.
       wrapper.querySelectorAll('.question-container').forEach(el => {
         el.dispatchEvent(new Event('resetquestion'));
       });
       
-      // Limpiamos los resultados
+      // Clear the displayed results.
       wrapper.querySelectorAll('.quiz-results-container').forEach(el => {
         el.dispatchEvent(new CustomEvent('scorechanged', { detail: { score: 0, total: 0 } }));
       });
     };
 
-    // Añadimos los listeners de forma nativa al contenedor del Quiz para los eventos que suben desde las preguntas
+    // Listen for events bubbling up from question components.
     wrapper.addEventListener('quizanswer', handleQuizAnswer);
     wrapper.addEventListener('requestscore', handleRequestScore);
     wrapper.addEventListener('resetquiz', handleResetQuiz);
 
-    // Limpieza al desmontar (muy importante para evitar memory leaks)
+    // Remove listeners when the component is destroyed.
     return () => {
       wrapper.removeEventListener('quizanswer', handleQuizAnswer);
       wrapper.removeEventListener('requestscore', handleRequestScore);
@@ -72,8 +73,8 @@
   });
 </script>
 
-<div class="quiz-wrapper" bind:this={wrapper}>
-  <!-- Marcador superior elegante -->
+<div class="quiz-wrapper" data-embedded={embedded ? 'true' : 'false'} bind:this={wrapper}>
+  <!-- Quiz score -->
   <div class="score-board">
     <span>{localizedTexts?.scoreLabel || 'Score'}:</span>
     <span class="score-numbers">
@@ -81,7 +82,7 @@
     </span>
   </div>
 
-  <!-- Aquí dentro se inyecta el Slideshow.astro -->
+  <!-- Quiz slides are rendered here. -->
   <div class="quiz-content">
     {@render children?.()}
   </div>
@@ -109,7 +110,7 @@
 
   .score-numbers strong {
     font-size: 1.5rem;
-    color: #4ade80; /* Un verde vibrante para destacar el número de aciertos */
+    color: #4ade80; /* Highlight the correct-answer count. */
   }
 
   @media print {

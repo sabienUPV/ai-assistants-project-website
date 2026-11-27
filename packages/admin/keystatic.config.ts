@@ -90,7 +90,7 @@ const createComponents = (collectionName: string) => ({
   slideshow: repeating({
     label: 'Slideshow',
     description: markdocTagAttributes.slideshow.description,
-    children: ['slide'], // Only allow slide components. This should match the tag name for slides
+    children: ['slide', 'quiz'],
     schema: {}, // No additional fields for the slideshow itself, just the slides
   }),
   slide: wrapper({
