@@ -3,6 +3,8 @@
 
   interface Props {
     prompt: string;
+    image?: string;
+    imageAlt?: string;
     answers: Answer[];
     localizedTexts?: {
       correctAnswerLabel?: string;
@@ -11,16 +13,16 @@
       printAnswerNoExplanationLabel?: string;
     };
   }
-  const { prompt, answers, localizedTexts }: Props = $props();
+  const { prompt, image, imageAlt, answers, localizedTexts }: Props = $props();
 
-  // Estados locales con Svelte 5
+  // Local state for the question.
   let status = $state<'playing' | 'revealed'>('playing');
   let selectedAnswer = $state<Answer | null>(null);
 
-  // Referencia al contenedor HTML
+  // Reference to the question container.
   let container: HTMLElement;
 
-  // Variable para guardar las referencias de los clones
+  // References to the slide clones used for printing.
   let clonedSlides: HTMLElement[] | null = null;
 
   function findSlideElement() {
@@ -33,85 +35,81 @@
     status = 'revealed';
     selectedAnswer = answer;
 
-    // Al responder, desbloqueamos la diapositiva padre
-    // (Nota: Como este evento se usa en el botón de cada respuesta, no podemos hacer closure de la slide (bueno, podríamos pero no merece la pena en este caso), así que la buscamos en el DOM directamente)
+    // Unlock the parent slide after an answer is selected.
+    // Find the slide in the DOM because the answer button handler does not capture it.
     const slide = findSlideElement();
     if (slide) slide.dataset.locked = 'false';
     
-    // Sumamos al marcador global
-    // Disparamos un evento nativo que "burbujeará" hacia arriba por el DOM
+    // Update the global score through a bubbling DOM event.
     container.dispatchEvent(new CustomEvent('quizanswer', {
       detail: { isCorrect: answer.isCorrect },
-      bubbles: true, // ¡Clave! Permite que el evento suba hasta el Quiz
+      bubbles: true, // Allow the event to bubble up to the quiz.
       composed: true
     }));
 
-    // Disparamos evento para avisar al Slideshow de que esta slide ya no está bloqueada
+    // Notify the slideshow that this slide is no longer locked.
     container.dispatchEvent(new CustomEvent('slidestatechanged', { 
       bubbles: true, 
       composed: true 
     }));
   }
 
-  // Función para devolver la pregunta a su estado inicial
+  // Restore the question to its initial state.
   function resetQuestion(slide: HTMLElement | null) {
     status = 'playing';
     selectedAnswer = null;
     
-    // Volvemos a echar el cerrojo a la diapositiva (para que el usuario no pueda avanzar sin responder)
+    // Lock the slide until the question is answered again.
     if (slide) slide.dataset.locked = 'true';
   }
 
   function cloneNodeBeforePrint(slide: HTMLElement | null) {
     if (!slide) return;
 
-    // Nos aseguramos de que la slide original no tenga la clase no-print aún para que los clones no la copien sin querer (ya que los clones no deben tener la clase no-print, sino la clase print-only)
+    // Keep the original slide's print classes off the clones.
     slide.classList.remove('no-print');
     
-    // Clonamos el nodo entero de la slide con sus hijos (deep clone)
+    // Clone the slide and all its children.
     const clonedUnrevealedSlide = slide.cloneNode(true) as HTMLElement;
 
     const clonedUnrevealedSlideContainer = clonedUnrevealedSlide.querySelector<HTMLElement>('.question-container');
     if (!clonedUnrevealedSlideContainer) return;
 
-    // Añadimos las siguientes clases CSS al primer container clonado para que se vea correctamente en el print:
-    // 1. print-question-clone: para que se vea en el print y no se vea en pantalla, y aplique estilos específicos de print
-    // 2. is-revealed: (este es solo para que el segundo nodo clonado se lo lleve sin tener que buscar en el DOM su container otra vez que es más costoso)
-    // para que muestre la respuesta correcta en el segundo nodo clonado (ya que el primer clon sería la versión sin revelar, y el segundo clon sería la versión revelada)
+    // Mark the first clone for print-only rendering and revealed-answer styling.
+    // The revealed clone inherits this class before it is removed from the first clone.
     clonedUnrevealedSlideContainer.classList.add('print-question-clone', 'is-revealed');
 
     const clonedRevealedSlide = clonedUnrevealedSlide.cloneNode(true) as HTMLElement;
 
-    // Nos aseguramos de que el contenedor del primer clon no tenga la clase is-revealed para que no se vea revelado en el print
-    // (ya que el segundo clon es el que se mostrará revelado)
+    // Keep the first clone unrevealed; the second clone shows the revealed answer.
     clonedUnrevealedSlideContainer.classList.remove('is-revealed');
 
-    // Nos aseguramos de que el details de explicaciones esté abierto en el clon revelado para que se vea en el print
+    // Open the explanations in the revealed clone for printing.
     const detailsElement = clonedRevealedSlide.querySelector<HTMLDetailsElement>('details.explanations');
     if (detailsElement) detailsElement.open = true;
 
-    // Usamos una clase CSS global especial para que solo se vean los clones en print y no en pantalla
+    // Show the clones only in print.
     clonedUnrevealedSlide.classList.add('print-only'); 
     clonedRevealedSlide.classList.add('print-only');
 
-    // En la slide original, inyectamos la clase CSS global especial no-print para que no se vea en print y solo se vea en pantalla
+    // Hide the original slide in print.
     slide.classList.add('no-print');
 
-    // Inyectamos las slides clonadas justo debajo de la original
-    // IMPORTANTE: Como usamos insertBefore, se van a inyectar en orden inverso, así que primero inyectamos la slide revelada y luego la no revelada para que se vea primero la no revelada y luego la revelada en el print
+    // Insert the clones below the original. Insert the revealed clone first so the
+    // unrevealed version appears before it in the printed document.
     if (slide.parentNode) {
       slide.parentNode.insertBefore(clonedRevealedSlide, slide.nextSibling);
       slide.parentNode.insertBefore(clonedUnrevealedSlide, slide.nextSibling);
     }
 
-    // Nos guardamos las referencias de los clones para poder borrarlos después del print
+    // Keep references so the clones can be removed after printing.
     clonedSlides = [clonedUnrevealedSlide, clonedRevealedSlide];
   }
 
   function removeClonedNodesAfterPrint(slide: HTMLElement | null) {
     if (!slide) return;
 
-    // Borramos los clones del DOM
+    // Remove the print clones from the DOM.
     if (clonedSlides && clonedSlides.length > 0) {
       clonedSlides.forEach((clonedSlide) => {
         if (clonedSlide.parentNode) {
@@ -134,27 +132,26 @@
     window.addEventListener('beforeprint', beforePrintHandler);
     window.addEventListener('afterprint', afterPrintHandler);
     
-    // Escuchamos la orden de reinicio que viene desde arriba
+    // Listen for reset events from the parent quiz.
     container.addEventListener('resetquestion', resetQuestionHandler);
 
-    // (DEBUG/DEV ONLY) Creamos funciones de test para poder probar el clonado desde la consola del navegador sin tener que abrir el diálogo de impresión
+    // Development-only helpers for testing print cloning without opening the print dialog.
     if (import.meta.env.DEV) {
-      // Nos inventamos un evento custom que sea idéntico a beforeprint y afterprint pero que solo llame a nuestros handlers
+      // Simulate beforeprint and afterprint using the same handlers.
       window.addEventListener('testbeforeprint', beforePrintHandler);
       window.addEventListener('testafterprint', afterPrintHandler);
 
-      // Exponemos funciones al objeto window del navegador que mandan el evento testbeforeprint y testafterprint para poder probarlo desde la consola del navegador
-      // Puedes llamarlas escribiendo testBeforePrint() o testAfterPrint() en la consola
+      // Expose console helpers named testBeforePrint() and testAfterPrint().
       if (!(window as any).testBeforePrint) {
         (window as any).testBeforePrint = () => {
-          console.log('🖨️ [DEV] Simulando beforeprint...');
+          console.log('🖨️ [DEV] Simulating beforeprint...');
           window.dispatchEvent(new Event('testbeforeprint'));
         };
       }
       
       if (!(window as any).testAfterPrint) {
         (window as any).testAfterPrint = () => {
-          console.log('🧹 [DEV] Simulando afterprint...');
+          console.log('🧹 [DEV] Simulating afterprint...');
           window.dispatchEvent(new Event('testafterprint'));
         };
       }
@@ -165,7 +162,7 @@
       window.removeEventListener('beforeprint', beforePrintHandler);
       window.removeEventListener('afterprint', afterPrintHandler);
 
-      // Limpieza de seguridad por si el componente se destruye con el diálogo abierto
+      // Clean up cloned nodes if the component is destroyed while printing.
       if (clonedSlides) {
         clonedSlides.forEach((clonedSlide) => {
           if (clonedSlide.parentNode) {
@@ -175,7 +172,7 @@
         clonedSlides = null;
       }
 
-      // (DEBUG/DEV ONLY) Limpiamos los event listeners de test al destruir el componente
+      // Remove development-only test listeners when the component is destroyed.
       if (import.meta.env.DEV) {
         window.removeEventListener('testbeforeprint', beforePrintHandler);
         window.removeEventListener('testafterprint', afterPrintHandler);
@@ -185,7 +182,12 @@
 </script>
 
 <div class="question-container" class:is-revealed={status === 'revealed'} bind:this={container}>
-  <h3 class="question-title">{prompt}</h3>
+  <div class="question-prompt">
+    {#if image}
+      <img class="question-image" src={image} alt={imageAlt ?? ''} loading="lazy" decoding="async" />
+    {/if}
+    <h3 class="question-title">{prompt}</h3>
+  </div>
 
   <div class="buttons">
     {#each answers as ans, index}
@@ -197,7 +199,15 @@
         onclick={() => guess(ans)}
         disabled={status === 'revealed'}
       >
-        <span class="answer-number">{index + 1})</span><span class="answer-text">{ans.text}</span>
+        <span class="answer-number">{index + 1})</span>
+        <span class="answer-content">
+          {#if ans.image}
+            <img class="answer-image" src={ans.image} alt={ans.imageAlt ?? ''} loading="lazy" decoding="async" />
+          {/if}
+          {#if ans.text}
+            <span class="answer-text">{ans.text}</span>
+          {/if}
+        </span>
       </button>
     {/each}
   </div>
@@ -241,15 +251,31 @@
 
   .question-title {
     font-size: 1.5rem;
-    margin-bottom: 2rem;
+    margin: 0;
     line-height: 1.4;
     color: var(--color-text);
   }
 
-  /* Cuadrícula adaptada */
+  .question-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .question-image {
+    display: block;
+    width: auto;
+    max-width: min(100%, 22rem);
+    max-height: 16rem;
+    object-fit: contain;
+  }
+
+  /* Responsive answer grid. */
   .buttons {
     display: grid;
-    grid-template-columns: 1fr; /* Móviles: 1 columna */
+    grid-template-columns: 1fr; /* One column on small screens. */
     gap: 1rem;
     width: 100%;
     margin-bottom: 2rem;
@@ -257,7 +283,13 @@
 
   @media (min-width: 600px) {
     .buttons {
-      grid-template-columns: repeat(2, 1fr); /* Desktop: 2 columnas */
+      grid-template-columns: repeat(2, 1fr); /* Two columns on wider screens. */
+    }
+  }
+
+  @media screen and (max-width: 1000px) {
+    :global(html.easy-to-read) .buttons {
+      grid-template-columns: 1fr;
     }
   }
 
@@ -290,14 +322,31 @@
   }
 
   .answer-number {
-    display: none; /* Ocultamos el número de respuesta por defecto */
+    display: none; /* Hide answer numbers until the question is revealed. */
+  }
+
+  .answer-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .answer-image {
+    display: block;
+    width: auto;
+    max-width: min(100%, 6rem);
+    max-height: 6rem;
+    object-fit: contain;
   }
 
   .question-container.is-revealed .answer-number {
-    display: inline; /* Mostramos el número de respuesta si la pregunta está revelada */
+    display: inline; /* Show answer numbers after the question is revealed. */
   }
 
-  /* Estados revelados (Estilos semánticos) */
+  /* Revealed-state styles. */
 
   /* NOTE: In order to simplify the CSS and make it more efficient, we use defaults with overrides to avoid extra checks. We first apply styles unselected and incorrect answers, then we override them for both selected incorrect answers and for correct answers. Since we use the same few styles in all cases, this does not add much overhead in terms of extra overrides, while making the CSS selectors way simpler, which is what matters most in terms of performance. */
 
@@ -391,12 +440,26 @@
 
   /* NOTE: We don't control the visibility of the original and cloned slides from CSS here because, since the slides are parent elements, we would need to use the :has() pseudo-class, which is not supported in all browsers yet. Instead, we inject global CSS classes "print-only" and "no-print" via JS to the original and cloned slide elements, so that the CSS style is apply from the top and works on all browsers */
   @media print {
-    /* Como en print se fuerza el fondo blanco en el global para ahorrar tinta, le ponemos un emoji de check verde detrás de la respuesta correcta para que se vea bien */
+    .question-prompt,
+    .answer-btn {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .question-image {
+      max-height: 12rem;
+    }
+
+    .answer-image {
+      max-height: 4rem;
+    }
+
+    /* Add a check mark so the correct answer remains identifiable in print. */
     .question-container.is-revealed .answer-btn.is-correct::after {
       content: ' ✅';
     }
 
-    /* Ocultamos el icono del details de explicaciones en print para que no se vea el triángulo (ya que no aporta nada en print) */
+    /* Hide the disclosure marker in print. */
     .explanations .explanations-summary::marker {
       content: '';
     }

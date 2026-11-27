@@ -334,11 +334,15 @@ const createComponents = (collectionName: string) => ({
     description: markdocTagAttributes.question.description,
     schema: {
       prompt: fields.text({ label: 'Prompt', validation: { isRequired: true }, multiline: true }),
+      image: fields.text({ label: 'Question Image Path' }),
+      imageAlt: fields.text({ label: 'Question Image Alternative Text' }),
       answers: fields.array(
         fields.object({
           text: fields.text({ label: 'Answer Text', validation: { isRequired: true } }),
           isCorrect: fields.checkbox({ label: 'Is Correct', defaultValue: false }),
           explanation: fields.text({ label: 'Explanation' }),
+          image: fields.text({ label: 'Answer Image Path' }),
+          imageAlt: fields.text({ label: 'Answer Image Alternative Text' }),
         }),
         {
           label: 'Answers',

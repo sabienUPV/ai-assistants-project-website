@@ -155,28 +155,110 @@ def call_llm_api(prompt_text, config):
         raise ValueError("The LLM API returned an empty response.")
 
     content = content.strip()
+    content = re.sub(
+        r"\A(?:\s*<think>.*?</think>\s*)+",
+        "",
+        content,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
     content = re.sub(r"\A```(?:markdoc|markdown)?[ \t]*\r?\n", "", content, flags=re.IGNORECASE)
     content = re.sub(r"\r?\n?```[ \t]*\Z", "", content)
     return content.strip()
 
 
+def sanitize_markdoc_tags(mdoc_text):
+    """Escape unescaped double quotes inside top-level Markdoc string attributes."""
+    def sanitize_tag(match):
+        tag = match.group(0)
+        body_start = tag.find(" ") + 1
+        body_end = tag.rfind("%}")
+        body = tag[body_start:body_end]
+        result = []
+        index = 0
+        nesting = 0
+
+        while index < len(body):
+            attribute = re.match(r"[A-Za-z_][\w-]*\s*[:=]\s*\"", body[index:])
+            if attribute and nesting == 0:
+                opening_quote = index + attribute.end() - 1
+                closing_quote = None
+                for candidate in range(opening_quote + 1, len(body)):
+                    if body[candidate] != '"' or _is_escaped(body, candidate):
+                        continue
+                    remainder = body[candidate + 1:]
+                    if (
+                        re.match(r"\s*[A-Za-z_][\w-]*\s*[:=]", remainder)
+                        or not remainder.strip()
+                    ):
+                        closing_quote = candidate
+                        break
+
+                if closing_quote is not None:
+                    result.append(body[index:opening_quote + 1])
+                    for quote_index in range(opening_quote + 1, closing_quote):
+                        char = body[quote_index]
+                        if char == '"' and not _is_escaped(body, quote_index):
+                            result.append("\\")
+                        result.append(char)
+                    result.append('"')
+                    index = closing_quote + 1
+                    continue
+
+            char = body[index]
+            result.append(char)
+            if char in "[{(":
+                nesting += 1
+            elif char in "]})":
+                nesting = max(0, nesting - 1)
+            elif char == '"' and nesting > 0:
+                next_quote = index + 1
+                while next_quote < len(body):
+                    if body[next_quote] == '"' and not _is_escaped(body, next_quote):
+                        break
+                    next_quote += 1
+                if next_quote < len(body):
+                    result.extend(body[index + 1:next_quote + 1])
+                    index = next_quote
+            index += 1
+
+        return tag[:body_start] + "".join(result) + tag[body_end:]
+
+    return re.sub(r"\{%.*?%\}", sanitize_tag, mdoc_text, flags=re.DOTALL)
+
+
+def _is_escaped(text, index):
+    backslashes = 0
+    index -= 1
+    while index >= 0 and text[index] == "\\":
+        backslashes += 1
+        index -= 1
+    return backslashes % 2 == 1
+
+
 def postprocess_and_save(llm_output, unit_str, title_str, unit_folder, output_img_dir):
     # --- POST-PROCESSING ---
 
-    # 1. Resolve Image Paths via Regex
-    # Looks for ![filename.ext](anything_or_nothing) and replaces it with the full Astro asset path
+    # 1. Resolve extracted image paths in Markdown and Markdoc attributes.
     astro_asset_path = f"@admin-assets/images/courses/{unit_folder}"
     processed_mdoc = re.sub(
         r'!\[([^\]]+)\]\([^\)]*\)',
         rf'![\1]({astro_asset_path}/\1)',
         llm_output
     )
+    extracted_image = r"slide_\d+_[^\"'\s]+\.(?:png|jpe?g|gif|webp|svg)"
+    processed_mdoc = re.sub(
+        rf'(\bimage\s*[:=]\s*")({extracted_image})(")',
+        rf'\1{astro_asset_path}/\2\3',
+        processed_mdoc,
+        flags=re.IGNORECASE,
+    )
+    processed_mdoc = sanitize_markdoc_tags(processed_mdoc)
 
     # 2. Remove Redundant Slide Titles
     # The LLM may have repeated the slide title at the top of the slide content.
     def clean_slide(match):
         full_slide = match.group(0)
-        title = match.group(1).strip()
+        title = match.group(1).replace(r'\"', '"').strip()
 
         # Regex to match either titles (e.g., ### Title) or emphasized/bolded titles (e.g., **Title**) at the start of the slide content, allowing for optional whitespace and newlines
         # Regex explanation:
@@ -194,7 +276,7 @@ def postprocess_and_save(llm_output, unit_str, title_str, unit_folder, output_im
     # - {%\s*slide\s+title="([^"]+)"[^%]*%} : Matches the opening slide tag and captures the title
     # - .*? : Non-greedy match for any content inside the slide
     # - {%\s*/slide\s*%} : Matches the closing slide tag
-    slide_pattern = r'{%\s*slide\s+title="([^"]+)"[^%]*%}.*?{%\s*/slide\s*%}'
+    slide_pattern = r'{%\s*slide\s+title="((?:\\.|[^"\\])*)"[^%]*%}.*?{%\s*/slide\s*%}'
     processed_mdoc = re.sub(slide_pattern, clean_slide, processed_mdoc, flags=re.DOTALL)
 
     # 3. Append Frontmatter
@@ -436,6 +518,21 @@ def extract_pptx_data(mode, dry_run, config, selected_file=None):
                                         "x": center_x, 
                                         "y": center_y
                                     })
+                                elif (
+                                    shape_type in [MSO_SHAPE_TYPE.FREEFORM, MSO_SHAPE_TYPE.AUTO_SHAPE]
+                                    and hasattr(shape, "line")
+                                    and getattr(getattr(shape.line, "fill", None), "type", None) == 1
+                                    and rel_width > 0.15
+                                    and rel_height > 0.15
+                                ):
+                                    elements.append({
+                                        "type": "CardFrame",
+                                        "content": f"[{name}]",
+                                        "x": center_x,
+                                        "y": center_y,
+                                        "width": rel_width,
+                                        "height": rel_height,
+                                    })
                                 else:
                                     # Pure vector path without image fill, and not a horizontal line. We just include a placeholder with the type of element for the LLM to handle.
                                     elements.append({"type": "Vector", "content": f"[{name}]", "x": center_x, "y": center_y})
@@ -463,7 +560,17 @@ def extract_pptx_data(mode, dry_run, config, selected_file=None):
                 elements.sort(key=lambda e: (round(e["y"], 2), e["x"]))
 
                 for el in elements:
-                    spatial_data_output.append(f"[X:{el['x']:.2f}, Y:{el['y']:.2f}] {el['type']}: {el['content']}")
+                    if el["type"] == "CardFrame":
+                        spatial_data_output.append(
+                            f"[X:{el['x']:.2f}, Y:{el['y']:.2f}, "
+                            f"W:{el['width']:.2f}, H:{el['height']:.2f}] "
+                            f"CardFrame: {el['content']}"
+                        )
+                    else:
+                        spatial_data_output.append(
+                            f"[X:{el['x']:.2f}, Y:{el['y']:.2f}] "
+                            f"{el['type']}: {el['content']}"
+                        )
 
         except Exception as e:
             print(f"❌ Error processing {filename}: {e}", file=sys.stderr)
@@ -500,13 +607,17 @@ You will receive raw data representing elements on slides. Each element has an [
 
 You must apply these logical rules to build the Markdoc layout:
 
-1. Slideshow Wrapping: Wrap the entire output in a single {{% slideshow %}} component. Each `--- SLIDE X ---` must be wrapped in a {{% slide title="[Extracted Title]" %}} tag. The title is usually the text element with the lowest Y value.
-2. Column Layouts (The X Axis): If you detect elements positioned on opposite sides of the screen (e.g., an image at X:0.10 and text at X:0.50), you MUST use the {{% columns %}} and {{% column %}} tags to recreate the visual layout.
-3. Paragraph Splitting (The Y Axis) - CRITICAL RULE: Often, a single text block contains multiple paragraphs separated by ` \\n `. If you see multiple images stacked vertically on one side (different Y values), and a single multi-paragraph text block on the other side, you must split the text block by `\\n` and pair each individual paragraph with its corresponding image (based on similar Y heights) inside separate {{% columns %}} blocks.
-4. Rich Text Preservation: If you see markdown bold (`**text**`) or bullets (`- text`) in the raw text elements, preserve them exactly as they are in the final output.
-5. Images: Render images using standard markdown syntax based on the input data. Do not alter the filenames.
-6. Title Deduplication: Once a text block is extracted as the slide's `title` attribute, DO NOT repeat it inside the slide body (e.g., do NOT write `### Title` or `**Title**` at the top of the content).
-7. Full-Width Interactive Components: Interactive components (e.g., `{{% textInput %}}`, `{{% quiz %}}`, etc.) and any immediate action prompt or challenge text directly preceding them (e.g., "**Your challenge:** ...") must NEVER be placed inside a `{{% column %}}`. If the slide uses `{{% columns %}}` for contextual content or images, close the `{{% columns %}}` block BEFORE rendering the action prompt and interactive component, ensuring they sit at the root slide level across the full width.
+1. Attribute Quote Safety: If a slide title or any attribute value contains a double quote (`"`), escape each inner quote as `\\\"` and keep the opening and closing attribute quotes unescaped. For example: `title="GAME: \\\"We're meeting for drinks at 7 pm\\\""`.
+2. Slideshow Wrapping: Wrap the output in a single {{% slideshow %}} component. By default, wrap each `--- SLIDE X ---` in a {{% slide title="[Extracted Title]" %}} tag. Quiz merging described in Rule 11 is the exception to the one-slide-to-one-Markdoc-slide rule. The title is usually the text element with the lowest Y value.
+3. Column Layouts (The X Axis): If you detect elements positioned on opposite sides of the screen (e.g., an image at X:0.10 and text at X:0.50), use the {{% columns %}} and {{% column %}} tags to recreate the visual layout.
+4. Paragraph Splitting (The Y Axis): A text block may contain multiple paragraphs separated by ` \\n `. If multiple images are stacked vertically on one side (different Y values) and a single multi-paragraph text block is on the other, split the text block by `\\n` and pair each paragraph with its corresponding image (based on similar Y heights) inside separate {{% columns %}} blocks.
+5. Verbatim Easy Read Paragraph Spacing - CRITICAL: NEVER rewrite, paraphrase, summarize, add, or omit any words from the source text. Separate every standalone sentence, paragraph, and lead-in with a blank line (`\\n\\n`) so Markdoc renders distinct `<p>` blocks for Easy Read accessibility. For mid-sentence line wraps where ` \\n ` splits an incomplete sentence across lines (for example, `"Say what you **need,** the **place** and \\n the **time**"`), join the lines into one continuous sentence with a single space. Keep bullet lists (`- ...`) grouped together, with blank lines before and after each list.
+6. Rich Text Preservation: Preserve Markdown bold (`**text**`) and bullets (`- text`) from the extracted text exactly in the final output.
+7. Images: Render images using standard Markdown syntax based on the input data. Do not alter filenames.
+8. Title Deduplication: Once a text block is used as the slide's `title` attribute, do not repeat it inside the slide body (for example, do not write `### Title` or `**Title**` at the top).
+9. Full-Width Interactive Components: Interactive components (e.g., `{{% textInput %}}`, `{{% quiz %}}`) and any immediate action prompt or challenge text directly preceding them (e.g., "**Your challenge:** ...") must never be placed inside a `{{% column %}}`. If the slide uses `{{% columns %}}` for context or images, close the columns block before rendering the action prompt and interactive component, keeping them at the slide root.
+10. Semantic Flashcard Conversion: When a slide represents cards (for example, a title containing "card" or "cards" such as "Need cards" or "Problem card", elements grouped inside `CardFrame` bounds, or 2–4 parallel columns each containing a small image/icon and a short bold phrase), wrap each card's content in a `{{% flashcard %}}` inside its corresponding `{{% column %}}`.
+11. Semantic Quiz Merging: When slides form an evaluation quiz or sequential `Question N` / `True or False N` followed by `Answer N` slides, merge all question/answer pairs into a single `{{% quiz %}}` block placed directly inside `{{% slideshow %}}` (DO NOT wrap `{{% quiz %}}` inside a `{{% slide %}}` tag, because each `{{% question %}}` renders its own slide). Map the question's main illustration to the question's `image` attribute. Put distinct pictograms for answer options in each answer's `image` attribute. Set `isCorrect` from the Answer slide and place any extra feedback text from that slide in the correct answer's `explanation`. This is the exception to Rule 2's one-to-one slide mapping.
 
 Input Data:
 Process the following slides and generate the clean Markdoc code. Do not include explanations, just output the .mdoc code.

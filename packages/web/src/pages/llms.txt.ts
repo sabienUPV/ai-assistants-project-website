@@ -7,13 +7,7 @@
  */
 
 import Markdoc from '@markdoc/markdoc';
-import { markdocTagAttributes } from '@markdoc-tags';
-
-interface TagConfig {
-  description?: string;
-  attributes?: Record<string, unknown>; // Optional, since a tag might not have attributes
-  contextForLLM?: string; // Optional property for LLM-specific context
-}
+import { markdocTagAttributes, type MarkdocTagDefinition } from '@markdoc-tags';
 
 export async function GET() {
   // 1. Fetch all raw .mdoc files from your content directories
@@ -74,15 +68,12 @@ export async function GET() {
   }
 
   // 4. Build the JSON Schema Context dynamically
-  const tagsSchema = Object.entries(markdocTagAttributes).map(([tag, config]) => {
-    // Cast config to TagConfig temporarily to safely check for optional properties without TypeScript errors (such as contextForLLM)
-    const configData = config as TagConfig;
-    
+  const tagsSchema = Object.entries<MarkdocTagDefinition>(markdocTagAttributes).map(([tag, config]) => {
     return {
       tag,
-      description: configData.description,
-      contextForLLM: configData.contextForLLM, // Will be undefined if not present, which JSON.stringify ignores cleanly
-      attributes: configData.attributes
+      description: config.description,
+      contextForLLM: config.contextForLLM,
+      attributes: 'attributes' in config ? config.attributes : undefined
     };
   });
 

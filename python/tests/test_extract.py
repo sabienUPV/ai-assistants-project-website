@@ -10,6 +10,9 @@ from unittest.mock import Mock, patch
 
 from openai import APIError
 from pptx import Presentation
+from pptx.dml.color import RGBColor
+from pptx.enum.shapes import MSO_SHAPE
+from pptx.util import Inches
 
 import extract
 
@@ -107,6 +110,7 @@ class ExtractTests(unittest.TestCase):
             api.assert_not_called()
             self.assertIn("System Role:", stdout.getvalue())
             self.assertIn("Example slide", stdout.getvalue())
+            self.assertIn('title="GAME: \\"', stdout.getvalue())
             self.assertFalse((root / "content").exists())
             self.assertFalse((root / "assets").exists())
 
@@ -131,6 +135,47 @@ class ExtractTests(unittest.TestCase):
                     temperature=0.1,
                 )
 
+    def test_api_response_strips_think_block_before_fences(self):
+        config = {"api_key": "key", "base_url": None, "model": "model"}
+        client = Mock()
+        client.chat.completions.create.return_value = SimpleNamespace(
+            choices=[SimpleNamespace(message=SimpleNamespace(
+                content='<think>private reasoning</think>\n```markdoc\n{% slide title="Title" %}\nBody\n{% /slide %}\n```'
+            ))]
+        )
+        with patch.object(extract, "OpenAI", return_value=client), \
+                contextlib.redirect_stderr(io.StringIO()):
+            result = extract.call_llm_api("prompt", config)
+        self.assertEqual(result, '{% slide title="Title" %}\nBody\n{% /slide %}')
+
+    def test_card_frame_is_included_in_spatial_prompt(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            pptx_path = root / "1 - Example.pptx"
+            presentation = Presentation()
+            slide = presentation.slides.add_slide(presentation.slide_layouts[6])
+            frame = slide.shapes.add_shape(
+                MSO_SHAPE.RECTANGLE,
+                Inches(1),
+                Inches(2),
+                Inches(4),
+                Inches(3),
+            )
+            frame.line.color.rgb = RGBColor(0, 0, 0)
+            presentation.save(pptx_path)
+            with patch.object(sys, "argv", ["extract.py", "--dry-run", "--file", str(pptx_path)]), \
+                    patch.object(sys.stdin, "isatty", return_value=False), \
+                    patch.object(extract, "resolve_config", return_value={}), \
+                    patch.object(extract, "LOCAL_IMG_DIR", str(root / "images")), \
+                    patch.object(extract, "urlopen", side_effect=OSError("offline")), \
+                    contextlib.redirect_stdout(io.StringIO()) as stdout, \
+                    contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(extract.main(), 0)
+            self.assertRegex(
+                stdout.getvalue(),
+                r"\[X:0\.30, Y:0\.47, W:0\.40, H:0\.40\] CardFrame: \[Rectangle_1\]",
+            )
+
     def test_postprocessing_saves_frontmatter_images_and_deduplicated_titles(self):
         response = (
             '{% slide title="First title" %}\n### First title\n'
@@ -154,6 +199,31 @@ class ExtractTests(unittest.TestCase):
             self.assertIn("![image.png](@admin-assets/images/courses/8-2/image.png)", result)
             self.assertIn("![other.jpg](@admin-assets/images/courses/8-2/other.jpg)", result)
             self.assertEqual((root / "assets" / "8-2" / "image.png").read_bytes(), b"image")
+
+    def test_postprocessing_repairs_attribute_quotes_and_resolves_tag_images(self):
+        response = (
+            "{% slide title=\"GAME: \"We're meeting for drinks at 7 pm\"\" %}\n"
+            '{% question prompt="Choose "yes" or no" image="slide_3_Freeform_8.png" '
+            'answers=[{text: "Yes", isCorrect: true, image: "slide_3_icon.png"}] %}\n'
+            '{% /slide %}'
+        )
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            images = root / "extracted"
+            images.mkdir()
+            with patch.object(extract, "CONTENT_DIR", str(root / "content")), \
+                    patch.object(extract, "ASSETS_DIR", str(root / "assets")), \
+                    contextlib.redirect_stderr(io.StringIO()):
+                extract.postprocess_and_save(response, "8.2", "Example", "8-2", str(images))
+            result = (root / "content" / "8-2.mdoc").read_text(encoding="utf-8")
+            asset_path = "@admin-assets/images/courses/8-2/"
+            self.assertIn(
+                "title=\"GAME: \\\"We're meeting for drinks at 7 pm\\\"\"",
+                result,
+            )
+            self.assertIn('prompt="Choose \\"yes\\" or no"', result)
+            self.assertIn(f'image="{asset_path}slide_3_Freeform_8.png"', result)
+            self.assertIn(f'image: "{asset_path}slide_3_icon.png"', result)
 
     def test_api_error_does_not_stop_batch(self):
         with tempfile.TemporaryDirectory() as temp:

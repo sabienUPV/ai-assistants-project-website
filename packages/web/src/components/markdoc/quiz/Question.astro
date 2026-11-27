@@ -2,6 +2,7 @@
 import Slide from '@components/markdoc/slides/Slide.astro';
 import QuestionInteractive from '@components/client/markdoc/quiz/Question.svelte';
 import type { Question } from '@core-types/quiz';
+import { resolveAdminImageSrc } from '@utils/imageResolution';
 
 const { t } = Astro.locals;
 
@@ -14,7 +15,12 @@ const localizedTexts = {
 
 interface Props extends Question {};
 
-const { prompt, answers } = Astro.props;
+const { prompt, image, imageAlt, answers } = Astro.props;
+const resolvedImage = await resolveAdminImageSrc(image);
+const resolvedAnswers = await Promise.all(answers.map(async (answer) => ({
+  ...answer,
+  image: await resolveAdminImageSrc(answer.image),
+})));
 ---
 
 {/* The slide starts locked until the question is answered */}
@@ -22,7 +28,9 @@ const { prompt, answers } = Astro.props;
   <QuestionInteractive
     client:load
     prompt={prompt}
-    answers={answers}
+    image={resolvedImage}
+    imageAlt={imageAlt}
+    answers={resolvedAnswers}
     localizedTexts={localizedTexts}
   />
 </Slide>

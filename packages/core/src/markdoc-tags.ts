@@ -8,6 +8,9 @@ import type { ArasaacSchema, DecisionButtonSchema, FlagSchema, TextInputSchema, 
 
 type Project = 'web' | 'admin';
 type AstroTagConfig = NonNullable<AstroMarkdocConfig['tags']>[string];
+export type MarkdocTagDefinition = AstroTagConfig & {
+  contextForLLM?: string;
+};
 type MarkdocTagsFromAttributes = {
   [K in keyof typeof markdocTagAttributes]: AstroTagConfig;
 };
@@ -94,10 +97,12 @@ export const markdocTagAttributes = {
   },
   quiz: {
     description: "Render a quiz component with the provided questions.",
+    contextForLLM: "Place quiz directly inside slideshow (never nested inside a slide tag, because each question renders its own locked slide). When consecutive slides form a quiz, merge each question and answer slide pair into one question inside a single quiz block.",
     children: ['question']
   },
   question: {
     description: "Define a single question for a quiz component.",
+    contextForLLM: "For sequential 'Question N' or 'True or False N' and 'Answer N' slides, combine each pair into one question inside a quiz block placed directly inside slideshow (not inside a slide tag). Use image for the question's main illustration, answer image fields for distinct pictograms beside choices, isCorrect according to the answer slide, and explanation on the correct answer for any extra feedback.",
     attributes: {
       prompt: {
         type: String,
@@ -108,6 +113,14 @@ export const markdocTagAttributes = {
         type: Array,
         required: true,
         description: "The possible answers to the question.",
+      },
+      image: {
+        type: String,
+        description: "Optional illustration path displayed with the question prompt.",
+      },
+      imageAlt: {
+        type: String,
+        description: "Alternative text for the question illustration.",
       },
     } satisfies TagAttributes<Question>,
   },
@@ -196,6 +209,7 @@ export const markdocTagAttributes = {
   },
   flashcard: {
     description: "Render a flashcard component with an icon and a color. The content inside the flashcard can be any valid Markdoc content.",
+    contextForLLM: "Use a flashcard for visual bordered cards, including slides titled 'Need cards' or 'Problem card', and for content grouped inside a visible card frame. Also use flashcards for 2–4 parallel columns pairing an icon or image with a short bold label.",
     attributes: {
       icon: {
         type: String,
@@ -210,7 +224,7 @@ export const markdocTagAttributes = {
       },
     },
   }
-} satisfies AstroMarkdocConfig['tags'];
+} satisfies Record<string, MarkdocTagDefinition>;
 
 /**
  * Generates the full Markdoc tag configuration with resolution paths mapped
