@@ -11,8 +11,7 @@ const { cropTop = 0, cropRight = 0, cropBottom = 0, cropLeft = 0 } = crop && cro
 
 // console.log('Image.astro props:', Astro.props);
 
-// Astro's <Image /> component requires imported file metadata rather than a string path.
-// Note: import.meta.glob does NOT allow for dynamic paths, so to find the correct path, we make it relative to the project root (by starting the path with "/") and then go back only one level to the packages folder of the monorepo to reach the admin project. This way, if we move this component file to another folder, it should not break the import.meta.glob path anymore (if we use relative paths, i.e. starting with "../", it will break if we move this file to another folder).
+// Astro's <Image /> component requires imported file metadata rather than a raw string path.
 const resolvedImage = (await resolveAdminImage(imageSrc)) ?? null;
 const finalWidth = width || (resolvedImage ? resolvedImage.width : 800);
 
